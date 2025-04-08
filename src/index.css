@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: rgb(30, 58, 138);
+  --primary-dark: rgb(21, 45, 110);
+  --primary-light: rgb(59, 86, 165);
+  --secondary: rgb(245, 158, 11);
+  --background: rgb(255, 255, 255);
+  --foreground: rgb(17, 24, 39);
+  --muted: rgb(243, 244, 246);
+  --muted-foreground: rgb(107, 114, 128);
+  --border: rgb(229, 231, 235);
+  --input: rgb(243, 244, 246);
+  --ring: rgb(30, 58, 138);
+  --radius: 0.5rem;
+  --popover: rgb(255, 255, 255);
+  --popover-foreground: rgb(6, 11, 24);
+}
+
+.dark {
+  --primary: rgb(147, 197, 253);
+  --primary-dark: rgb(30, 58, 138);
+  --primary-light: rgb(191, 219, 254);
+  --secondary: rgb(252, 211, 77);
+  --background: rgb(17, 24, 39);
+  --foreground: rgb(243, 244, 246);
+  --muted: rgb(30, 41, 59);
+  --muted-foreground: rgb(156, 163, 175);
+  --border: rgb(55, 65, 81);
+  --input: rgb(51, 65, 85);
+  --ring: rgb(147, 197, 253);
+  --popover: rgb(6, 11, 24);
+  --popover-foreground: rgb(245, 247, 250);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    /* font-feature-settings: "rlig" 1, "calt" 1; */
+  }
+}

@@ -8,12 +8,20 @@ function FixturesPage() {
   return (
     <div className="space-y-6">
       <DashboardHeader heading="Fixtures" text="Manage your match fixtures.">
-        <Link to="/dashboard/fixtures/new">
-          <Button variant="secondary">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Fixture
-          </Button>
-        </Link>
+        <div className="flex gap-3">
+          <Link to="/dashboard/fixtures/new/bulk">
+            <Button variant="secondary">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Bulk Fixture
+            </Button>
+          </Link>
+          <Link to="/dashboard/fixtures/new">
+            <Button variant="secondary">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Fixture
+            </Button>
+          </Link>
+        </div>
       </DashboardHeader>
       <FixturesTable />
     </div>

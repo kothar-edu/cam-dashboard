@@ -8,7 +8,7 @@ function NewFixturePage() {
         heading="Create Fixture"
         text="Add a new match fixture to your cricket league."
       />
-      <div className="grid gap-8">
+      <div className="grid gap-8 h-[50vh]">
         <FixtureForm />
       </div>
     </div>

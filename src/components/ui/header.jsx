@@ -1,25 +1,27 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useAuth } from "../../contexts/AuthContext"
-import { useTheme } from "../../contexts/ThemeContext"
-import { Bell, Sun, Moon, ChevronDown } from "lucide-react"
+import { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { useTheme } from "../../contexts/ThemeContext";
+import { Bell, Sun, Moon, ChevronDown } from "lucide-react";
 
 export function Header() {
-  const { user, logout } = useAuth()
-  const { theme, toggleTheme } = useTheme()
-  const [isProfileOpen, setIsProfileOpen] = useState(false)
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   const handleLogout = () => {
-    setIsProfileOpen(false)
-    logout()
-  }
+    setIsProfileOpen(false);
+    logout();
+  };
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm z-10">
       <div className="px-4 py-3 md:px-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-gray-800 dark:text-white md:block hidden">Cricket Dashboard</h1>
+        <h1 className="text-xl font-semibold text-gray-800 dark:text-white md:block hidden">
+          CAM Dashboard
+        </h1>
 
         <div className="flex items-center space-x-4">
           {/* Theme toggle */}
@@ -34,8 +36,8 @@ export function Header() {
           <div className="relative">
             <button
               onClick={() => {
-                setIsNotificationsOpen(!isNotificationsOpen)
-                setIsProfileOpen(false)
+                setIsNotificationsOpen(!isNotificationsOpen);
+                setIsProfileOpen(false);
               }}
               className="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 relative"
             >
@@ -46,20 +48,34 @@ export function Header() {
             {isNotificationsOpen && (
               <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10 border border-gray-200 dark:border-gray-700">
                 <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Notifications</h3>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Notifications
+                  </h3>
                 </div>
                 <div className="max-h-60 overflow-y-auto">
                   <div className="px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <p className="text-sm text-gray-700 dark:text-gray-300">New player registration</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">2 minutes ago</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      New player registration
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      2 minutes ago
+                    </p>
                   </div>
                   <div className="px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <p className="text-sm text-gray-700 dark:text-gray-300">Tournament schedule updated</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">1 hour ago</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      Tournament schedule updated
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      1 hour ago
+                    </p>
                   </div>
                   <div className="px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <p className="text-sm text-gray-700 dark:text-gray-300">Payment verification pending</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">3 hours ago</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      Payment verification pending
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      3 hours ago
+                    </p>
                   </div>
                 </div>
                 <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700">
@@ -75,8 +91,8 @@ export function Header() {
           <div className="relative">
             <button
               onClick={() => {
-                setIsProfileOpen(!isProfileOpen)
-                setIsNotificationsOpen(false)
+                setIsProfileOpen(!isProfileOpen);
+                setIsNotificationsOpen(false);
               }}
               className="flex items-center space-x-2 focus:outline-none"
             >
@@ -86,7 +102,10 @@ export function Header() {
               <span className="hidden md:block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {user?.name || "Admin"}
               </span>
-              <ChevronDown size={16} className="text-gray-500 dark:text-gray-400" />
+              <ChevronDown
+                size={16}
+                className="text-gray-500 dark:text-gray-400"
+              />
             </button>
 
             {isProfileOpen && (
@@ -115,6 +134,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }
-

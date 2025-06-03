@@ -6,6 +6,12 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
+      src: "/src",
+      components: "/src/components",
+      hooks: "/src/hooks",
+      layouts: "src/layouts",
+      pages: "/src/pages",
+      lib: "/src/lib",
     },
   },
   plugins: [react()],

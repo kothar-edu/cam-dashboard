@@ -19,17 +19,20 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, Trash, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useTournaments } from "../../hooks/use-tournaments";
 import { LoadingSpinner } from "../ui/loading-spinner";
 import { Badge } from "../ui/badge";
 import { useGet } from "../../hooks/useApi";
+import { ViewGroupsModal } from "./view-groups-modal";
 
 export function TournamentsTable() {
   const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(null);
   const { data: tournaments, loading } = useGet("/game/tournament/");
+  const [viewingGroupsForTournament, setViewingGroupsForTournament] =
+    useState(null);
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this tournament?")) {
@@ -47,6 +50,8 @@ export function TournamentsTable() {
     );
   }
 
+  const tournamentGroups = [];
+
   // Make sure tournaments is an array before trying to map over it
   const tournamentsList = Array.isArray(tournaments?.results)
     ? tournaments?.results
@@ -62,6 +67,16 @@ export function TournamentsTable() {
     );
   }
 
+  const handleViewGroups = (e, tournamentId) => {
+    e.stopPropagation(); // Prevent row click
+    setViewingGroupsForTournament(tournamentId);
+  };
+
+  // Get group count for a tournament
+  const getGroupCount = (tournamentId) => {
+    return tournamentGroups[tournamentId]?.length || 0;
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -70,7 +85,8 @@ export function TournamentsTable() {
             <TableHead>Tournament</TableHead>
             <TableHead>Total Teams</TableHead>
             <TableHead>Match Type</TableHead>
-            <TableHead className="hidden md:table-cell">Dates</TableHead>
+            <TableHead className="hidden md:table-cell">Dates</TableHead>{" "}
+            <TableHead>Groups</TableHead>
             <TableHead className="hidden md:table-cell">Ball Type</TableHead>
             <TableHead className="hidden md:table-cell">Pitch Type</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -102,6 +118,24 @@ export function TournamentsTable() {
               <TableCell className="hidden md:table-cell">
                 {new Date(tournament.start).toLocaleDateString()} -{" "}
                 {new Date(tournament.end).toLocaleDateString()}
+              </TableCell>
+              <TableCell>
+                {" "}
+                <div className="flex items-center">
+                  <Badge variant="secondary" className="mr-2">
+                    <Users className="h-3 w-3 mr-1" />
+                    {getGroupCount(tournament.id)}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={(e) => handleViewGroups(e, tournament.id)}
+                  >
+                    <Eye className="h-3 w-3 mr-1" />
+                    View
+                  </Button>
+                </div>
               </TableCell>
               <TableCell className="hidden md:table-cell">
                 {tournament.ballType}
@@ -151,6 +185,13 @@ export function TournamentsTable() {
           ))}
         </TableBody>
       </Table>
+      {viewingGroupsForTournament && (
+        <ViewGroupsModal
+          isOpen={!!viewingGroupsForTournament}
+          onClose={() => setViewingGroupsForTournament(null)}
+          tournamentId={viewingGroupsForTournament}
+        />
+      )}
     </div>
   );
 }

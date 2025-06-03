@@ -40,6 +40,8 @@ import TransfersPage from "./pages/TransfersPage";
 import PointsPage from "./pages/PointsPage";
 import SettingsPage from "./pages/SettingsPage";
 import "./index.css";
+import BulkFixtureUploadPage from "./pages/NewBulkFixtureForm";
+import { DataProvider } from "./contexts/DataContext";
 
 function App() {
   return (
@@ -70,7 +72,11 @@ function App() {
               <Route path="players/:id" element={<EditPlayerPage />} />
               <Route path="players/:id/stats" element={<PlayerStatsPage />} />
               <Route path="fixtures" element={<FixturesPage />} />
-              <Route path="fixtures/new" element={<NewFixturePage />} />
+              <Route path="fixtures/new" element={<NewFixturePage />} />{" "}
+              <Route
+                path="fixtures/new/bulk"
+                element={<BulkFixtureUploadPage />}
+              />
               <Route path="fixtures/:id" element={<EditFixturePage />} />
               <Route path="scorecards" element={<ScorecardsPage />} />
               <Route path="scorecards/:id" element={<EditScorecardPage />} />

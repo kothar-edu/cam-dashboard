@@ -15,13 +15,13 @@ export const Button = forwardRef(
     ref
   ) => {
     const baseStyles =
-      "inline-flex items-center justify-center font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors";
+      "inline-flex items-center justify-center font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors dark:text-black";
 
     const variantStyles = {
       primary:
         "bg-primary hover:bg-primary-dark text-white focus:ring-primary dark:bg-parimary-light dark:text-primary",
       secondary:
-        "bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 focus:ring-gray-500",
+        "bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100 focus:ring-gray-500",
       outline:
         "border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-700 dark:border-gray-600 dark:hover:bg-gray-800 dark:text-gray-300 focus:ring-gray-500",
       danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500",

@@ -1,42 +1,49 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { useTournaments } from "../../hooks/use-tournaments"
-import { Button } from "../ui/button"
-import { Card, CardContent } from "../ui/card"
-import { FormField } from "../ui/form-field"
-import { LoadingSpinner } from "../ui/loading-spinner"
-import { ImageUpload } from "../ui/image-upload"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
-import { Label } from "../ui/label"
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useTournaments } from "../../hooks/use-tournaments";
+import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
+import { FormField } from "../ui/form-field";
+import { LoadingSpinner } from "../ui/loading-spinner";
+import { ImageUpload } from "../ui/image-upload";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Label } from "../ui/label";
+import { useEdit, useGet, usePost } from "src/hooks/useApi";
 
 export function TournamentForm({ id: propId }) {
-  const navigate = useNavigate()
-  const { id: urlId } = useParams()
-  const id = propId || urlId
+  const navigate = useNavigate();
+  const { id: urlId } = useParams();
+  const id = propId || urlId;
 
-  const { getTournament, createTournament, updateTournament } = useTournaments()
-  const [isLoading, setIsLoading] = useState(false)
-  const [isFetching, setIsFetching] = useState(!!id)
+  const { getTournament, createTournament, updateTournament } =
+    useTournaments();
+  const { post, loading, error } = usePost();
+  const { edit } = useEdit();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(!!id);
 
   const [formData, setFormData] = useState({
     name: "",
+    start: "2025-04-09T06:16:30.360Z",
+    end: "2025-04-09T06:16:30.360Z",
+    team_size: 0,
+    teams: null,
     logo: "",
-    startDate: "",
-    endDate: "",
-    time: "",
-    matchType: "limited over",
-    totalPlayers: "11",
-    ballType: "leather",
-    pitchType: "turf",
-  })
+  });
 
   useEffect(() => {
     const fetchTournament = async () => {
       if (id) {
         try {
-          const tournament = await getTournament(id)
+          const tournament = await getTournament(id);
           if (tournament) {
             setFormData({
               name: tournament.name,
@@ -48,56 +55,56 @@ export function TournamentForm({ id: propId }) {
               totalPlayers: tournament.totalPlayers.toString(),
               ballType: tournament.ballType,
               pitchType: tournament.pitchType,
-            })
+            });
           }
         } catch (error) {
-          console.error("Error fetching tournament:", error)
+          console.error("Error fetching tournament:", error);
         } finally {
-          setIsFetching(false)
+          setIsFetching(false);
         }
       }
-    }
+    };
 
-    fetchTournament()
-  }, [id, getTournament])
+    fetchTournament();
+  }, [id, getTournament]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSelectChange = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleImageUpload = (url) => {
-    setFormData((prev) => ({ ...prev, logo: url }))
-  }
+    setFormData((prev) => ({ ...prev, logo: url }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
       if (id) {
-        await updateTournament(id, formData)
+        await edit("/game/tournament/", formData);
       } else {
-        await createTournament(formData)
+        await post("/game/tournament/", formData);
       }
-      navigate("/dashboard/tournaments")
+      navigate("/dashboard/tournaments");
     } catch (error) {
-      console.error("Error saving tournament:", error)
+      console.error("Error saving tournament:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (isFetching) {
     return (
       <div className="flex h-96 items-center justify-center">
         <LoadingSpinner />
       </div>
-    )
+    );
   }
 
   return (
@@ -116,60 +123,68 @@ export function TournamentForm({ id: propId }) {
 
             <div className="space-y-2">
               <Label htmlFor="matchType">Match Type</Label>
-              <Select value={formData.matchType} onValueChange={(value) => handleSelectChange("matchType", value)}>
+              <Select
+                value={formData.matchType}
+                onValueChange={(value) =>
+                  handleSelectChange("matchType", value)
+                }
+              >
                 <SelectTrigger id="matchType">
                   <SelectValue placeholder="Select match type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="limited over">Limited Over</SelectItem>
                   <SelectItem value="test">Test</SelectItem>
-                  <SelectItem value="t20">T20</SelectItem>
-                  <SelectItem value="odi">ODI</SelectItem>
+                  {/* <SelectItem value="t20">T20</SelectItem>
+                  <SelectItem value="odi">ODI</SelectItem> */}
                 </SelectContent>
               </Select>
             </div>
 
             <FormField
               label="Start Date"
-              name="startDate"
+              name="start"
               type="date"
-              value={formData.startDate}
+              value={formData.start}
               onChange={handleChange}
               required
             />
 
             <FormField
               label="End Date"
-              name="endDate"
+              name="end"
               type="date"
-              value={formData.endDate}
+              value={formData.end}
               onChange={handleChange}
               required
             />
 
-            <FormField label="Time" name="time" type="time" value={formData.time} onChange={handleChange} />
+            <FormField
+              label="Time"
+              name="time"
+              type="time"
+              value={formData.time}
+              onChange={handleChange}
+            />
 
             <div className="space-y-2">
-              <Label htmlFor="totalPlayers">Total Players in Team</Label>
-              <Select
-                value={formData.totalPlayers}
-                onValueChange={(value) => handleSelectChange("totalPlayers", value)}
-              >
-                <SelectTrigger id="totalPlayers">
-                  <SelectValue placeholder="Select number of players" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="11">11</SelectItem>
-                  <SelectItem value="15">15</SelectItem>
-                  <SelectItem value="16">16</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                </SelectContent>
-              </Select>
+              <FormField
+                label="Team Size"
+                name="team_size"
+                type="number"
+                value={formData.team_size}
+                onChange={handleChange}
+                placeholder="Team Size"
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="ballType">Ball Type</Label>
-              <Select value={formData.ballType} onValueChange={(value) => handleSelectChange("ballType", value)}>
+              <Select
+                value={formData.ballType}
+                onValueChange={(value) => handleSelectChange("ballType", value)}
+              >
                 <SelectTrigger id="ballType">
                   <SelectValue placeholder="Select ball type" />
                 </SelectTrigger>
@@ -183,7 +198,12 @@ export function TournamentForm({ id: propId }) {
 
             <div className="space-y-2">
               <Label htmlFor="pitchType">Pitch Type</Label>
-              <Select value={formData.pitchType} onValueChange={(value) => handleSelectChange("pitchType", value)}>
+              <Select
+                value={formData.pitchType}
+                onValueChange={(value) =>
+                  handleSelectChange("pitchType", value)
+                }
+              >
                 <SelectTrigger id="pitchType">
                   <SelectValue placeholder="Select pitch type" />
                 </SelectTrigger>
@@ -200,7 +220,11 @@ export function TournamentForm({ id: propId }) {
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Tournament Logo
               </label>
-              <ImageUpload value={formData.logo} onChange={handleImageUpload} placeholder="Upload tournament logo" />
+              <ImageUpload
+                value={formData.logo}
+                onChange={handleImageUpload}
+                placeholder="Upload tournament logo"
+              />
             </div>
           </div>
 
@@ -229,6 +253,5 @@ export function TournamentForm({ id: propId }) {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }
-

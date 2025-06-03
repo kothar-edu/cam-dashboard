@@ -53,8 +53,6 @@ export function FixturesTable() {
     ? fixtures?.results
     : [];
 
-  console.log(fixturesList);
-
   if (!fixturesList?.length) {
     return (
       <div className="rounded-md border">

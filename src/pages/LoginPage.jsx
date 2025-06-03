@@ -22,8 +22,9 @@ function LoginPage() {
   const [password, setPassword] = useState("p@55w0rd");
   const { login, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
   // If already authenticated, redirect to dashboard
-  if (isAuthenticated) {
+  if (token) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -52,8 +53,7 @@ function LoginPage() {
         }
       );
       localStorage.setItem("token", response?.data?.access);
-      console.log(response?.data?.access);
-      navigate("/dashboard");
+      navigate("/dashboard/teams");
     } catch (error) {
       console.error("Login failed:", error);
     }
@@ -115,7 +115,12 @@ function LoginPage() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+              variant=""
+            >
               {loading ? (
                 <>
                   <LoadingSpinner size="sm" className="mr-2" />

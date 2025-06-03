@@ -61,7 +61,7 @@ export function TeamsTable() {
   }
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border h-full">
       <Table>
         <TableHeader>
           <TableRow>

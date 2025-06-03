@@ -601,7 +601,7 @@ export function Sidebar() {
           <div className="flex items-center px-4 py-5 border-b border-gray-200 dark:border-gray-700">
             <Cricket className="h-8 w-8 text-primary" />
             <h1 className="ml-2 text-xl font-bold text-gray-800 dark:text-white">
-              Cricket Manager
+              CAM Dashboard
             </h1>
           </div>
 

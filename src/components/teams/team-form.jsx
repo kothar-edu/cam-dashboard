@@ -21,6 +21,14 @@ export function TeamForm({ id: propId }) {
     name: "",
     code: "",
     logo: "",
+    matches_played: 0,
+    sixes: 0,
+    fours: 0,
+    maidens: 0,
+    hattricks: 0,
+    runs_scored: 0,
+    wickets_taken: 0,
+    wickets_lost: 0,
   });
   const { post } = usePost();
 

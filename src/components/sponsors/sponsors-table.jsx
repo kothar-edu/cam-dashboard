@@ -22,55 +22,23 @@ import { Button } from "../ui/button";
 import { MoreHorizontal, Pencil, Trash, ExternalLink } from "lucide-react";
 import { LoadingSpinner } from "../ui/loading-spinner";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { useDelete } from "../../hooks/useApi";
 
-export function SponsorsTable() {
+export function SponsorsTable({ sponsors, loading }) {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(null);
-
+  const { deleteById } = useDelete();
   // Mock sponsors data
-  const sponsors = [
-    {
-      id: "1",
-      name: "SportsTech",
-      website: "https://sportstech.com",
-      logo: "/placeholder.svg",
-      createdAt: "2023-01-15T00:00:00.000Z",
-    },
-    {
-      id: "2",
-      name: "CricketGear",
-      website: "https://cricketgear.com",
-      logo: "/placeholder.svg",
-      createdAt: "2023-02-10T00:00:00.000Z",
-    },
-    {
-      id: "3",
-      name: "AthleteZone",
-      website: "https://athletezone.com",
-      logo: "/placeholder.svg",
-      createdAt: "2023-03-05T00:00:00.000Z",
-    },
-    {
-      id: "4",
-      name: "Global Sports",
-      website: "https://globalsports.com",
-      logo: "/placeholder.svg",
-      createdAt: "2023-04-12T00:00:00.000Z",
-    },
-  ];
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this sponsor?")) {
       setIsDeleting(id);
-      // Simulate delete API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await deleteById("/game/sponsor/", id);
       setIsDeleting(null);
-      // In a real app, you would call an API to delete the sponsor
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
         <LoadingSpinner />
@@ -78,44 +46,57 @@ export function SponsorsTable() {
     );
   }
 
+  if (!sponsors?.results?.length) {
+    return (
+      <div className="rounded-md border">
+        <div className="p-8 text-center text-muted-foreground">
+          No sponsors found. Create one to get started.
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border s">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Sponsor</TableHead>
             <TableHead className="hidden md:table-cell">Website</TableHead>
-            <TableHead className="hidden md:table-cell">Added On</TableHead>
+            <TableHead className="hidden md:table-cell">Extra Info</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sponsors.map((sponsor) => (
+          {sponsors?.results?.map((sponsor) => (
             <TableRow key={sponsor.id}>
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">
-                    <AvatarImage src={sponsor.logo} alt={sponsor.name} />
-                    <AvatarFallback>
-                      {sponsor.name.substring(0, 2)}
-                    </AvatarFallback>
+                    {sponsor.image ? (
+                      <AvatarImage src={sponsor.image} alt={sponsor.name} />
+                    ) : (
+                      <AvatarFallback>
+                        {sponsor.name.substring(0, 2)}
+                      </AvatarFallback>
+                    )}
                   </Avatar>
                   <div className="font-medium">{sponsor.name}</div>
                 </div>
               </TableCell>
               <TableCell className="hidden md:table-cell">
                 <a
-                  href={sponsor.website}
+                  href={sponsor.supported_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center text-blue-600 hover:underline"
                 >
-                  {sponsor.website}
+                  {sponsor.supported_url}
                   <ExternalLink className="ml-1 h-3 w-3" />
                 </a>
               </TableCell>
               <TableCell className="hidden md:table-cell">
-                {new Date(sponsor.createdAt).toLocaleDateString()}
+                {sponsor.extra_info}
               </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>

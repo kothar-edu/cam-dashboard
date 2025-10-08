@@ -1,24 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { BarChart2, Calendar, TrendingUp, Trophy, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useGet } from "src/hooks/useApi";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { useTeams } from "../hooks/use-teams";
-import { useTournaments } from "../hooks/use-tournaments";
-import { usePlayers } from "../hooks/use-players";
-import { useFixtures } from "../hooks/use-fixtures";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
-import { BarChart2, Users, Trophy, Calendar, TrendingUp } from "lucide-react";
 
 function DashboardPage() {
-  const { teams, isLoading: teamsLoading } = useTeams();
-  const { tournaments, isLoading: tournamentsLoading } = useTournaments();
-  const { players, isLoading: playersLoading } = usePlayers();
-  const { fixtures, isLoading: fixturesLoading } = useFixtures();
+  const { data: teams, isLoading: teamsLoading } = useGet("/game/teams/");
+  // const { teams, isLoading: teamsLoading } = useTeams();
+  const { data: tournaments, isLoading: tournamentsLoading } =
+    useGet("/game/tournament/");
+  const { data: players, isLoading: playersLoading } = useGet("/game/players/");
+  const { data: fixtures, isLoading: fixturesLoading } =
+    useGet("/game/fixtures/");
 
   const [stats, setStats] = useState({
     totalTeams: 0,
@@ -28,33 +28,33 @@ function DashboardPage() {
     recentActivity: [],
   });
 
-  useEffect(() => {
-    // Update stats when data is loaded
-    if (
-      !teamsLoading &&
-      !tournamentsLoading &&
-      !playersLoading &&
-      !fixturesLoading
-    ) {
-      setStats({
-        totalTeams: teams.length,
-        totalPlayers: players.length,
-        totalTournaments: tournaments.length,
-        upcomingMatches: fixtures.filter((f) => new Date(f.date) > new Date())
-          .length,
-        recentActivity: generateRecentActivity(),
-      });
-    }
-  }, [
-    teams,
-    tournaments,
-    players,
-    fixtures,
-    teamsLoading,
-    tournamentsLoading,
-    playersLoading,
-    fixturesLoading,
-  ]);
+  // useEffect(() => {
+  //   // Update stats when data is loaded
+  //   if (
+  //     !teamsLoading &&
+  //     !tournamentsLoading &&
+  //     !playersLoading &&
+  //     !fixturesLoading
+  //   ) {
+  //     setStats({
+  //       totalTeams: teams.length,
+  //       totalPlayers: players.length,
+  //       totalTournaments: tournaments.length,
+  //       upcomingMatches: fixtures.filter((f) => new Date(f.date) > new Date())
+  //         .length,
+  //       recentActivity: generateRecentActivity(),
+  //     });
+  //   }
+  // }, [
+  //   teams,
+  //   tournaments,
+  //   players,
+  //   fixtures,
+  //   teamsLoading,
+  //   tournamentsLoading,
+  //   playersLoading,
+  //   fixturesLoading,
+  // ]);
 
   // Generate mock recent activity
   const generateRecentActivity = () => {
@@ -210,7 +210,7 @@ function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {fixtures
+                {fixtures?.results
                   .filter((f) => new Date(f.date) > new Date())
                   .slice(0, 3)
                   .map((fixture, index) => (

@@ -1,86 +1,68 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { Button } from "../ui/button"
-import { Card, CardContent } from "../ui/card"
-import { FormField } from "../ui/form-field"
-import { LoadingSpinner } from "../ui/loading-spinner"
-import { ImageUpload } from "../ui/image-upload"
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
+import { FormField } from "../ui/form-field";
+import { LoadingSpinner } from "../ui/loading-spinner";
+import { ImageUpload } from "../ui/image-upload";
+import { usePost } from "src/hooks/useApi";
 
 export function SponsorForm({ id }) {
-  const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(false)
-  const [isFetching, setIsFetching] = useState(!!id)
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(!!id);
+  const { post } = usePost({
+    successMessage: "Sponsor created successfully",
+    errorMessage: "Failed to create sponsor",
+    onSuccess: "/dashboard/sponsors",
+  });
 
   const [formData, setFormData] = useState({
     name: "",
-    website: "",
-    logo: "",
-  })
-
-  useEffect(() => {
-    const fetchSponsor = async () => {
-      if (id) {
-        try {
-          setIsFetching(true)
-          // Simulate API call
-          await new Promise((resolve) => setTimeout(resolve, 1000))
-
-          // Mock sponsor data
-          setFormData({
-            name: "SportsTech",
-            website: "https://sportstech.com",
-            logo: "/placeholder.svg",
-          })
-        } catch (error) {
-          console.error("Error fetching sponsor:", error)
-        } finally {
-          setIsFetching(false)
-        }
-      }
-    }
-
-    fetchSponsor()
-  }, [id])
+    supported_url: "",
+    extra_info: "",
+    image: null,
+  });
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleImageUpload = (url) => {
-    setFormData((prev) => ({ ...prev, logo: url }))
-  }
+    setFormData((prev) => ({ ...prev, logo: url }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
       // Validate website URL
       if (formData.website && !formData.website.match(/^https?:\/\/.+\..+/)) {
-        throw new Error("Please enter a valid website URL (e.g., https://example.com)")
+        throw new Error(
+          "Please enter a valid website URL (e.g., https://example.com)"
+        );
       }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      navigate("/dashboard/sponsors")
+      // Post will handle success navigation automatically
+      await post("/game/sponsor/", formData);
     } catch (error) {
-      console.error("Error saving sponsor:", error)
-      alert(error.message)
+      console.error("Error saving sponsor:", error);
+      // Error handling is done by the usePost hook
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (isFetching) {
     return (
       <div className="flex h-96 items-center justify-center">
         <LoadingSpinner />
       </div>
-    )
+    );
   }
 
   return (
@@ -96,22 +78,31 @@ export function SponsorForm({ id }) {
               placeholder="Enter sponsor name"
               required
             />
-
             <FormField
               label="Website"
-              name="website"
-              type="url"
-              value={formData.website}
+              name="supported_url"
+              value={formData.supported_url}
               onChange={handleChange}
               placeholder="https://example.com"
               required
+            />{" "}
+            <FormField
+              label="Extra Info"
+              name="extra_info"
+              value={formData.extra_info}
+              onChange={handleChange}
+              placeholder="Enter extra info"
+              required
             />
-
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2">
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Sponsor Logo
               </label>
-              <ImageUpload value={formData.logo} onChange={handleImageUpload} placeholder="Upload sponsor logo" />
+              <ImageUpload
+                value={formData.image}
+                onChange={handleImageUpload}
+                placeholder="Upload sponsor logo"
+              />
             </div>
           </div>
 
@@ -140,6 +131,5 @@ export function SponsorForm({ id }) {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }
-

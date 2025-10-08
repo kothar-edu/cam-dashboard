@@ -34,10 +34,9 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Badge } from "@/components/ui/badge";
 import { useGet } from "../../hooks/useApi";
 
-export function PlayersTable() {
+export function PlayersTable({ players, loading }) {
   const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(null);
-  const { data: players, loading: isLoading } = useGet("/game/player/");
   const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this player?")) {
       setIsDeleting(id);
@@ -46,10 +45,12 @@ export function PlayersTable() {
     }
   };
 
+  // const { data: players, loading } = useGet("/game/player/");
+
   // Update the PlayersTable component to ensure players is always an array before mapping
 
   // First, let's add a check to ensure players is an array before mapping
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
         <LoadingSpinner />
@@ -59,7 +60,6 @@ export function PlayersTable() {
 
   // Make sure players is an array before trying to map over it
   const playersList = Array.isArray(players?.results) ? players?.results : [];
-  console.log(playersList);
   if (!playersList.length) {
     return (
       <div className="rounded-md border">
@@ -77,6 +77,9 @@ export function PlayersTable() {
           <TableRow>
             <TableHead>Player</TableHead>
             <TableHead className="hidden md:table-cell">Team</TableHead>
+            <TableHead className="hidden md:table-cell">
+              Jersey Number
+            </TableHead>
             <TableHead className="hidden md:table-cell">Nationality</TableHead>
             <TableHead>Verification</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -89,8 +92,8 @@ export function PlayersTable() {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">
                     <AvatarImage
-                      src={player.profilePicture || "/placeholder.svg"}
-                      alt={player.full_name}
+                      src={player.user?.picture || "/placeholder.svg"}
+                      alt={player.user?.full_name}
                     />
                     <AvatarFallback>
                       {player?.full_name?.substring(0, 2)}
@@ -105,10 +108,13 @@ export function PlayersTable() {
                 </div>
               </TableCell>
               <TableCell className="hidden md:table-cell">
-                {player.teamId}
+                {player.team_name}
               </TableCell>
               <TableCell className="hidden md:table-cell">
-                {player.nationality}
+                {player.jersey_no}
+              </TableCell>
+              <TableCell className="hidden md:table-cell">
+                {player?.user?.nationality ?? "-"}
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">

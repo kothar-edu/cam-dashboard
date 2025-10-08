@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Input } from "../components/ui/input";
@@ -14,7 +14,7 @@ import {
   CardFooter,
 } from "../components/ui/card";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
-import logo from "../../public/assets/cam-youth (1).png";
+import logo from "/assets/cam-youth (1).png";
 import axios from "axios";
 
 function LoginPage() {
@@ -24,9 +24,12 @@ function LoginPage() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   // If already authenticated, redirect to dashboard
-  if (token) {
-    return <Navigate to="/dashboard" replace />;
-  }
+
+  useEffect(() => {
+    if (token) {
+      navigate("/dashboard");
+    }
+  }, [token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,7 +44,7 @@ function LoginPage() {
       // await login(email, password);
       // Navigate is handled automatically by the redirect in the component
       const response = await axios.post(
-        `${"https://devapi.cam-youth.com/api"}/user/login/`,
+        `${import.meta.env.VITE_URL}/user/login/`,
         { email, password },
         {
           method: "POST",

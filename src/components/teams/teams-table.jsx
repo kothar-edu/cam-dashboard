@@ -25,11 +25,10 @@ import { useTeams } from "../../hooks/use-teams";
 import { LoadingSpinner } from "../ui/loading-spinner";
 import { useGet } from "../../hooks/useApi";
 
-export function TeamsTable() {
+export function TeamsTable({ teams, loading }) {
   const navigate = useNavigate();
   // const { teams, isLoading, deleteTeam } = useTeams()
   const [isDeleting, setIsDeleting] = useState(null);
-  const { data: teams, loading } = useGet("/game/teams/");
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this team?")) {
@@ -65,6 +64,7 @@ export function TeamsTable() {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>SN</TableHead>
             <TableHead>Team</TableHead>
             <TableHead>Abbreviation</TableHead>
             <TableHead className="hidden md:table-cell">Players</TableHead>
@@ -72,8 +72,9 @@ export function TeamsTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {teamsList.map((team) => (
+          {teamsList.map((team, index) => (
             <TableRow key={team.id}>
+              <TableCell>{index + 1}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">

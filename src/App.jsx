@@ -21,6 +21,7 @@ import PlayersPage from "./pages/PlayersPage";
 import NewPlayerPage from "./pages/NewPlayerPage";
 import EditPlayerPage from "./pages/EditPlayerPage";
 import PlayerStatsPage from "./pages/PlayerStatsPage";
+import UsersPage from "./pages/UsersPage";
 import FixturesPage from "./pages/FixturesPage";
 import NewFixturePage from "./pages/NewFixturePage";
 import EditFixturePage from "./pages/EditFixturePage";
@@ -71,6 +72,7 @@ function App() {
               <Route path="players/new" element={<NewPlayerPage />} />
               <Route path="players/:id" element={<EditPlayerPage />} />
               <Route path="players/:id/stats" element={<PlayerStatsPage />} />
+              <Route path="users" element={<UsersPage />} />
               <Route path="fixtures" element={<FixturesPage />} />
               <Route path="fixtures/new" element={<NewFixturePage />} />{" "}
               <Route

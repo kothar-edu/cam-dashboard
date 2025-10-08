@@ -33,6 +33,7 @@ import {
 } from "../ui/dialog";
 import { usePlayers } from "../../hooks/use-players";
 import { useTeams } from "../../hooks/use-teams";
+import { useGet } from "src/hooks/useApi";
 
 export function VotingTable() {
   const navigate = useNavigate();
@@ -41,6 +42,9 @@ export function VotingTable() {
   const { teams } = useTeams();
   const [isDeleting, setIsDeleting] = useState(null);
   const [selectedPoll, setSelectedPoll] = useState(null);
+
+  const { data, loading } = useGet("/game/voting/");
+  console.log(data);
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this poll?")) {

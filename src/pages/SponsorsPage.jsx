@@ -6,8 +6,11 @@ import { Plus } from "lucide-react";
 import { useGet } from "src/hooks/useApi";
 
 function SponsorsPage() {
-  const { data: sponsors = [], loading: isLoading } = useGet("/game/sponsor/");
-  console.log(sponsors);
+  const {
+    data: sponsors = [],
+    loading: isLoading,
+    refetch,
+  } = useGet("/game/sponsor/");
 
   return (
     <div className="space-y-6 h-full">
@@ -23,7 +26,11 @@ function SponsorsPage() {
           </Button>
         </Link>
       </DashboardHeader>
-      <SponsorsTable sponsors={sponsors} loading={isLoading} />
+      <SponsorsTable
+        sponsors={sponsors}
+        loading={isLoading}
+        onRefresh={refetch}
+      />
     </div>
   );
 }

@@ -5,6 +5,8 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/queryClient";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -46,60 +48,262 @@ import { DataProvider } from "./contexts/DataContext";
 
 function App() {
   return (
-    <Router>
-      <ThemeProvider>
-        <AuthProvider>
-          <Toaster position="top-right" />
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<DashboardPage />} />
-              <Route path="teams" element={<TeamsPage />} />
-              <Route path="teams/new" element={<NewTeamPage />} />
-              <Route path="teams/:id" element={<EditTeamPage />} />
-              <Route path="tournaments" element={<TournamentsPage />} />
-              <Route path="tournaments/new" element={<NewTournamentPage />} />
-              <Route path="tournaments/:id" element={<EditTournamentPage />} />
-              <Route path="players" element={<PlayersPage />} />
-              <Route path="players/new" element={<NewPlayerPage />} />
-              <Route path="players/:id" element={<EditPlayerPage />} />
-              <Route path="players/:id/stats" element={<PlayerStatsPage />} />
-              <Route path="users" element={<UsersPage />} />
-              <Route path="fixtures" element={<FixturesPage />} />
-              <Route path="fixtures/new" element={<NewFixturePage />} />{" "}
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <ThemeProvider>
+          <AuthProvider>
+            <Toaster position="top-right" />
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route
-                path="fixtures/new/bulk"
-                element={<BulkFixtureUploadPage />}
-              />
-              <Route path="fixtures/:id" element={<EditFixturePage />} />
-              <Route path="scorecards" element={<ScorecardsPage />} />
-              <Route path="scorecards/:id" element={<EditScorecardPage />} />
-              <Route path="posts" element={<PostsPage />} />
-              <Route path="posts/new" element={<NewPostPage />} />
-              <Route path="posts/:id" element={<EditPostPage />} />
-              <Route path="sponsors" element={<SponsorsPage />} />
-              <Route path="sponsors/new" element={<NewSponsorPage />} />
-              <Route path="sponsors/:id" element={<EditSponsorPage />} />
-              <Route path="voting" element={<VotingPage />} />
-              <Route path="voting/new" element={<NewVotingPage />} />
-              <Route path="voting/:id" element={<EditVotingPage />} />
-              <Route path="verification" element={<VerificationPage />} />
-              <Route path="transfers" element={<TransfersPage />} />
-              <Route path="points" element={<PointsPage />} />
-              <Route path="settings" element={<SettingsPage />} />
-            </Route>
-          </Routes>
-        </AuthProvider>
-      </ThemeProvider>
-    </Router>
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route
+                  index
+                  element={
+                    <ProtectedRoute>
+                      <DashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="teams"
+                  element={
+                    <ProtectedRoute>
+                      <TeamsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="teams/new"
+                  element={
+                    <ProtectedRoute>
+                      <NewTeamPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="teams/:id"
+                  element={
+                    <ProtectedRoute>
+                      <EditTeamPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="tournaments"
+                  element={
+                    <ProtectedRoute>
+                      <TournamentsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="tournaments/new"
+                  element={
+                    <ProtectedRoute>
+                      <NewTournamentPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="tournaments/:id"
+                  element={
+                    <ProtectedRoute>
+                      <EditTournamentPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="players"
+                  element={
+                    <ProtectedRoute>
+                      <PlayersPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="players/new"
+                  element={
+                    <ProtectedRoute>
+                      <NewPlayerPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="players/:id"
+                  element={
+                    <ProtectedRoute>
+                      <EditPlayerPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="players/:id/stats"
+                  element={
+                    <ProtectedRoute>
+                      <PlayerStatsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="users"
+                  element={
+                    <ProtectedRoute>
+                      <UsersPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="fixtures"
+                  element={
+                    <ProtectedRoute>
+                      <FixturesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="fixtures/new"
+                  element={
+                    <ProtectedRoute>
+                      <NewFixturePage />
+                    </ProtectedRoute>
+                  }
+                />{" "}
+                <Route
+                  path="fixtures/new/bulk"
+                  element={
+                    <ProtectedRoute>
+                      <BulkFixtureUploadPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="fixtures/:id"
+                  element={
+                    <ProtectedRoute>
+                      <EditFixturePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="scorecards"
+                  element={
+                    <ProtectedRoute>
+                      <ScorecardsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="scorecards/:id" element={<EditScorecardPage />} />
+                <Route
+                  path="posts"
+                  element={
+                    <ProtectedRoute>
+                      <PostsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="posts/new"
+                  element={
+                    <ProtectedRoute>
+                      <NewPostPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="posts/:id"
+                  element={
+                    <ProtectedRoute>
+                      <EditPostPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="sponsors"
+                  element={
+                    <ProtectedRoute>
+                      <SponsorsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="sponsors/new"
+                  element={
+                    <ProtectedRoute>
+                      <NewSponsorPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="sponsors/:id" element={<EditSponsorPage />} />
+                <Route
+                  path="voting"
+                  element={
+                    <ProtectedRoute>
+                      <VotingPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="voting/new"
+                  element={
+                    <ProtectedRoute>
+                      <NewVotingPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="voting/:id"
+                  element={
+                    <ProtectedRoute>
+                      <EditVotingPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="verification"
+                  element={
+                    <ProtectedRoute>
+                      <VerificationPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="transfers"
+                  element={
+                    <ProtectedRoute>
+                      <TransfersPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="points"
+                  element={
+                    <ProtectedRoute>
+                      <PointsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="settings"
+                  element={
+                    <ProtectedRoute>
+                      <SettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+              </Route>
+            </Routes>
+          </AuthProvider>
+        </ThemeProvider>
+      </Router>
+    </QueryClientProvider>
   );
 }
 

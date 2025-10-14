@@ -1,30 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { FormField } from "../ui/form-field";
 import { LoadingSpinner } from "../ui/loading-spinner";
 import { ImageUpload } from "../ui/image-upload";
-import { usePost } from "src/hooks/useApi";
+import { useEdit, useGetById, usePost } from "src/hooks/useApi";
 
 export function SponsorForm({ id }) {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(!!id);
-  const { post } = usePost({
-    successMessage: "Sponsor created successfully",
-    errorMessage: "Failed to create sponsor",
-    onSuccess: "/dashboard/sponsors",
-  });
-
   const [formData, setFormData] = useState({
     name: "",
     supported_url: "",
     extra_info: "",
     image: null,
   });
+
+  const { post } = usePost({
+    successMessage: "Sponsor created successfully",
+    errorMessage: "Failed to create sponsor",
+    onSuccess: () => navigate("/dashboard/sponsors"),
+  });
+
+  const { edit } = useEdit({
+    successMessage: "Sponsor updated successfully",
+    errorMessage: "Failed to update sponsor",
+    onSuccess: () => navigate("/dashboard/sponsors"),
+  });
+
+  const { data, loading: getByIdLoading } = useGetById("/game/sponsor", id);
+
+  useEffect(() => {
+    if (data) {
+      setFormData(data);
+    }
+  }, [data]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,7 +61,11 @@ export function SponsorForm({ id }) {
       }
 
       // Post will handle success navigation automatically
-      await post("/game/sponsor/", formData);
+      if (id) {
+        await edit("/game/sponsor", id, formData);
+      } else {
+        await post("/game/sponsor/", formData);
+      }
     } catch (error) {
       console.error("Error saving sponsor:", error);
       // Error handling is done by the usePost hook
@@ -57,7 +74,7 @@ export function SponsorForm({ id }) {
     }
   };
 
-  if (isFetching) {
+  if (getByIdLoading) {
     return (
       <div className="flex h-96 items-center justify-center">
         <LoadingSpinner />

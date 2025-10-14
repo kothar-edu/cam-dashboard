@@ -14,17 +14,20 @@ import {
   CardFooter,
 } from "../components/ui/card";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
+import { useToast } from "../hooks/use-toast";
 import logo from "/assets/cam-youth (1).png";
 import axios from "axios";
 
 function LoginPage() {
   const [email, setEmail] = useState("admin@email.com");
   const [password, setPassword] = useState("p@55w0rd");
+  const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
   const token = localStorage.getItem("token");
-  // If already authenticated, redirect to dashboard
 
+  // If already authenticated, redirect to dashboard
   useEffect(() => {
     if (token) {
       navigate("/dashboard");
@@ -36,15 +39,14 @@ function LoginPage() {
 
     // Basic validation
     if (!email || !password) {
-      toast.error("Please enter both email and password");
+      toast.success("Please enter both email and password");
       return;
     }
 
+    setIsLoading(true);
     try {
-      // await login(email, password);
-      // Navigate is handled automatically by the redirect in the component
       const response = await axios.post(
-        `${import.meta.env.VITE_URL}/user/login/`,
+        `https://devapi.cam-youth.com/api/user/login/`,
         { email, password },
         {
           method: "POST",
@@ -55,10 +57,17 @@ function LoginPage() {
           },
         }
       );
+
       localStorage.setItem("token", response?.data?.access);
-      navigate("/dashboard/teams");
+
+      toast.success("Login successful!");
+
+      navigate("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
+      toast.error("Login failed. Please check your credentials.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -121,10 +130,10 @@ function LoginPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={loading}
+              disabled={isLoading}
               variant=""
             >
-              {loading ? (
+              {isLoading ? (
                 <>
                   <LoadingSpinner size="sm" className="mr-2" />
                   Signing in...

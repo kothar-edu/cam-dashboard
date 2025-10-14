@@ -32,38 +32,47 @@ export function useGet(
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const api = createApi(withAuth);
+
+  // Memoize the API instance to prevent recreation on every render
+  const api = useMemo(() => createApi(withAuth), [withAuth]);
 
   // Memoize params and query to prevent unnecessary re-renders
   const memoizedParams = useMemo(() => params, [JSON.stringify(params)]);
   const memoizedQuery = useMemo(() => query, [JSON.stringify(query)]);
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
-    // Build the URL with path parameters
-    let url = endpoint;
-    if (memoizedParams && Object.keys(memoizedParams).length > 0) {
-      Object.keys(memoizedParams).forEach((key) => {
-        url = url.replace(`:${key}`, memoizedParams[key]);
-      });
+    try {
+      // Build the URL with path parameters
+      let url = endpoint;
+      if (memoizedParams && Object.keys(memoizedParams).length > 0) {
+        Object.keys(memoizedParams).forEach((key) => {
+          url = url.replace(`:${key}`, memoizedParams[key]);
+        });
+      }
+
+      // Add query parameters
+      const config = {};
+      if (memoizedQuery && Object.keys(memoizedQuery).length > 0) {
+        config.params = memoizedQuery;
+      }
+
+      const response = await api.get(url, config);
+      setData(response.data);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
     }
+  }, [api, endpoint, memoizedParams, memoizedQuery]);
 
-    // Add query parameters
-    const config = {};
-    if (memoizedQuery && Object.keys(memoizedQuery).length > 0) {
-      config.params = memoizedQuery;
-    }
+  useEffect(() => {
+    fetchData();
+  }, [...deps]);
 
-    api
-      .get(url, config)
-      .then((res) => setData(res.data))
-      .catch((err) => setError(err))
-      .finally(() => setLoading(false));
-  }, [endpoint, ...deps, memoizedParams, memoizedQuery]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  return { data, loading, error };
+  return { data, loading, error, refetch: fetchData };
 }
 
 // GET by ID
@@ -75,7 +84,8 @@ export function useGetById(
   params = {},
   query = {}
 ) {
-  return useGet(`${endpoint}/${id}`, deps, withAuth, params, query);
+  if (id) return useGet(`${endpoint}/${id}/`, deps, withAuth, params, query);
+  else return { data: null, loading: false, error: null };
 }
 
 // POST
@@ -91,7 +101,7 @@ export function usePost(config = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const api = createApi(withAuth);
-  const { toast } = useToast();
+  const toast = useToast();
 
   const post = useCallback(
     async (endpoint, payload, options = {}) => {
@@ -100,17 +110,15 @@ export function usePost(config = {}) {
 
       try {
         const res = await api.post(endpoint, payload);
-
-        if (res.status === 200) {
+        console.log(res);
+        if (res.data) {
           const message = options.successMessage || successMessage;
-          toast({
-            title: "Success",
-            description: message,
-          });
-          onSuccess();
+          toast.success(message || "Data created successfully");
+          onSuccess && onSuccess();
           return res.data;
         } else {
-          onError();
+          onError && onError();
+          toast.error(errorMessage || "Failed to create data");
         }
       } catch (err) {
         console.error(err);
@@ -125,90 +133,94 @@ export function usePost(config = {}) {
 }
 
 // PUT
-export function useEdit(withAuth = true, messages = {}) {
+export function useEdit(config = {}) {
+  const {
+    withAuth = true,
+    successMessage = "Data updated successfully",
+    errorMessage = "Failed to update data",
+    onSuccess,
+    onError,
+  } = config;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const api = createApi(withAuth);
-  const { toast } = useToast();
+  const toast = useToast();
 
   const edit = useCallback(
     async (endpoint, id, payload, customMessages = {}) => {
       setLoading(true);
       try {
-        const res = await api.put(`${endpoint}/${id}`, payload);
+        const res = await api.put(`${endpoint}/${id}/`, payload);
 
-        const successMessage =
+        const message =
           customMessages.success ||
-          messages.success ||
+          successMessage ||
           "Data updated successfully";
-        toast({
-          title: "Success",
-          description: successMessage,
-        });
+        onSuccess && onSuccess();
+        toast.success(message);
 
         return res.data;
       } catch (err) {
         setError(err);
 
-        const errorMessage =
-          customMessages.error || messages.error || "Failed to update data";
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
+        const message =
+          customMessages.error || errorMessage || "Failed to update data";
+        onError && onError();
+        toast.error(message);
 
         throw err;
       } finally {
         setLoading(false);
       }
     },
-    [api, messages, toast]
+    [api, onSuccess, onError, toast]
   );
 
   return { edit, loading, error };
 }
 
 // DELETE
-export function useDelete(withAuth = true, messages = {}) {
+export function useDelete(config = {}) {
+  const {
+    withAuth = true,
+    successMessage = "Data deleted successfully",
+    errorMessage = "Failed to delete data",
+    onSuccess,
+    onError,
+  } = config;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const api = createApi(withAuth);
-  const { toast } = useToast();
+  const toast = useToast();
 
   const deleteById = useCallback(
     async (endpoint, id, customMessages = {}) => {
       setLoading(true);
       try {
-        const res = await api.delete(`${endpoint}/${id}`);
-
-        const successMessage =
+        const res = await api.delete(`${endpoint}/${id}/`);
+        const message =
           customMessages.success ||
-          messages.success ||
+          successMessage ||
           "Data deleted successfully";
-        toast({
-          title: "Success",
-          description: successMessage,
-        });
+        toast.success(message);
+        onSuccess && onSuccess();
 
         return res.data;
       } catch (err) {
         setError(err);
+        onError && onError();
+        setLoading(false);
 
-        const errorMessage =
-          customMessages.error || messages.error || "Failed to delete data";
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
+        const message =
+          customMessages.error || errorMessage || "Failed to delete data";
+        toast.error(message);
 
         throw err;
       } finally {
         setLoading(false);
       }
     },
-    [api, messages, toast]
+    [api, onSuccess, onError, toast]
   );
 
   return { deleteById, loading, error };

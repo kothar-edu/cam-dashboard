@@ -1,7 +1,7 @@
 "use client";
 
 import { BarChart2, Calendar, TrendingUp, Trophy, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useGet } from "src/hooks/useApi";
 import {
   Card,
@@ -27,70 +27,6 @@ function DashboardPage() {
     upcomingMatches: 0,
     recentActivity: [],
   });
-
-  // useEffect(() => {
-  //   // Update stats when data is loaded
-  //   if (
-  //     !teamsLoading &&
-  //     !tournamentsLoading &&
-  //     !playersLoading &&
-  //     !fixturesLoading
-  //   ) {
-  //     setStats({
-  //       totalTeams: teams.length,
-  //       totalPlayers: players.length,
-  //       totalTournaments: tournaments.length,
-  //       upcomingMatches: fixtures.filter((f) => new Date(f.date) > new Date())
-  //         .length,
-  //       recentActivity: generateRecentActivity(),
-  //     });
-  //   }
-  // }, [
-  //   teams,
-  //   tournaments,
-  //   players,
-  //   fixtures,
-  //   teamsLoading,
-  //   tournamentsLoading,
-  //   playersLoading,
-  //   fixturesLoading,
-  // ]);
-
-  // Generate mock recent activity
-  const generateRecentActivity = () => {
-    return [
-      {
-        id: 1,
-        type: "player_added",
-        message: "New player John Doe registered",
-        time: "2 hours ago",
-      },
-      {
-        id: 2,
-        type: "match_completed",
-        message: "Match completed: Team A vs Team B",
-        time: "5 hours ago",
-      },
-      {
-        id: 3,
-        type: "tournament_created",
-        message: "Summer Tournament 2023 created",
-        time: "1 day ago",
-      },
-      {
-        id: 4,
-        type: "player_transfer",
-        message: "Player transfer: Mike Smith from Team C to Team D",
-        time: "2 days ago",
-      },
-      {
-        id: 5,
-        type: "payment_verified",
-        message: "Payment verified for player David Johnson",
-        time: "3 days ago",
-      },
-    ];
-  };
 
   const isLoading =
     teamsLoading || tournamentsLoading || playersLoading || fixturesLoading;

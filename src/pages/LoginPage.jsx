@@ -1,38 +1,38 @@
 "use client";
 
+import axios from "axios";
 import { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { Input } from "../components/ui/input";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from "../components/ui/card";
+import { Input } from "../components/ui/input";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
+import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../hooks/use-toast";
 import logo from "/assets/cam-youth (1).png";
-import axios from "axios";
 
 function LoginPage() {
   const [email, setEmail] = useState("admin@email.com");
   const [password, setPassword] = useState("p@55w0rd");
   const [isLoading, setIsLoading] = useState(false);
-  const { login, isAuthenticated, loading } = useAuth();
+  const { login, isAuthenticated, loading, setUser, setToken, token } =
+    useAuth();
   const navigate = useNavigate();
   const toast = useToast();
-  const token = localStorage.getItem("token");
 
   // If already authenticated, redirect to dashboard
   useEffect(() => {
     if (token) {
       navigate("/dashboard");
     }
-  }, [token]);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,9 +59,9 @@ function LoginPage() {
       );
 
       localStorage.setItem("token", response?.data?.access);
-
+      setToken(response?.data?.access);
       toast.success("Login successful!");
-
+      setUser(response?.data);
       navigate("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);

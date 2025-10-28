@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { DashboardHeader } from "../components/dashboard/dashboard-header";
 import { UsersTable } from "../components/users/users-table";
 import { UserForm } from "../components/users/user-form";
@@ -11,12 +11,19 @@ import {
 } from "../components/ui/sheet";
 import { Plus } from "lucide-react";
 import { useGet } from "../hooks/useApi";
+import { useAuth } from "../contexts/AuthContext";
+import { Drawer } from "@mui/material";
 
 function UsersPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-
-  const { data: users, loading: isLoading, error } = useGet("/user/");
+  const {
+    userPagination,
+    setUserPagination,
+    refetchPaginatedUsers,
+    usersList: users,
+    isFetchingUsers,
+  } = useAuth();
 
   const handleAddUser = () => {
     setSelectedUser(null);
@@ -34,11 +41,11 @@ function UsersPage() {
   };
 
   const handleUserSuccess = () => {
-    setRefreshKey((prev) => prev + 1);
+    refetchPaginatedUsers();
   };
 
   const handleDeleteUser = () => {
-    setRefreshKey((prev) => prev + 1);
+    refetchPaginatedUsers();
   };
 
   return (
@@ -55,29 +62,20 @@ function UsersPage() {
       </DashboardHeader>
 
       <UsersTable
-        users={users}
-        loading={isLoading}
+        loading={isFetchingUsers}
         onEdit={handleEditUser}
         onDelete={handleDeleteUser}
       />
 
-      {/* Side Drawer for Add/Edit User */}
-      <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto z-[10000]">
-          <SheetHeader>
-            <SheetTitle>
-              {selectedUser ? "Edit User" : "Add New User"}
-            </SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">
-            <UserForm
-              user={selectedUser}
-              onClose={handleCloseDrawer}
-              onSuccess={handleUserSuccess}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
+      {isDrawerOpen && (
+        <UserForm
+          user={selectedUser}
+          onClose={handleCloseDrawer}
+          onSuccess={handleUserSuccess}
+          open={isDrawerOpen}
+          setSelectedUser={setSelectedUser}
+        />
+      )}
     </div>
   );
 }

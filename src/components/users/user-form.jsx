@@ -1,71 +1,87 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FormField } from "@/components/ui/form-field";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { ImageUpload } from "@/components/ui/image-upload";
+import { Close } from "@mui/icons-material";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useGet, usePost, useEdit } from "../../hooks/useApi";
+  Autocomplete,
+  Checkbox,
+  Drawer,
+  IconButton,
+  TextField,
+} from "@mui/material";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { useToast } from "../../hooks/use-toast";
+import { useAuth } from "../../contexts/AuthContext";
 
-export function UserForm({ user, onClose, onSuccess }) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(!!user?.id);
-  const { toast } = useToast();
-  const { post } = usePost({
-    successMessage: "User created successfully",
-    errorMessage: "Failed to create user",
-    onSuccess: (data) => {
-      if (onSuccess) onSuccess();
-      if (onClose) onClose();
-    },
-  });
-
-  const { edit } = useEdit({
-    successMessage: "User updated successfully",
-    errorMessage: "Failed to update user",
-  });
-
+export function UserForm({ user, onClose, onSuccess, open, setSelectedUser }) {
+  const toast = useToast();
+  const [isImageUpdated, setIsImageUpdated] = useState(false);
+  const { rolesList, refetchRoles } = useAuth();
   const [formData, setFormData] = useState({
-    full_name: "",
     email: "",
-    password: "",
-    role: "user",
+    picture: "",
+    full_name: "",
+    phone: "",
+    gender: "m",
+    groups: [],
+    is_staff: false,
     is_active: true,
-    profile_picture: "",
-    phone_number: "",
-    nationality: "",
-    date_of_birth: "",
-    gender: "male",
+    is_phone_verified: false,
+    is_email_verified: false,
+    is_verified: false,
+    is_payment_verified: false,
+    payment_status: "unverified",
+    subscription_end_date: "",
+    password: "",
   });
 
   useEffect(() => {
-    if (user?.id) {
-      setFormData({
-        full_name: user.full_name || "",
-        email: user.email || "",
-        password: "",
-        role: user.role || "user",
-        is_active: user.is_active !== undefined ? user.is_active : true,
-        profile_picture: user.profile_picture || user.picture || "",
-        phone_number: user.phone_number || "",
-        nationality: user.nationality || "",
-        date_of_birth: user.date_of_birth || "",
-        gender: user.gender || "male",
-      });
-      setIsFetching(false);
+    if (rolesList.length === 0) {
+      refetchRoles();
     }
-  }, [user]);
+  }, [rolesList]);
+
+  useEffect(() => {
+    if (user?.id) {
+      getUserData(user.id);
+      setIsImageUpdated(false); // Reset image updated flag when opening edit form
+    } else {
+      setIsImageUpdated(false); // Reset for new user form
+    }
+  }, [user?.id]);
+
+  const { mutate: getUserData, isPending: isGettingUserData } = useMutation({
+    mutationFn: (id) => axios.get(`/user/${id}/`),
+    onSuccess: (data) => {
+      setFormData({
+        ...data?.data,
+        groups: data?.data?.roles || data?.data?.groups || [],
+      });
+    },
+    onError: (error) => {
+      toast.error("Failed to get user data");
+    },
+  });
+  const { mutate: postUser, isPending: isPostingUser } = useMutation({
+    mutationFn: (data) =>
+      user?.id
+        ? axios.patch(`/user/${user.id}/`, data)
+        : axios.post("/user/", data),
+    onSuccess: (data) => {
+      toast.success(
+        user?.id ? "User updated successfully" : "User created successfully"
+      );
+      onSuccess && onSuccess();
+      onClose && onClose();
+      setSelectedUser && setSelectedUser(null);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -75,195 +91,384 @@ export function UserForm({ user, onClose, onSuccess }) {
     }));
   };
 
-  const handleSelectChange = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  console.log(formData);
 
-  const handleImageUpload = (url) => {
-    setFormData((prev) => ({ ...prev, profile_picture: url }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      // Remove empty password field if editing
-      const submitData = { ...formData };
-      if (user?.id && !submitData.password) {
-        delete submitData.password;
-      }
-
-      if (user?.id) {
-        await edit("/users", user.id, submitData);
-        if (onSuccess) onSuccess();
-        if (onClose) onClose();
-      } else {
-        await post("/users", submitData);
-        // onSuccess and onClose are handled by the usePost hook
-      }
-    } catch (error) {
-      // Error toast is already handled by the API hooks
-    } finally {
-      setIsLoading(false);
+  const handleSelectChange = (name, value, type = "single") => {
+    if (type === "array") {
+      setFormData((prev) => ({ ...prev, [name]: [value] }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  if (isFetching) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Here you would typically upload to your server
+      // For now, we'll just create a local URL
+      const url = URL.createObjectURL(file);
+      setFormData((prev) => ({ ...prev, picture: url }));
+      setIsImageUpdated(true);
+    }
+  };
+
+  // Options for dropdowns
+  const roleOptions = rolesList.map((role) => ({
+    label: role.name,
+    value: role.id,
+  }));
+
+  const genderOptions = [
+    { label: "Male", value: "m" },
+    { label: "Female", value: "f" },
+    { label: "Other", value: "o" },
+  ];
+
+  const paymentStatusOptions = [
+    { label: "Pending", value: "pending" },
+    { label: "Verified", value: "verified" },
+    { label: "Unverified", value: "unverified" },
+    { label: "Rejected", value: "rejected" },
+  ];
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Create a copy of formData
+    const submitData = { ...formData };
+
+    // Remove picture key if image wasn't updated
+    if (!isImageUpdated) {
+      delete submitData.picture;
+    }
+    if (typeof submitData.groups[0] === "string") {
+      submitData.roles = rolesList?.filter(
+        (item) => item.name === submitData.groups[0]
+      )[0]?.id;
+      delete submitData.groups;
+    }
+
+    console.log(submitData);
+
+    postUser(submitData);
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{user?.id ? "Edit User" : "Add New User"}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            <FormField
-              label="Full Name"
-              name="full_name"
-              value={formData.full_name}
-              onChange={handleChange}
-              placeholder="Enter full name"
-              required
-            />
-
-            <FormField
-              label="Email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter email address"
-              required
-            />
-
-            <FormField
-              label={
-                user?.id
-                  ? "New Password (leave blank to keep current)"
-                  : "Password"
-              }
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter password"
-              required={!user?.id}
-            />
-
-            <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <Select
-                value={formData.role}
-                onValueChange={(value) => handleSelectChange("role", value)}
-              >
-                <SelectTrigger id="role">
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">User</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="moderator">Moderator</SelectItem>
-                </SelectContent>
-              </Select>
+    <Drawer
+      anchor="right"
+      open={open}
+      onClose={onClose}
+      slotProps={{ paper: { style: { width: "35%", height: "100vh " } } }}
+    >
+      <form onSubmit={handleSubmit}>
+        <div className="flex items-center justify-between p-4 border-b">
+          <div className="text-lg font-medium">
+            {user?.id ? "Edit User" : "Add New User"}
+          </div>
+          <IconButton variant="outline" onClick={onClose}>
+            <Close className="h-4 w-4" />
+          </IconButton>
+        </div>
+        <div onSubmit={handleSubmit} className="space-y-6 p-4 mt-4 relative">
+          {isGettingUserData ? (
+            <div className="flex h-96 items-center justify-center">
+              <LoadingSpinner />
             </div>
+          ) : (
+            <>
+              <div className="flex flex-col gap-6">
+                <TextField
+                  fullWidth
+                  label="Full Name"
+                  name="full_name"
+                  value={formData.full_name}
+                  onChange={handleChange}
+                  placeholder="Enter full name"
+                  required
+                  size="small"
+                  className="w-full"
+                />
 
-            <FormField
-              label="Phone Number"
-              name="phone_number"
-              value={formData.phone_number}
-              onChange={handleChange}
-              placeholder="Enter phone number"
-            />
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter email address"
+                  required
+                  size="small"
+                />
 
-            <FormField
-              label="Nationality"
-              name="nationality"
-              value={formData.nationality}
-              onChange={handleChange}
-              placeholder="Enter nationality"
-            />
-
-            <FormField
-              label="Date of Birth"
-              name="date_of_birth"
-              type="date"
-              value={formData.date_of_birth}
-              onChange={handleChange}
-            />
-
-            <div className="space-y-2">
-              <Label htmlFor="gender">Gender</Label>
-              <Select
-                value={formData.gender}
-                onValueChange={(value) => handleSelectChange("gender", value)}
-              >
-                <SelectTrigger id="gender">
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Profile Picture
-              </label>
-              <ImageUpload
-                value={formData.profile_picture}
-                onChange={handleImageUpload}
-                placeholder="Upload profile picture"
-              />
-            </div>
-
-            <div className="flex items-center space-x-2 md:col-span-2">
-              <Checkbox
-                id="is_active"
-                name="is_active"
-                checked={formData.is_active}
-                onCheckedChange={(checked) =>
-                  setFormData((prev) => ({ ...prev, is_active: checked }))
+                {/* <TextField
+                fullWidth
+                label={
+                  user?.id
+                    ? "New Password (leave blank to keep current)"
+                    : "Password"
                 }
-              />
-              <Label htmlFor="is_active">Active User</Label>
-            </div>
-          </div>
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter password"
+                required={!user?.id}
+                size="small"
+              /> */}
 
-          <div className="flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <LoadingSpinner className="mr-2 h-4 w-4" />
-                  {user?.id ? "Updating..." : "Creating..."}
-                </>
-              ) : user?.id ? (
-                "Update User"
-              ) : (
-                "Create User"
-              )}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+                <Autocomplete
+                  size="small"
+                  options={roleOptions}
+                  value={
+                    roleOptions.find(
+                      (opt) =>
+                        opt.label === formData.groups[0] ||
+                        opt.value === formData.groups[0]
+                    ) || null
+                  }
+                  onChange={(e, newValue) => {
+                    console.log(newValue);
+                    handleSelectChange(
+                      "groups",
+                      newValue?.value || "",
+                      "array"
+                    );
+                  }}
+                  getOptionLabel={(option) => option.label}
+                  isOptionEqualToValue={(option, value) =>
+                    option.value === value.value
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Role"
+                      placeholder="Select role"
+                    />
+                  )}
+                />
+
+                <TextField
+                  fullWidth
+                  label="Phone Number"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="+1234567890"
+                  size="small"
+                />
+
+                <Autocomplete
+                  size="small"
+                  options={genderOptions}
+                  value={
+                    genderOptions.find(
+                      (opt) => opt.value === formData.gender
+                    ) || null
+                  }
+                  onChange={(e, newValue) =>
+                    handleSelectChange("gender", newValue?.value || "m")
+                  }
+                  getOptionLabel={(option) => option.label}
+                  isOptionEqualToValue={(option, value) =>
+                    option.value === value.value
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Gender"
+                      placeholder="Select gender"
+                    />
+                  )}
+                />
+
+                <Autocomplete
+                  size="small"
+                  options={paymentStatusOptions}
+                  value={
+                    paymentStatusOptions.find(
+                      (opt) => opt.value === formData.payment_status
+                    ) || null
+                  }
+                  onChange={(e, newValue) =>
+                    handleSelectChange(
+                      "payment_status",
+                      newValue?.value || "unverified"
+                    )
+                  }
+                  getOptionLabel={(option) => option.label}
+                  isOptionEqualToValue={(option, value) =>
+                    option.value === value.value
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Payment Status"
+                      placeholder="Select payment status"
+                    />
+                  )}
+                />
+
+                <div className="w-full">
+                  <label
+                    htmlFor="subscription_end_date"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
+                    Subscription End Date
+                  </label>
+                  <TextField
+                    fullWidth
+                    placeholder="Subscription End Date"
+                    name="subscription_end_date"
+                    type="date"
+                    value={formData.subscription_end_date}
+                    onChange={handleChange}
+                    size="small"
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Profile Picture
+                  </label>
+                  <input
+                    type="file"
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold  file:text-primary-foreground hover:file:bg-primary/90"
+                  />
+                  {formData.picture && (
+                    <div className="mt-2">
+                      <img
+                        src={formData.picture}
+                        alt="Profile preview"
+                        className="max-w-[200px] max-h-[200px] object-cover rounded-lg"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="md:col-span-2 grid grid-cols-2 gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={formData.is_active}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          is_active: e.target.checked,
+                        }))
+                      }
+                      name="is_active"
+                      size="small"
+                    />
+                    <label className="text-sm font-medium">Active</label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={formData.is_staff}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          is_staff: e.target.checked,
+                        }))
+                      }
+                      name="is_staff"
+                      size="small"
+                    />
+                    <label className="text-sm font-medium">Staff</label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={formData.is_email_verified}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          is_email_verified: e.target.checked,
+                        }))
+                      }
+                      name="is_email_verified"
+                      size="small"
+                    />
+                    <label className="text-sm font-medium">
+                      Email Verified
+                    </label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={formData.is_phone_verified}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          is_phone_verified: e.target.checked,
+                        }))
+                      }
+                      name="is_phone_verified"
+                      size="small"
+                    />
+                    <label className="text-sm font-medium">
+                      Phone Verified
+                    </label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={formData.is_verified}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          is_verified: e.target.checked,
+                        }))
+                      }
+                      name="is_verified"
+                      size="small"
+                    />
+                    <label className="text-sm font-medium">Verified</label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={formData.is_payment_verified}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          is_payment_verified: e.target.checked,
+                        }))
+                      }
+                      name="is_payment_verified"
+                      size="small"
+                    />
+                    <label className="text-sm font-medium">
+                      Payment Verified
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>{" "}
+        <div className="flex justify-end space-x-2 absolute bottom-0 right-0 p-4 w-full border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={isPostingUser}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isPostingUser}>
+            {isPostingUser ? (
+              <>
+                <LoadingSpinner className="mr-2 h-4 w-4" />
+                {isPostingUser ? "Updating..." : "Creating..."}
+              </>
+            ) : (
+              "Submit"
+            )}
+          </Button>
+        </div>
+      </form>
+    </Drawer>
   );
 }

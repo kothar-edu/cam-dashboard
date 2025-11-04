@@ -23,6 +23,13 @@ export const AuthProvider = ({ children }) => {
     paymentStatus: null,
   });
 
+  const [playerPagination, setPlayerPagination] = useState({
+    pageIndex: 0,
+    pageSize: 20,
+    search: null,
+    currentTeam: null,
+  });
+
   const getUsers = async (userPagination) => {
     const params = {};
 
@@ -90,6 +97,65 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  const getPlayers = async (playerPagination) => {
+    const params = {};
+    if (playerPagination.pageSize) {
+      params.limit = playerPagination.pageSize;
+    }
+    if (
+      playerPagination.pageIndex !== undefined &&
+      playerPagination.pageIndex !== null
+    ) {
+      params.offset = playerPagination.pageIndex * playerPagination.pageSize;
+    }
+    if (playerPagination.search) {
+      params.search = playerPagination.search;
+    }
+    if (playerPagination.currentTeam) {
+      params.current_team = playerPagination.currentTeam;
+    }
+    const response = await axios.get("/game/player/", { params });
+    return response.data;
+  };
+
+  const {
+    data: playersList = [],
+    isFetching: isFetchingPlayers,
+    error: errorPlayers,
+  } = useQuery({
+    queryKey: ["players", playerPagination],
+    queryFn: () => getPlayers(playerPagination),
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    staleTime: 0,
+    cacheTime: 0,
+    enabled: !!token,
+  });
+  const refetchPaginatedPlayers = (params = {}) => {
+    queryClient.fetchQuery({
+      queryKey: ["players", playerPagination],
+      queryFn: () => getPlayers(params),
+    });
+  };
+
+  const {
+    data: teamsList = [],
+    isFetching: isFetchingTeams,
+    error: errorTeams,
+    refetch: refetchTeams,
+  } = useQuery({
+    queryKey: ["teams"],
+    queryFn: () => getTeams(),
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    staleTime: 0,
+    cacheTime: 0,
+    enabled: !!token,
+  });
+  const getTeams = async () => {
+    const response = await axios.get("/game/teams/");
+    return response.data;
+  };
   const {
     data: rolesList = [],
     isFetching: isFetchingRoles,
@@ -151,6 +217,18 @@ export const AuthProvider = ({ children }) => {
     isFetchingRoles,
     errorRoles,
     refetchRoles,
+
+    playersList,
+    isFetchingPlayers,
+    errorPlayers,
+    playerPagination,
+    setPlayerPagination,
+    refetchPaginatedPlayers,
+
+    teamsList,
+    isFetchingTeams,
+    errorTeams,
+    refetchTeams,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

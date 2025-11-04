@@ -1,25 +1,15 @@
-import { useContext, useState, useEffect } from "react";
-import { DashboardHeader } from "../components/dashboard/dashboard-header";
-import { UsersTable } from "../components/users/users-table";
-import { UserForm } from "../components/users/user-form";
-import { Button } from "../components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "../components/ui/sheet";
 import { Plus } from "lucide-react";
-import { useGet } from "../hooks/useApi";
+import { useState } from "react";
+import { DashboardHeader } from "../components/dashboard/dashboard-header";
+import { Button } from "../components/ui/button";
+import { UserForm } from "../components/users/user-form";
+import { UsersTable } from "../components/users/users-table";
 import { useAuth } from "../contexts/AuthContext";
-import { Drawer } from "@mui/material";
 
 function UsersPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const {
-    userPagination,
-    setUserPagination,
     refetchPaginatedUsers,
     usersList: users,
     isFetchingUsers,
@@ -54,6 +44,8 @@ function UsersPage() {
         heading="Users"
         text="Manage system users and their permissions."
         count={users?.count}
+        refetch={refetchPaginatedUsers}
+        loading={isFetchingUsers}
       >
         <Button onClick={handleAddUser}>
           <Plus className="mr-2 h-4 w-4" />

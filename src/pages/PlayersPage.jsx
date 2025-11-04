@@ -4,9 +4,16 @@ import { PlayersTable } from "../components/players/players-table";
 import { Button } from "../components/ui/button";
 import { Plus } from "lucide-react";
 import { useGet } from "src/hooks/useApi";
+import { useAuth } from "src/contexts/AuthContext";
 
 function PlayersPage() {
-  const { data: players, loading: isLoading } = useGet("/game/player/");
+  const {
+    playerPagination,
+    setPlayerPagination,
+    refetchPaginatedPlayers,
+    playersList: players,
+    isFetchingPlayers,
+  } = useAuth();
 
   return (
     <div className="space-y-6">
@@ -14,6 +21,7 @@ function PlayersPage() {
         heading="Players"
         text="Manage your players."
         count={players?.count}
+        refetch={refetchPaginatedPlayers}
       >
         <Link to="/dashboard/players/new">
           <Button variant="secondary">
@@ -22,7 +30,7 @@ function PlayersPage() {
           </Button>
         </Link>
       </DashboardHeader>
-      <PlayersTable players={players} loading={isLoading} />
+      <PlayersTable loading={isFetchingPlayers} />
     </div>
   );
 }

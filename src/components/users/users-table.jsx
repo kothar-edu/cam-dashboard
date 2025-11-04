@@ -8,7 +8,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../hooks/use-toast";
 import { useDelete } from "../../hooks/useApi";
@@ -24,7 +24,19 @@ export function UsersTable({ loading, onEdit, onDelete }) {
     errorMessage: "Failed to delete user",
   });
 
-  const { userPagination, setUserPagination, usersList: users } = useAuth();
+  const {
+    userPagination,
+    setUserPagination,
+    usersList: users,
+    teamsList,
+    isFetchingTeams,
+    errorTeams,
+    refetchTeams,
+  } = useAuth();
+
+  useEffect(() => {
+    if (teamsList.length === 0) refetchTeams();
+  }, []);
 
   // Make sure users is an array before trying to map over it
   const usersList = Array.isArray(users?.results) ? users?.results : [];

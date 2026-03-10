@@ -109,7 +109,8 @@ export function usePost(config = {}) {
       setError(null);
 
       try {
-        const res = await api.post(endpoint, payload);
+        const url = endpoint.endsWith("/") ? endpoint : `${endpoint}/`;
+        const res = await api.post(url, payload);
         console.log(res);
         if (res.data) {
           const message = options.successMessage || successMessage;

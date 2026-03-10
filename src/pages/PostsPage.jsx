@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 import { useGet } from "src/hooks/useApi";
 
 function PostsPage() {
-  const { data: posts = [], loading: isLoading } = useGet(
+  const { data: posts = [], loading: isLoading, refetch } = useGet(
     "/newsfeed/api/v1/post/"
   );
 
@@ -24,7 +24,7 @@ function PostsPage() {
           </Button>
         </Link>
       </DashboardHeader>
-      <PostsTable posts={posts} loading={isLoading} />
+      <PostsTable posts={posts} loading={isLoading} onDelete={refetch} />
     </div>
   );
 }

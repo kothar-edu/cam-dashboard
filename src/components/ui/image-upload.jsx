@@ -1,10 +1,13 @@
 "use client"
 
+import axios from "axios"
 import { useState } from "react"
 import { Button } from "./button"
 import { Input } from "./input"
 import { LoadingSpinner } from "./loading-spinner"
 import { Upload, X } from "lucide-react"
+
+const getAuthToken = () => localStorage.getItem("token")
 
 export function ImageUpload({ value, onChange, placeholder = "Upload image" }) {
   const [isUploading, setIsUploading] = useState(false)
@@ -14,15 +17,21 @@ export function ImageUpload({ value, onChange, placeholder = "Upload image" }) {
     if (!file) return
 
     setIsUploading(true)
-
     try {
-      // In a real app, you would upload to your server or a service like Cloudinary
-      // For this demo, we'll simulate an upload with a timeout
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // Simulate a URL return
-      const imageUrl = URL.createObjectURL(file)
-      onChange(imageUrl)
+      const formData = new FormData()
+      formData.append("image", file)
+      const token = getAuthToken()
+      const response = await axios.post(
+        `${import.meta.env.VITE_URL}newsfeed/api/v1/upload-image/`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        }
+      )
+      onChange(response.data.image_url)
     } catch (error) {
       console.error("Error uploading image:", error)
     } finally {

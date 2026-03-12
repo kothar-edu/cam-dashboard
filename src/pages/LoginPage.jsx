@@ -46,7 +46,7 @@ function LoginPage() {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        `https://devapi.cam-youth.com/api/user/login/`,
+        `${import.meta.env.VITE_URL}api/user/login/`,
         { email, password },
         {
           method: "POST",

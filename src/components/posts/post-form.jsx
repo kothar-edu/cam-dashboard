@@ -10,46 +10,47 @@ import { ImageUpload } from "../ui/image-upload"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import { Label } from "../ui/label"
 import { Textarea } from "../ui/textarea"
+import { useGetById, usePost, useEdit } from "src/hooks/useApi"
+
+const POST_ENDPOINT = "/newsfeed/api/v1/post"
 
 export function PostForm({ id }) {
   const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(false)
-  const [isFetching, setIsFetching] = useState(!!id)
+  const { post, loading: isCreating } = usePost({
+    successMessage: "Post created successfully",
+    onSuccess: () => navigate("/dashboard/posts"),
+  })
+  const { edit, loading: isUpdating } = useEdit({
+    successMessage: "Post updated successfully",
+    onSuccess: () => navigate("/dashboard/posts"),
+  })
+
+  const { data: existingPost, loading: isFetching } = useGetById(POST_ENDPOINT, id)
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    date: new Date().toISOString().split("T")[0],
-    type: "post",
+    post_date: new Date().toISOString().split("T")[0],
+    post_time: new Date().toTimeString().split(" ")[0],
+    post_type: "Blog",
+    status: "Published",
     image: "",
   })
 
   useEffect(() => {
-    const fetchPost = async () => {
-      if (id) {
-        try {
-          setIsFetching(true)
-          // Simulate API call
-          await new Promise((resolve) => setTimeout(resolve, 1000))
-
-          // Mock post data
-          setFormData({
-            title: "Tournament Announcement",
-            description: "We are excited to announce our upcoming tournament starting next month!",
-            date: "2025-03-01",
-            type: "post",
-            image: "/placeholder.svg",
-          })
-        } catch (error) {
-          console.error("Error fetching post:", error)
-        } finally {
-          setIsFetching(false)
-        }
-      }
+    if (existingPost) {
+      const coverImage = existingPost.images?.find((img) => img.is_cover) ?? existingPost.images?.[0]
+      setFormData({
+        title: existingPost.title ?? "",
+        description: existingPost.description ?? "",
+        post_date: existingPost.post_date ?? new Date().toISOString().split("T")[0],
+        post_time: existingPost.post_time ?? new Date().toTimeString().split(" ")[0],
+        post_type: existingPost.post_type ?? "Blog",
+        status: existingPost.status ?? "Published",
+        image: coverImage?.image_url ?? "",
+      })
     }
-
-    fetchPost()
-  }, [id])
+  }, [existingPost])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -64,21 +65,33 @@ export function PostForm({ id }) {
     setFormData((prev) => ({ ...prev, image: url }))
   }
 
+  const buildPayload = () => {
+    const payload = {
+      post_type: formData.post_type,
+      title: formData.title,
+      description: formData.description,
+      post_date: formData.post_date,
+      post_time: formData.post_time,
+      status: formData.status,
+      tags: [],
+    }
+    if (formData.image) {
+      payload.images = [{ image_url: formData.image, is_cover: true }]
+    }
+    return payload
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setIsLoading(true)
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      navigate("/dashboard/posts")
-    } catch (error) {
-      console.error("Error saving post:", error)
-    } finally {
-      setIsLoading(false)
+    const payload = buildPayload()
+    if (id) {
+      await edit(POST_ENDPOINT, id, payload)
+    } else {
+      await post(POST_ENDPOINT, payload)
     }
   }
+
+  const isLoading = isCreating || isUpdating
 
   if (isFetching) {
     return (
@@ -116,17 +129,46 @@ export function PostForm({ id }) {
               />
             </div>
 
-            <FormField label="Date" name="date" type="date" value={formData.date} onChange={handleChange} required />
+            <FormField
+              label="Date"
+              name="post_date"
+              type="date"
+              value={formData.post_date}
+              onChange={handleChange}
+              required
+            />
 
             <div className="space-y-2">
-              <Label htmlFor="type">Post Type</Label>
-              <Select value={formData.type} onValueChange={(value) => handleSelectChange("type", value)}>
-                <SelectTrigger id="type">
+              <Label htmlFor="post_type">Post Type</Label>
+              <Select
+                value={formData.post_type}
+                onValueChange={(value) => handleSelectChange("post_type", value)}
+              >
+                <SelectTrigger id="post_type">
                   <SelectValue placeholder="Select post type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="post">Post</SelectItem>
-                  <SelectItem value="event">Event</SelectItem>
+                  <SelectItem value="Blog">Blog</SelectItem>
+                  <SelectItem value="News">News</SelectItem>
+                  <SelectItem value="Event">Event</SelectItem>
+                  <SelectItem value="Match Update">Match Update</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => handleSelectChange("status", value)}
+              >
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Draft">Draft</SelectItem>
+                  <SelectItem value="Published">Published</SelectItem>
+                  <SelectItem value="Archived">Archived</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -140,7 +182,12 @@ export function PostForm({ id }) {
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => navigate("/dashboard/posts")} disabled={isLoading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate("/dashboard/posts")}
+              disabled={isLoading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>

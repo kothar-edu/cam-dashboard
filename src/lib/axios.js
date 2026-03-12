@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = `https://devapi.cam-youth.com/api`;
+const BASE_URL = `${import.meta.env.VITE_URL}api`;
 const token = localStorage.getItem("token");
 
 axios.defaults.baseURL = BASE_URL;

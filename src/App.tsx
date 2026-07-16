@@ -11,6 +11,9 @@ import PlayersPage from '@/pages/PlayersPage';
 import FixturesPage from '@/pages/FixturesPage';
 import ScorecardsPage from '@/pages/ScorecardsPage';
 import PointsPage from '@/pages/PointsPage';
+import PostsPage from '@/pages/PostsPage';
+import SponsorsPage from '@/pages/SponsorsPage';
+import BoundaryLabelsPage from '@/pages/BoundaryLabelsPage';
 
 const placeholderRoutes = [
   'teams/new',
@@ -25,10 +28,8 @@ const placeholderRoutes = [
   'fixtures/new/bulk',
   'fixtures/:id',
   'scorecards/:id',
-  'posts',
   'posts/new',
   'posts/:id',
-  'sponsors',
   'sponsors/new',
   'sponsors/:id',
   'voting',
@@ -61,6 +62,9 @@ export default function App() {
           <Route path="fixtures" element={<FixturesPage />} />
           <Route path="scorecards" element={<ScorecardsPage />} />
           <Route path="points" element={<PointsPage />} />
+          <Route path="posts" element={<PostsPage />} />
+          <Route path="sponsors" element={<SponsorsPage />} />
+          <Route path="boundary-labels" element={<BoundaryLabelsPage />} />
           {placeholderRoutes.map((path) => (
             <Route key={path} path={path} element={<PlaceholderPage />} />
           ))}

@@ -15,6 +15,7 @@ import {
   LogOut,
   BirdIcon as CricketBall,
   Tag,
+  Building2,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
@@ -47,8 +48,16 @@ function isActive(pathname: string, path: string) {
 
 export function ShellSidebar() {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, canManageTenants } = useAuth();
   const { activeTenant } = useTenant();
+
+  const navRoutes = canManageTenants
+    ? [
+        ...routes.slice(0, 5),
+        { title: 'Tenants', href: '/dashboard/tenants', icon: Building2 },
+        ...routes.slice(5),
+      ]
+    : routes;
 
   return (
     <aside className="flex h-screen w-64 flex-col border-r border-border bg-[#12233D] text-white">
@@ -66,7 +75,7 @@ export function ShellSidebar() {
 
       <nav className="flex-1 overflow-y-auto px-2 py-4">
         <ul className="space-y-1">
-          {routes.map((route) => {
+          {navRoutes.map((route) => {
             const Icon = route.icon;
             const active = isActive(location.pathname, route.href);
             return (

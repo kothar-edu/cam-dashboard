@@ -1,51 +1,32 @@
-# Remaining Dashboard Placeholder Routes
+# Dashboard Routes — Complete
 
-These routes are registered in `src/App.tsx` and render `PlaceholderPage`. They are
-**out of scope** for the dashboard revamp epic (SP1–SP6). List pages and tenant-scoped
-admin actions are shipped; detail/create/edit flows are future work.
+All routes previously listed here now render real typed pages (no `PlaceholderPage`).
 
-## Cricket entities
+## Implemented
 
-| Route pattern | Intended feature | Backend API status |
-|---------------|------------------|-------------------|
-| `/dashboard/teams/new` | Create team form | `POST /api/game/teams/` exists |
-| `/dashboard/teams/:id` | Team detail/edit | `GET/PATCH /api/game/teams/{id}/` exists |
-| `/dashboard/tournaments/new` | Create tournament | `POST /api/game/tournament/` exists |
-| `/dashboard/tournaments/:id` | Tournament detail/groups | `GET/PATCH` + group endpoints exist |
-| `/dashboard/players/new` | Create player | `POST /api/game/player/` exists |
-| `/dashboard/players/:id` | Player profile edit | `GET/PATCH /api/game/player/{id}/` exists |
-| `/dashboard/players/:id/stats` | Player statistics view | Stats endpoints exist |
-| `/dashboard/fixtures/new` | Create fixture | `POST /api/game/match/` exists |
-| `/dashboard/fixtures/new/bulk` | CSV bulk upload | Legacy bulk UI removed; needs rebuild |
-| `/dashboard/fixtures/:id` | Fixture edit | `GET/PATCH /api/game/match/{id}/` exists |
-| `/dashboard/scorecards/:id` | Live scorecard editor | Scoring APIs exist (complex UI) |
+| Route | Page |
+|-------|------|
+| `/dashboard/teams/new` | `TeamFormPage` |
+| `/dashboard/teams/:id` | `TeamDetailPage` (read-only; backend has no team retrieve) |
+| `/dashboard/tournaments/new`, `/:id` | `TournamentFormPage` |
+| `/dashboard/players/new`, `/:id` | `PlayerFormPage` |
+| `/dashboard/players/:id/stats` | `PlayerStatsPage` |
+| `/dashboard/fixtures/new` | `FixtureFormPage` |
+| `/dashboard/fixtures/new/bulk` | `BulkFixtureFormPage` |
+| `/dashboard/fixtures/:id` | `FixtureFormPage` |
+| `/dashboard/scorecards/:id` | `ScorecardDetailPage` |
+| `/dashboard/posts/new`, `/:id` | `PostFormPage` |
+| `/dashboard/sponsors/new`, `/:id` | `SponsorFormPage` |
+| `/dashboard/voting` | `VotingListPage` |
+| `/dashboard/voting/new`, `/:id` | `VotingFormPage` |
+| Settings → Create admin | `SettingsPage` tab |
+| Tenants admin assignment | Email lookup via `GET /api/user/lookup/` |
 
-## Content
+## Known gaps
 
-| Route pattern | Intended feature | Backend API status |
-|---------------|------------------|-------------------|
-| `/dashboard/posts/new` | Create post | `POST newsfeed/api/v1/post/` exists |
-| `/dashboard/posts/:id` | Edit post | `GET/PATCH` exists |
-| `/dashboard/sponsors/new` | Create sponsor | `POST /api/game/sponsor/` exists |
-| `/dashboard/sponsors/:id` | Edit sponsor | `GET/PATCH` exists |
+- **Team edit**: `TeamViewSet` exposes list + create only (superuser create). Detail page is read-only from list data.
+- **Scorecard editor**: Shows fixture lineups from API; live lineup mutation UI (batting/bowling update endpoints) not ported — legacy scorecard editor was mocked.
+- **Create admin documents**: Image uploads (ID card, payslip) omitted in dashboard form; optional on `UserRegisterAdminSerializer`.
+- **Voting**: Uses real `nominee-voting-player` + `voting` newsfeed APIs (tournament player nominations), not the legacy mock poll model.
 
-## Voting
-
-| Route pattern | Intended feature | Notes |
-|---------------|------------------|-------|
-| `/dashboard/voting` | Poll list | Was 100% mock in legacy app |
-| `/dashboard/voting/new` | Create poll | No typed API client yet |
-| `/dashboard/voting/:id` | Edit poll | No typed API client yet |
-
-## Also deferred (no placeholder route)
-
-- **Settings → Create admin tab**: `UserRegisterAdminSerializer` requires full player
-  profile fields; not suitable for a minimal admin-creation form without backend changes.
-
-## Priority recommendation for a follow-up epic
-
-1. Team/tournament/player detail forms (highest admin traffic)
-2. Fixture create/edit + bulk upload
-3. Post/sponsor editors
-4. Scorecard editor (may share patterns with livescore-admin)
-5. Voting polls (needs API discovery + new typed client)
+Plan: `docs/superpowers/plans/2026-07-16-dashboard-deferred-routes.md`

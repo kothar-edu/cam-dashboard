@@ -11,6 +11,7 @@ import {
   useRevokeTenantAdmin,
   useTenantMemberships,
 } from '@/hooks/useTenantAdmin';
+import { UserEmailLookupField } from '@/components/forms/UserEmailLookupField';
 
 export default function TenantsPage() {
   const { canManageTenants } = useAuth();
@@ -19,6 +20,7 @@ export default function TenantsPage() {
   const [newTenantName, setNewTenantName] = useState('');
   const [newSchemaName, setNewSchemaName] = useState('');
   const [adminUserId, setAdminUserId] = useState('');
+  const [resolvedAdminLabel, setResolvedAdminLabel] = useState('');
 
   const memberships = useTenantMemberships(selectedTenantId);
   const createTenantMutation = useCreateTenant();
@@ -52,7 +54,12 @@ export default function TenantsPage() {
     if (!selectedTenantId || !adminUserId.trim()) return;
     assignAdminMutation.mutate(
       { user: adminUserId.trim(), tenant: selectedTenantId },
-      { onSuccess: () => setAdminUserId('') }
+      {
+        onSuccess: () => {
+          setAdminUserId('');
+          setResolvedAdminLabel('');
+        },
+      }
     );
   };
 
@@ -127,20 +134,22 @@ export default function TenantsPage() {
           <>
             <form
               onSubmit={handleAssignAdmin}
-              className="flex max-w-2xl flex-wrap items-end gap-3 rounded-lg border bg-white p-4"
+              className="max-w-2xl space-y-4 rounded-lg border bg-white p-4"
             >
-              <div className="min-w-[240px] flex-1">
-                <Input
-                  label="User ID (UUID)"
-                  value={adminUserId}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                    setAdminUserId(event.target.value)
-                  }
-                  placeholder="Paste user UUID from Users page"
-                  required
-                />
-              </div>
-              <Button type="submit" disabled={assignAdminMutation.isPending}>
+              <UserEmailLookupField
+                onResolved={(user) => {
+                  setAdminUserId(user.id);
+                  setResolvedAdminLabel(`${user.full_name} (${user.email})`);
+                }}
+                onClear={() => {
+                  setAdminUserId('');
+                  setResolvedAdminLabel('');
+                }}
+              />
+              {resolvedAdminLabel ? (
+                <p className="text-sm text-green-700">Selected: {resolvedAdminLabel}</p>
+              ) : null}
+              <Button type="submit" disabled={assignAdminMutation.isPending || !adminUserId}>
                 Assign tenant admin
               </Button>
             </form>

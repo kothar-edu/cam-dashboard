@@ -10,4 +10,11 @@ export async function listScorecards(params?: ListParams): Promise<Paginated<Fix
 }
 
 export { getFixture } from './fixtures';
-export type { FixtureDetail, LineupEntry } from './fixtures';
+export {
+  updateLineupBatting,
+  updateLineupBowling,
+  type FixtureDetail,
+  type LineupEntry,
+  type LineupBattingUpdatePayload,
+  type LineupBowlingUpdatePayload,
+} from './fixtures';

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { DataTable } from '@/components/data-table/DataTable';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useTenant } from '@/contexts/TenantContext';
@@ -48,6 +49,18 @@ export default function TeamsPage() {
           { id: 'name', header: 'Name', cell: (row) => row.name },
           { id: 'code', header: 'Abbreviation', cell: (row) => row.code },
           { id: 'players', header: 'Players', cell: (row) => row.total_players },
+          {
+            id: 'actions',
+            header: 'Actions',
+            cell: (row) => (
+              <Link
+                to={`/dashboard/teams/${row.id}`}
+                className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D]"
+              >
+                Edit
+              </Link>
+            ),
+          },
         ]}
         data={teams}
         loading={isLoading}

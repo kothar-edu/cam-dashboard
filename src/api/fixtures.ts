@@ -44,9 +44,41 @@ export type LineupEntry = {
   player: { id: string; full_name: string };
   runs_scored: number;
   balls_faced: number;
+  fours: number;
+  sixes: number;
+  dismissed: boolean;
   wickets_taken: number;
   balls_thrown: number;
+  runs_conceded: number;
+  maidens: number;
+  hattricks: number;
 };
+
+export type LineupBattingUpdatePayload = {
+  id: string;
+  runs_scored: number;
+  balls_faced: number;
+  fours: number;
+  sixes: number;
+  dismissed: boolean;
+};
+
+export type LineupBowlingUpdatePayload = {
+  id: string;
+  balls_thrown: number;
+  runs_conceded: number;
+  wickets_taken: number;
+  maidens: number;
+  hattricks: number;
+};
+
+export async function updateLineupBatting(payload: LineupBattingUpdatePayload[]): Promise<void> {
+  await apiClient.put('/game/lineup/batting-update/', payload);
+}
+
+export async function updateLineupBowling(payload: LineupBowlingUpdatePayload[]): Promise<void> {
+  await apiClient.put('/game/lineup/bowling-update/', payload);
+}
 
 export type UpdateFixturePayload = {
   time?: string;

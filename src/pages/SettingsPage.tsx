@@ -114,6 +114,10 @@ function CreateAdminForm() {
   const [otherCountry, setOtherCountry] = useState('');
   const [visaType, setVisaType] = useState('citizen');
   const [role, setRole] = useState('');
+  const [picture, setPicture] = useState<File | null>(null);
+  const [idCard, setIdCard] = useState<File | null>(null);
+  const [paySlip, setPaySlip] = useState<File | null>(null);
+  const [studyDocument, setStudyDocument] = useState<File | null>(null);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -128,6 +132,10 @@ function CreateAdminForm() {
         other_country: otherCountry || undefined,
         visa_type: visaType,
         role: role ? Number(role) : undefined,
+        picture,
+        id_card: idCard,
+        pay_slip: paySlip,
+        study_document: studyDocument,
       },
       {
         onSuccess: () => {
@@ -136,6 +144,10 @@ function CreateAdminForm() {
           setPhone('');
           setDob('');
           setOtherCountry('');
+          setPicture(null);
+          setIdCard(null);
+          setPaySlip(null);
+          setStudyDocument(null);
         },
       }
     );
@@ -181,6 +193,10 @@ function CreateAdminForm() {
         onChange={setRole}
         options={(rolesQuery.data ?? []).map((item) => ({ value: String(item.id), label: item.name }))}
       />
+      <FileField label="Profile picture (optional)" onChange={setPicture} />
+      <FileField label="ID card (optional)" onChange={setIdCard} />
+      <FileField label="Payslip (optional)" onChange={setPaySlip} />
+      <FileField label="Study document (optional)" onChange={setStudyDocument} />
       {createMutation.isError ? <p className="text-sm text-red-600">Failed to create admin user.</p> : null}
       {createMutation.isSuccess ? <p className="text-sm text-green-700">Admin user created. They will receive a welcome email.</p> : null}
       <Button type="submit" disabled={createMutation.isPending}>
@@ -219,6 +235,20 @@ function SelectField({
           </option>
         ))}
       </select>
+    </div>
+  );
+}
+
+function FileField({ label, onChange }: { label: string; onChange: (file: File | null) => void }) {
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-[#12233D]">{label}</label>
+      <input
+        type="file"
+        accept="image/*,.pdf"
+        className="block w-full text-sm text-muted-foreground"
+        onChange={(event) => onChange(event.target.files?.[0] ?? null)}
+      />
     </div>
   );
 }

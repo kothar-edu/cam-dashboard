@@ -1,18 +1,62 @@
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
-import { useScorecard } from '@/hooks/useScorecards';
+import { useScorecard, useUpdateLineupBatting, useUpdateLineupBowling } from '@/hooks/useScorecards';
 import type { LineupEntry } from '@/api/scorecards';
+
+type EditableLineup = LineupEntry;
 
 export default function ScorecardDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data, isLoading, isError } = useScorecard(id);
+  const battingMutation = useUpdateLineupBatting(id);
+  const bowlingMutation = useUpdateLineupBowling(id);
+
+  const [lineupsA, setLineupsA] = useState<EditableLineup[]>([]);
+  const [lineupsB, setLineupsB] = useState<EditableLineup[]>([]);
+
+  useEffect(() => {
+    if (data) {
+      setLineupsA((data.lineups_a ?? []).map(normalizeLineup));
+      setLineupsB((data.lineups_b ?? []).map(normalizeLineup));
+    }
+  }, [data]);
+
+  const saveBatting = () => {
+    const payload = [...lineupsA, ...lineupsB].map((lineup) => ({
+      id: lineup.id,
+      runs_scored: lineup.runs_scored,
+      balls_faced: lineup.balls_faced,
+      fours: lineup.fours,
+      sixes: lineup.sixes,
+      dismissed: lineup.dismissed,
+    }));
+    if (payload.length) battingMutation.mutate(payload);
+  };
+
+  const saveBowling = () => {
+    const payload = [...lineupsA, ...lineupsB].map((lineup) => ({
+      id: lineup.id,
+      balls_thrown: lineup.balls_thrown,
+      runs_conceded: lineup.runs_conceded,
+      wickets_taken: lineup.wickets_taken,
+      maidens: lineup.maidens,
+      hattricks: lineup.hattricks,
+    }));
+    if (payload.length) bowlingMutation.mutate(payload);
+  };
+
+  const pending = battingMutation.isPending || bowlingMutation.isPending;
+  const saveError = battingMutation.isError || bowlingMutation.isError;
+  const saveSuccess = battingMutation.isSuccess || bowlingMutation.isSuccess;
 
   return (
     <TenantRequired>
       <div className="space-y-6">
-        <PageHeader title="Scorecard" backTo="/dashboard/scorecards" />
+        <PageHeader title="Scorecard editor" backTo="/dashboard/scorecards" />
         {isLoading && !data ? (
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         ) : isError || !data ? (
@@ -28,8 +72,42 @@ export default function ScorecardDetailPage() {
               </p>
               {data.result ? <p className="mt-2 text-sm">{data.result}</p> : null}
             </div>
-            <LineupTable title={data.opponent_a.team_name} lineups={data.lineups_a ?? []} />
-            <LineupTable title={data.opponent_b.team_name} lineups={data.lineups_b ?? []} />
+
+            <LineupEditor
+              title={`${data.opponent_a.team_name} — batting`}
+              lineups={lineupsA}
+              onChange={setLineupsA}
+              mode="batting"
+            />
+            <LineupEditor
+              title={`${data.opponent_b.team_name} — batting`}
+              lineups={lineupsB}
+              onChange={setLineupsB}
+              mode="batting"
+            />
+            <LineupEditor
+              title={`${data.opponent_a.team_name} — bowling`}
+              lineups={lineupsA}
+              onChange={setLineupsA}
+              mode="bowling"
+            />
+            <LineupEditor
+              title={`${data.opponent_b.team_name} — bowling`}
+              lineups={lineupsB}
+              onChange={setLineupsB}
+              mode="bowling"
+            />
+
+            <div className="flex flex-wrap gap-3">
+              <Button type="button" onClick={saveBatting} disabled={pending || !lineupsA.length && !lineupsB.length}>
+                {battingMutation.isPending ? 'Saving batting…' : 'Save batting stats'}
+              </Button>
+              <Button type="button" variant="outline" onClick={saveBowling} disabled={pending || !lineupsA.length && !lineupsB.length}>
+                {bowlingMutation.isPending ? 'Saving bowling…' : 'Save bowling stats'}
+              </Button>
+            </div>
+            {saveError ? <p className="text-sm text-red-600">Failed to save lineup changes.</p> : null}
+            {saveSuccess ? <p className="text-sm text-green-700">Lineup stats saved.</p> : null}
           </div>
         )}
       </div>
@@ -37,38 +115,137 @@ export default function ScorecardDetailPage() {
   );
 }
 
-function LineupTable({ title, lineups }: { title: string; lineups: LineupEntry[] }) {
+function LineupEditor({
+  title,
+  lineups,
+  onChange,
+  mode,
+}: {
+  title: string;
+  lineups: EditableLineup[];
+  onChange: (lineups: EditableLineup[]) => void;
+  mode: 'batting' | 'bowling';
+}) {
+  const updateLineup = (lineupId: string, patch: Partial<EditableLineup>) => {
+    onChange(lineups.map((lineup) => (lineup.id === lineupId ? { ...lineup, ...patch } : lineup)));
+  };
+
   return (
     <div className="overflow-hidden rounded-lg border bg-white">
       <div className="border-b px-4 py-3 font-semibold text-[#12233D]">{title}</div>
-      <table className="min-w-full text-sm">
-        <thead className="bg-gray-50 text-left">
-          <tr>
-            <th className="px-4 py-2">Player</th>
-            <th className="px-4 py-2">Runs</th>
-            <th className="px-4 py-2">Balls</th>
-            <th className="px-4 py-2">Wickets</th>
-          </tr>
-        </thead>
-        <tbody>
-          {lineups.length ? (
-            lineups.map((lineup) => (
-              <tr key={lineup.id} className="border-t">
-                <td className="px-4 py-2">{lineup.player.full_name}</td>
-                <td className="px-4 py-2">{lineup.runs_scored}</td>
-                <td className="px-4 py-2">{lineup.balls_faced}</td>
-                <td className="px-4 py-2">{lineup.wickets_taken}</td>
+      {lineups.length ? (
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead className="bg-gray-50 text-left">
+              <tr>
+                <th className="px-4 py-2">Player</th>
+                {mode === 'batting' ? (
+                  <>
+                    <th className="px-4 py-2">Runs</th>
+                    <th className="px-4 py-2">Balls</th>
+                    <th className="px-4 py-2">4s</th>
+                    <th className="px-4 py-2">6s</th>
+                    <th className="px-4 py-2">Out</th>
+                  </>
+                ) : (
+                  <>
+                    <th className="px-4 py-2">Balls</th>
+                    <th className="px-4 py-2">Runs conc.</th>
+                    <th className="px-4 py-2">Wkts</th>
+                    <th className="px-4 py-2">Maidens</th>
+                    <th className="px-4 py-2">Hattricks</th>
+                  </>
+                )}
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td className="px-4 py-4 text-muted-foreground" colSpan={4}>
-                No lineup data available.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {lineups.map((lineup) => (
+                <tr key={lineup.id} className="border-t">
+                  <td className="px-4 py-2">{lineup.player.full_name}</td>
+                  {mode === 'batting' ? (
+                    <>
+                      <td className="px-4 py-2">
+                        <StatInput value={lineup.runs_scored} onChange={(value) => updateLineup(lineup.id, { runs_scored: value })} />
+                      </td>
+                      <td className="px-4 py-2">
+                        <StatInput value={lineup.balls_faced} onChange={(value) => updateLineup(lineup.id, { balls_faced: value })} />
+                      </td>
+                      <td className="px-4 py-2">
+                        <StatInput value={lineup.fours} onChange={(value) => updateLineup(lineup.id, { fours: value })} />
+                      </td>
+                      <td className="px-4 py-2">
+                        <StatInput value={lineup.sixes} onChange={(value) => updateLineup(lineup.id, { sixes: value })} />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          type="checkbox"
+                          checked={lineup.dismissed}
+                          onChange={(event) => updateLineup(lineup.id, { dismissed: event.target.checked })}
+                        />
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-4 py-2">
+                        <StatInput value={lineup.balls_thrown} onChange={(value) => updateLineup(lineup.id, { balls_thrown: value })} />
+                      </td>
+                      <td className="px-4 py-2">
+                        <StatInput
+                          value={lineup.runs_conceded}
+                          onChange={(value) => updateLineup(lineup.id, { runs_conceded: value })}
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <StatInput
+                          value={lineup.wickets_taken}
+                          onChange={(value) => updateLineup(lineup.id, { wickets_taken: value })}
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <StatInput value={lineup.maidens} onChange={(value) => updateLineup(lineup.id, { maidens: value })} />
+                      </td>
+                      <td className="px-4 py-2">
+                        <StatInput value={lineup.hattricks} onChange={(value) => updateLineup(lineup.id, { hattricks: value })} />
+                      </td>
+                    </>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="px-4 py-4 text-sm text-muted-foreground">No lineup data available.</p>
+      )}
     </div>
   );
+}
+
+function StatInput({ value, onChange }: { value: number; onChange: (value: number) => void }) {
+  return (
+    <input
+      type="number"
+      min={0}
+      className="w-16 rounded border border-gray-300 px-2 py-1"
+      value={value}
+      onChange={(event) => onChange(Number(event.target.value) || 0)}
+    />
+  );
+}
+
+function normalizeLineup(lineup: LineupEntry): EditableLineup {
+  return {
+    id: lineup.id,
+    player: lineup.player,
+    runs_scored: lineup.runs_scored ?? 0,
+    balls_faced: lineup.balls_faced ?? 0,
+    fours: lineup.fours ?? 0,
+    sixes: lineup.sixes ?? 0,
+    dismissed: lineup.dismissed ?? false,
+    wickets_taken: lineup.wickets_taken ?? 0,
+    balls_thrown: lineup.balls_thrown ?? 0,
+    runs_conceded: lineup.runs_conceded ?? 0,
+    maidens: lineup.maidens ?? 0,
+    hattricks: lineup.hattricks ?? 0,
+  };
 }

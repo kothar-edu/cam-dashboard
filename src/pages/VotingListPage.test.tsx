@@ -26,6 +26,19 @@ vi.mock('@/hooks/useVoting', () => ({
     isLoading: false,
     isError: false,
   }),
+  useVotingPolls: () => ({
+    data: {
+      count: 1,
+      results: [
+        {
+          tournament: { id: 't1', name: 'Premier League', logo: null, start: '', total_teams: 4 },
+          player: [{ id: 'p1', full_name: 'Player One', total_votes: 12 }],
+        },
+      ],
+    },
+    isLoading: false,
+    isError: false,
+  }),
 }));
 
 describe('VotingListPage', () => {
@@ -41,6 +54,7 @@ describe('VotingListPage', () => {
 
     expect(screen.getByText('Voting polls')).toBeInTheDocument();
     expect(screen.getByText('Premier League')).toBeInTheDocument();
+    expect(screen.getByText('Player One (12)')).toBeInTheDocument();
     expect(screen.getByText('Create nomination')).toBeInTheDocument();
   });
 });

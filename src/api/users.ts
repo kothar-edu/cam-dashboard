@@ -15,9 +15,20 @@ export type DashboardUser = {
   subscription_end_date: string | null;
 };
 
+export type UserLookup = {
+  id: string;
+  email: string;
+  full_name: string;
+};
+
 export async function listUsers(params?: ListParams): Promise<Paginated<DashboardUser>> {
   const response = await apiClient.get<Paginated<DashboardUser> | DashboardUser[]>('/user/', {
     params,
   });
   return parsePaginated(response.data);
+}
+
+export async function lookupUserByEmail(email: string): Promise<UserLookup> {
+  const { data } = await apiClient.get<UserLookup>('/user/lookup/', { params: { email } });
+  return data;
 }

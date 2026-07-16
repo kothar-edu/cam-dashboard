@@ -8,3 +8,6 @@ export async function listScorecards(params?: ListParams): Promise<Paginated<Fix
   });
   return parsePaginated(response.data);
 }
+
+export { getFixture } from './fixtures';
+export type { FixtureDetail, LineupEntry } from './fixtures';

@@ -15,3 +15,35 @@ export async function listTournaments(params?: ListParams): Promise<Paginated<To
   });
   return parsePaginated(response.data);
 }
+
+export type TournamentDetail = Tournament & {
+  end: string;
+  team_size: number;
+  opponents: Array<{ id: string; team_id: string; team_name: string }>;
+};
+
+export type CreateTournamentPayload = {
+  name: string;
+  start: string;
+  end: string;
+  team_size: number;
+  teams: string[];
+};
+
+export async function getTournament(id: string): Promise<TournamentDetail> {
+  const { data } = await apiClient.get<TournamentDetail>(`/game/tournament/${id}/`);
+  return data;
+}
+
+export async function createTournament(payload: CreateTournamentPayload): Promise<TournamentDetail> {
+  const { data } = await apiClient.post<TournamentDetail>('/game/tournament/', payload);
+  return data;
+}
+
+export async function updateTournament(
+  id: string,
+  payload: Partial<CreateTournamentPayload>
+): Promise<TournamentDetail> {
+  const { data } = await apiClient.patch<TournamentDetail>(`/game/tournament/${id}/`, payload);
+  return data;
+}

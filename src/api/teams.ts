@@ -13,3 +13,14 @@ export async function listTeams(params?: ListParams): Promise<Paginated<Team>> {
   const response = await apiClient.get<Paginated<Team> | Team[]>('/game/teams/', { params });
   return parsePaginated(response.data);
 }
+
+export type CreateTeamPayload = {
+  name: string;
+  code: string;
+  logo?: string | null;
+};
+
+export async function createTeam(payload: CreateTeamPayload): Promise<Team> {
+  const { data } = await apiClient.post<Team>('/game/teams/', payload);
+  return data;
+}

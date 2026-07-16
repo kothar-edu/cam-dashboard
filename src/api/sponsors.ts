@@ -16,3 +16,26 @@ export async function listSponsors(params?: ListParams): Promise<Paginated<Spons
   });
   return parsePaginated(response.data);
 }
+
+export type SponsorPayload = {
+  name: string;
+  supported_url?: string | null;
+  extra_info?: string | null;
+  sponsor_type?: string;
+  image?: string | null;
+};
+
+export async function getSponsor(id: string): Promise<Sponsor> {
+  const { data } = await apiClient.get<Sponsor>(`/game/sponsor/${id}/`);
+  return data;
+}
+
+export async function createSponsor(payload: SponsorPayload): Promise<Sponsor> {
+  const { data } = await apiClient.post<Sponsor>('/game/sponsor/', payload);
+  return data;
+}
+
+export async function updateSponsor(id: string, payload: SponsorPayload): Promise<Sponsor> {
+  const { data } = await apiClient.patch<Sponsor>(`/game/sponsor/${id}/`, payload);
+  return data;
+}

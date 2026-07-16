@@ -22,3 +22,56 @@ export async function listFixtures(params?: ListParams): Promise<Paginated<Fixtu
   const response = await apiClient.get<Paginated<Fixture>>('/game/match/', { params });
   return parsePaginated(response.data);
 }
+
+export type CreateFixturePayload = {
+  name: string;
+  team_a: string;
+  team_b: string;
+  time: string;
+  ground: string;
+  logo?: string;
+};
+
+export type FixtureDetail = Fixture & {
+  round: string | null;
+  result: string | null;
+  lineups_a?: LineupEntry[];
+  lineups_b?: LineupEntry[];
+};
+
+export type LineupEntry = {
+  id: string;
+  player: { id: string; full_name: string };
+  runs_scored: number;
+  balls_faced: number;
+  wickets_taken: number;
+  balls_thrown: number;
+};
+
+export type UpdateFixturePayload = {
+  time?: string;
+  round?: string;
+  ground?: string;
+  over_limit?: number;
+  bowling_limit?: number;
+};
+
+export async function getFixture(id: string): Promise<FixtureDetail> {
+  const { data } = await apiClient.get<FixtureDetail>(`/game/match/${id}/`);
+  return data;
+}
+
+export async function createFixture(payload: CreateFixturePayload): Promise<Fixture> {
+  const { data } = await apiClient.post<Fixture>('/game/match/', payload);
+  return data;
+}
+
+export async function createFixturesBulk(payload: CreateFixturePayload[]): Promise<unknown> {
+  const { data } = await apiClient.post('/game/match/create-multiple-match/', payload);
+  return data;
+}
+
+export async function updateFixture(id: string, payload: UpdateFixturePayload): Promise<FixtureDetail> {
+  const { data } = await apiClient.patch<FixtureDetail>(`/game/match/${id}/`, payload);
+  return data;
+}

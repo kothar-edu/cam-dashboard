@@ -52,6 +52,11 @@ export type LineupEntry = {
   runs_conceded: number;
   maidens: number;
   hattricks: number;
+  catches: number;
+  run_outs: number;
+  direct_hits: number;
+  run_out_supports: number;
+  stumps: number;
 };
 
 export type LineupBattingUpdatePayload = {
@@ -72,12 +77,25 @@ export type LineupBowlingUpdatePayload = {
   hattricks: number;
 };
 
+export type LineupFieldingUpdatePayload = {
+  id: string;
+  catches: number;
+  run_outs: number;
+  direct_hits: number;
+  run_out_supports: number;
+  stumps: number;
+};
+
 export async function updateLineupBatting(payload: LineupBattingUpdatePayload[]): Promise<void> {
   await apiClient.put('/game/lineup/batting-update/', payload);
 }
 
 export async function updateLineupBowling(payload: LineupBowlingUpdatePayload[]): Promise<void> {
   await apiClient.put('/game/lineup/bowling-update/', payload);
+}
+
+export async function updateLineupFielding(payload: LineupFieldingUpdatePayload[]): Promise<void> {
+  await apiClient.put('/game/lineup/fielding-update/', payload);
 }
 
 export type UpdateFixturePayload = {

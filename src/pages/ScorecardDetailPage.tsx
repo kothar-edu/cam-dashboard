@@ -4,7 +4,12 @@ import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
-import { useScorecard, useUpdateLineupBatting, useUpdateLineupBowling } from '@/hooks/useScorecards';
+import {
+  useScorecard,
+  useUpdateLineupBatting,
+  useUpdateLineupBowling,
+  useUpdateLineupFielding,
+} from '@/hooks/useScorecards';
 import type { LineupEntry } from '@/api/scorecards';
 
 type EditableLineup = LineupEntry;
@@ -14,6 +19,7 @@ export default function ScorecardDetailPage() {
   const { data, isLoading, isError } = useScorecard(id);
   const battingMutation = useUpdateLineupBatting(id);
   const bowlingMutation = useUpdateLineupBowling(id);
+  const fieldingMutation = useUpdateLineupFielding(id);
 
   const [lineupsA, setLineupsA] = useState<EditableLineup[]>([]);
   const [lineupsB, setLineupsB] = useState<EditableLineup[]>([]);
@@ -49,9 +55,21 @@ export default function ScorecardDetailPage() {
     if (payload.length) bowlingMutation.mutate(payload);
   };
 
-  const pending = battingMutation.isPending || bowlingMutation.isPending;
-  const saveError = battingMutation.isError || bowlingMutation.isError;
-  const saveSuccess = battingMutation.isSuccess || bowlingMutation.isSuccess;
+  const saveFielding = () => {
+    const payload = [...lineupsA, ...lineupsB].map((lineup) => ({
+      id: lineup.id,
+      catches: lineup.catches,
+      run_outs: lineup.run_outs,
+      direct_hits: lineup.direct_hits,
+      run_out_supports: lineup.run_out_supports,
+      stumps: lineup.stumps,
+    }));
+    if (payload.length) fieldingMutation.mutate(payload);
+  };
+
+  const pending = battingMutation.isPending || bowlingMutation.isPending || fieldingMutation.isPending;
+  const saveError = battingMutation.isError || bowlingMutation.isError || fieldingMutation.isError;
+  const saveSuccess = battingMutation.isSuccess || bowlingMutation.isSuccess || fieldingMutation.isSuccess;
 
   return (
     <TenantRequired>
@@ -97,13 +115,28 @@ export default function ScorecardDetailPage() {
               onChange={setLineupsB}
               mode="bowling"
             />
+            <LineupEditor
+              title={`${data.opponent_a.team_name} — fielding`}
+              lineups={lineupsA}
+              onChange={setLineupsA}
+              mode="fielding"
+            />
+            <LineupEditor
+              title={`${data.opponent_b.team_name} — fielding`}
+              lineups={lineupsB}
+              onChange={setLineupsB}
+              mode="fielding"
+            />
 
             <div className="flex flex-wrap gap-3">
-              <Button type="button" onClick={saveBatting} disabled={pending || !lineupsA.length && !lineupsB.length}>
+              <Button type="button" onClick={saveBatting} disabled={pending || (!lineupsA.length && !lineupsB.length)}>
                 {battingMutation.isPending ? 'Saving batting…' : 'Save batting stats'}
               </Button>
-              <Button type="button" variant="outline" onClick={saveBowling} disabled={pending || !lineupsA.length && !lineupsB.length}>
+              <Button type="button" variant="outline" onClick={saveBowling} disabled={pending || (!lineupsA.length && !lineupsB.length)}>
                 {bowlingMutation.isPending ? 'Saving bowling…' : 'Save bowling stats'}
+              </Button>
+              <Button type="button" variant="outline" onClick={saveFielding} disabled={pending || (!lineupsA.length && !lineupsB.length)}>
+                {fieldingMutation.isPending ? 'Saving fielding…' : 'Save fielding stats'}
               </Button>
             </div>
             {saveError ? <p className="text-sm text-red-600">Failed to save lineup changes.</p> : null}
@@ -124,7 +157,7 @@ function LineupEditor({
   title: string;
   lineups: EditableLineup[];
   onChange: (lineups: EditableLineup[]) => void;
-  mode: 'batting' | 'bowling';
+  mode: 'batting' | 'bowling' | 'fielding';
 }) {
   const updateLineup = (lineupId: string, patch: Partial<EditableLineup>) => {
     onChange(lineups.map((lineup) => (lineup.id === lineupId ? { ...lineup, ...patch } : lineup)));
@@ -147,13 +180,21 @@ function LineupEditor({
                     <th className="px-4 py-2">6s</th>
                     <th className="px-4 py-2">Out</th>
                   </>
-                ) : (
+                ) : mode === 'bowling' ? (
                   <>
                     <th className="px-4 py-2">Balls</th>
                     <th className="px-4 py-2">Runs conc.</th>
                     <th className="px-4 py-2">Wkts</th>
                     <th className="px-4 py-2">Maidens</th>
                     <th className="px-4 py-2">Hattricks</th>
+                  </>
+                ) : (
+                  <>
+                    <th className="px-4 py-2">Catches</th>
+                    <th className="px-4 py-2">Run outs</th>
+                    <th className="px-4 py-2">Direct hits</th>
+                    <th className="px-4 py-2">RO support</th>
+                    <th className="px-4 py-2">Stumpings</th>
                   </>
                 )}
               </tr>
@@ -184,7 +225,7 @@ function LineupEditor({
                         />
                       </td>
                     </>
-                  ) : (
+                  ) : mode === 'bowling' ? (
                     <>
                       <td className="px-4 py-2">
                         <StatInput value={lineup.balls_thrown} onChange={(value) => updateLineup(lineup.id, { balls_thrown: value })} />
@@ -206,6 +247,27 @@ function LineupEditor({
                       </td>
                       <td className="px-4 py-2">
                         <StatInput value={lineup.hattricks} onChange={(value) => updateLineup(lineup.id, { hattricks: value })} />
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-4 py-2">
+                        <StatInput value={lineup.catches} onChange={(value) => updateLineup(lineup.id, { catches: value })} />
+                      </td>
+                      <td className="px-4 py-2">
+                        <StatInput value={lineup.run_outs} onChange={(value) => updateLineup(lineup.id, { run_outs: value })} />
+                      </td>
+                      <td className="px-4 py-2">
+                        <StatInput value={lineup.direct_hits} onChange={(value) => updateLineup(lineup.id, { direct_hits: value })} />
+                      </td>
+                      <td className="px-4 py-2">
+                        <StatInput
+                          value={lineup.run_out_supports}
+                          onChange={(value) => updateLineup(lineup.id, { run_out_supports: value })}
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <StatInput value={lineup.stumps} onChange={(value) => updateLineup(lineup.id, { stumps: value })} />
                       </td>
                     </>
                   )}
@@ -247,5 +309,10 @@ function normalizeLineup(lineup: LineupEntry): EditableLineup {
     runs_conceded: lineup.runs_conceded ?? 0,
     maidens: lineup.maidens ?? 0,
     hattricks: lineup.hattricks ?? 0,
+    catches: lineup.catches ?? 0,
+    run_outs: lineup.run_outs ?? 0,
+    direct_hits: lineup.direct_hits ?? 0,
+    run_out_supports: lineup.run_out_supports ?? 0,
+    stumps: lineup.stumps ?? 0,
   };
 }

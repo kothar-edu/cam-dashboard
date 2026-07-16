@@ -4,8 +4,10 @@ import {
   listScorecards,
   updateLineupBatting,
   updateLineupBowling,
+  updateLineupFielding,
   type LineupBattingUpdatePayload,
   type LineupBowlingUpdatePayload,
+  type LineupFieldingUpdatePayload,
 } from '@/api/scorecards';
 import type { ListParams } from '@/api/pagination';
 import { useTenant } from '@/contexts/TenantContext';
@@ -45,6 +47,17 @@ export function useUpdateLineupBowling(scorecardId?: string) {
   const { activeTenantId } = useTenant();
   return useMutation({
     mutationFn: (payload: LineupBowlingUpdatePayload[]) => updateLineupBowling(payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['scorecard', activeTenantId, scorecardId] });
+    },
+  });
+}
+
+export function useUpdateLineupFielding(scorecardId?: string) {
+  const qc = useQueryClient();
+  const { activeTenantId } = useTenant();
+  return useMutation({
+    mutationFn: (payload: LineupFieldingUpdatePayload[]) => updateLineupFielding(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['scorecard', activeTenantId, scorecardId] });
     },

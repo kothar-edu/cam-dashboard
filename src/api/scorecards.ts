@@ -13,8 +13,10 @@ export { getFixture } from './fixtures';
 export {
   updateLineupBatting,
   updateLineupBowling,
+  updateLineupFielding,
   type FixtureDetail,
   type LineupEntry,
   type LineupBattingUpdatePayload,
   type LineupBowlingUpdatePayload,
+  type LineupFieldingUpdatePayload,
 } from './fixtures';

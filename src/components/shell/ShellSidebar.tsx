@@ -14,6 +14,7 @@ import {
   VoteIcon,
   LogOut,
   BirdIcon as CricketBall,
+  Tag,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
@@ -28,6 +29,7 @@ const routes = [
   { title: 'Fixtures', href: '/dashboard/fixtures', icon: Calendar },
   { title: 'Posts', href: '/dashboard/posts', icon: FileText },
   { title: 'Sponsors', href: '/dashboard/sponsors', icon: DollarSign },
+  { title: 'Boundary Labels', href: '/dashboard/boundary-labels', icon: Tag },
   { title: 'Voting Polls', href: '/dashboard/voting', icon: VoteIcon },
   { title: 'Player Verification', href: '/dashboard/verification', icon: UserCheck },
   { title: 'Player Transfers', href: '/dashboard/transfers', icon: RefreshCw },

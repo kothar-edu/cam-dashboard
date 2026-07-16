@@ -14,6 +14,11 @@ import PointsPage from '@/pages/PointsPage';
 import PostsPage from '@/pages/PostsPage';
 import SponsorsPage from '@/pages/SponsorsPage';
 import BoundaryLabelsPage from '@/pages/BoundaryLabelsPage';
+import VerificationPage from '@/pages/VerificationPage';
+import TransfersPage from '@/pages/TransfersPage';
+import UsersPage from '@/pages/UsersPage';
+import TenantsPage from '@/pages/TenantsPage';
+import SettingsPage from '@/pages/SettingsPage';
 
 const placeholderRoutes = [
   'teams/new',
@@ -23,7 +28,6 @@ const placeholderRoutes = [
   'players/new',
   'players/:id',
   'players/:id/stats',
-  'users',
   'fixtures/new',
   'fixtures/new/bulk',
   'fixtures/:id',
@@ -35,9 +39,6 @@ const placeholderRoutes = [
   'voting',
   'voting/new',
   'voting/:id',
-  'verification',
-  'transfers',
-  'settings',
 ];
 
 export default function App() {
@@ -65,6 +66,11 @@ export default function App() {
           <Route path="posts" element={<PostsPage />} />
           <Route path="sponsors" element={<SponsorsPage />} />
           <Route path="boundary-labels" element={<BoundaryLabelsPage />} />
+          <Route path="verification" element={<VerificationPage />} />
+          <Route path="transfers" element={<TransfersPage />} />
+          <Route path="users" element={<UsersPage />} />
+          <Route path="tenants" element={<TenantsPage />} />
+          <Route path="settings" element={<SettingsPage />} />
           {placeholderRoutes.map((path) => (
             <Route key={path} path={path} element={<PlaceholderPage />} />
           ))}

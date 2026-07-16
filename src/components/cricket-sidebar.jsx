@@ -38,7 +38,7 @@ import {
   SidebarMenuSubItem,
   SidebarMenuSubButton,
 } from "./ui/sidebar";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext.legacy";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { ThemeToggle } from "./theme-toggle";

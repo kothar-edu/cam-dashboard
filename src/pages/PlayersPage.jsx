@@ -4,7 +4,7 @@ import { PlayersTable } from "../components/players/players-table";
 import { Button } from "../components/ui/button";
 import { Plus } from "lucide-react";
 import { useGet } from "src/hooks/useApi";
-import { useAuth } from "src/contexts/AuthContext";
+import { useAuth } from "src/contexts/AuthContext.legacy";
 
 function PlayersPage() {
   const {

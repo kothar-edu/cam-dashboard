@@ -9,7 +9,7 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext.legacy";
 import { useToast } from "../../hooks/use-toast";
 import { useDelete } from "../../hooks/useApi";
 import { PlayerForm } from "./player-form";

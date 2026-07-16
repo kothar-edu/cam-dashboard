@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext.legacy";
 import { useTheme } from "../../contexts/ThemeContext";
 import { Bell, Sun, Moon, ChevronDown } from "lucide-react";
 

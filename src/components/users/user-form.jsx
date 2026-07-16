@@ -14,7 +14,7 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useToast } from "../../hooks/use-toast";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext.legacy";
 
 export function UserForm({ user, onClose, onSuccess, open, setSelectedUser }) {
   const toast = useToast();

@@ -14,7 +14,7 @@ import {
 } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext.legacy";
 import { useToast } from "../hooks/use-toast";
 import logo from "/assets/cam-youth (1).png";
 

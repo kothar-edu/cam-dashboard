@@ -1,7 +1,7 @@
 "use client";
 
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext.legacy";
 import { LoadingSpinner } from "../ui/loading-spinner";
 
 function ProtectedRoute({ children }) {

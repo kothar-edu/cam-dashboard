@@ -4,7 +4,7 @@ import { DashboardHeader } from "../components/dashboard/dashboard-header";
 import { Button } from "../components/ui/button";
 import { UserForm } from "../components/users/user-form";
 import { UsersTable } from "../components/users/users-table";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext.legacy";
 
 function UsersPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { type AxiosInstance } from 'axios';
 
 const ACCESS_KEY = 'cam_dashboard_access';
 const REFRESH_KEY = 'cam_dashboard_refresh';
@@ -34,17 +34,12 @@ export function clearStoredTenantId() {
   localStorage.removeItem(TENANT_KEY);
 }
 
-const baseURL = `${import.meta.env.VITE_URL ?? '/'}api`;
+const viteBase = import.meta.env.VITE_URL ?? '/';
+const apiBaseURL = `${viteBase}api`;
+const newsfeedBaseURL = `${viteBase}newsfeed/api/v1`;
 
-export const apiClient = axios.create({ baseURL });
-
-apiClient.interceptors.request.use((config) => {
-  const token = getStoredAccessToken();
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  const tenantId = getStoredTenantId();
-  if (tenantId) config.headers['X-Tenant-ID'] = tenantId;
-  return config;
-});
+export const apiClient = axios.create({ baseURL: apiBaseURL });
+export const newsfeedClient = axios.create({ baseURL: newsfeedBaseURL });
 
 let refreshPromise: Promise<string | null> | null = null;
 
@@ -52,7 +47,7 @@ async function refreshAccessToken(): Promise<string | null> {
   const refresh = getStoredRefreshToken();
   if (!refresh) return null;
   try {
-    const response = await axios.post(`${baseURL}/user/token/refresh/`, { refresh });
+    const response = await axios.post(`${apiBaseURL}/user/token/refresh/`, { refresh });
     const access = response.data.access as string;
     localStorage.setItem(ACCESS_KEY, access);
     return access;
@@ -62,20 +57,33 @@ async function refreshAccessToken(): Promise<string | null> {
   }
 }
 
-apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const original = error.config;
-    if (error.response?.status !== 401 || original._retry) return Promise.reject(error);
-    original._retry = true;
-    if (!refreshPromise) {
-      refreshPromise = refreshAccessToken().finally(() => {
-        refreshPromise = null;
-      });
+function attachAuthInterceptors(client: AxiosInstance) {
+  client.interceptors.request.use((config) => {
+    const token = getStoredAccessToken();
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    const tenantId = getStoredTenantId();
+    if (tenantId) config.headers['X-Tenant-ID'] = tenantId;
+    return config;
+  });
+
+  client.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const original = error.config;
+      if (error.response?.status !== 401 || original._retry) return Promise.reject(error);
+      original._retry = true;
+      if (!refreshPromise) {
+        refreshPromise = refreshAccessToken().finally(() => {
+          refreshPromise = null;
+        });
+      }
+      const access = await refreshPromise;
+      if (!access) return Promise.reject(error);
+      original.headers.Authorization = `Bearer ${access}`;
+      return client(original);
     }
-    const access = await refreshPromise;
-    if (!access) return Promise.reject(error);
-    original.headers.Authorization = `Bearer ${access}`;
-    return apiClient(original);
-  }
-);
+  );
+}
+
+attachAuthInterceptors(apiClient);
+attachAuthInterceptors(newsfeedClient);

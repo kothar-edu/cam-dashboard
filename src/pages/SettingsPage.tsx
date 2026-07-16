@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { FileField } from '@/components/forms/FileField';
 import { useChangePassword } from '@/hooks/useSettings';
 import { useCreateAdminUser } from '@/hooks/useCreateAdmin';
 import { useCountries } from '@/hooks/useCountries';
@@ -193,10 +194,10 @@ function CreateAdminForm() {
         onChange={setRole}
         options={(rolesQuery.data ?? []).map((item) => ({ value: String(item.id), label: item.name }))}
       />
-      <FileField label="Profile picture (optional)" onChange={setPicture} />
-      <FileField label="ID card (optional)" onChange={setIdCard} />
-      <FileField label="Payslip (optional)" onChange={setPaySlip} />
-      <FileField label="Study document (optional)" onChange={setStudyDocument} />
+      <FileField label="Profile picture (optional)" accept="image/*,.pdf" onChange={setPicture} />
+      <FileField label="ID card (optional)" accept="image/*,.pdf" onChange={setIdCard} />
+      <FileField label="Payslip (optional)" accept="image/*,.pdf" onChange={setPaySlip} />
+      <FileField label="Study document (optional)" accept="image/*,.pdf" onChange={setStudyDocument} />
       {createMutation.isError ? <p className="text-sm text-red-600">Failed to create admin user.</p> : null}
       {createMutation.isSuccess ? <p className="text-sm text-green-700">Admin user created. They will receive a welcome email.</p> : null}
       <Button type="submit" disabled={createMutation.isPending}>
@@ -235,20 +236,6 @@ function SelectField({
           </option>
         ))}
       </select>
-    </div>
-  );
-}
-
-function FileField({ label, onChange }: { label: string; onChange: (file: File | null) => void }) {
-  return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-[#12233D]">{label}</label>
-      <input
-        type="file"
-        accept="image/*,.pdf"
-        className="block w-full text-sm text-muted-foreground"
-        onChange={(event) => onChange(event.target.files?.[0] ?? null)}
-      />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { FileField } from '@/components/forms/FileField';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
@@ -15,13 +16,12 @@ export default function TeamDetailPage() {
 
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
-  const [logoUrl, setLogoUrl] = useState('');
+  const [logo, setLogo] = useState<File | null>(null);
 
   useEffect(() => {
     if (teamQuery.data) {
       setName(teamQuery.data.name);
       setCode(teamQuery.data.code);
-      setLogoUrl(teamQuery.data.logo ?? '');
     }
   }, [teamQuery.data]);
 
@@ -34,7 +34,7 @@ export default function TeamDetailPage() {
         payload: {
           name: name.trim(),
           code: code.trim().toUpperCase(),
-          logo: logoUrl || null,
+          logo,
         },
       },
       { onSuccess: () => navigate('/dashboard/teams') }
@@ -64,7 +64,7 @@ export default function TeamDetailPage() {
               maxLength={5}
               required
             />
-            <Input label="Logo URL" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} />
+            <FileField label="Team logo" currentUrl={teamQuery.data.logo} onChange={setLogo} />
             {updateMutation.isError ? (
               <p className="text-sm text-red-600">Failed to update team. Check permissions and try again.</p>
             ) : null}

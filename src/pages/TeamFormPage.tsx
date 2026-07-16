@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { FileField } from '@/components/forms/FileField';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { useCreateTeam } from '@/hooks/useTeams';
@@ -11,11 +12,12 @@ export default function TeamFormPage() {
   const createMutation = useCreateTeam();
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
+  const [logo, setLogo] = useState<File | null>(null);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     createMutation.mutate(
-      { name: name.trim(), code: code.trim().toUpperCase() },
+      { name: name.trim(), code: code.trim().toUpperCase(), logo },
       { onSuccess: () => navigate('/dashboard/teams') }
     );
   };
@@ -38,6 +40,7 @@ export default function TeamFormPage() {
             placeholder="e.g. RCB"
             required
           />
+          <FileField label="Team logo (optional)" onChange={setLogo} />
           {createMutation.isError ? (
             <p className="text-sm text-red-600">Failed to create team. Check permissions and try again.</p>
           ) : null}

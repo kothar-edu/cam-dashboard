@@ -4,9 +4,9 @@ type Paginated<T> = { count: number; results: T[] };
 
 export type FixtureSummary = {
   id: string;
-  team_a: { name: string };
-  team_b: { name: string };
-  scheduled_at: string;
+  opponent_a: { team_name: string };
+  opponent_b: { team_name: string };
+  time: string;
 };
 
 export type DashboardStats = {
@@ -35,8 +35,8 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
     apiClient.get<Paginated<unknown>>('/game/teams/'),
     apiClient.get<Paginated<unknown>>('/game/player/', { params: { limit: 1 } }),
     apiClient.get<Paginated<unknown>>('/game/tournament/'),
-    apiClient.get<Paginated<FixtureSummary>>('/game/fixture/', {
-      params: { status: 'Scheduled', limit: 5, ordering: 'scheduled_at' },
+    apiClient.get<Paginated<FixtureSummary>>('/game/match/', {
+      params: { status: 'Upcoming', limit: 5, ordering: 'time' },
     }),
   ]);
 

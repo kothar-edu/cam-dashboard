@@ -5,24 +5,25 @@ import DashboardLayout from '@/layouts/DashboardLayout';
 import LoginPage from '@/pages/LoginPage';
 import PlaceholderPage from '@/pages/PlaceholderPage';
 import DashboardHomePage from '@/pages/DashboardHomePage';
+import TournamentsPage from '@/pages/TournamentsPage';
+import TeamsPage from '@/pages/TeamsPage';
+import PlayersPage from '@/pages/PlayersPage';
+import FixturesPage from '@/pages/FixturesPage';
+import ScorecardsPage from '@/pages/ScorecardsPage';
+import PointsPage from '@/pages/PointsPage';
 
 const placeholderRoutes = [
-  'teams',
   'teams/new',
   'teams/:id',
-  'tournaments',
   'tournaments/new',
   'tournaments/:id',
-  'players',
   'players/new',
   'players/:id',
   'players/:id/stats',
   'users',
-  'fixtures',
   'fixtures/new',
   'fixtures/new/bulk',
   'fixtures/:id',
-  'scorecards',
   'scorecards/:id',
   'posts',
   'posts/new',
@@ -35,7 +36,6 @@ const placeholderRoutes = [
   'voting/:id',
   'verification',
   'transfers',
-  'points',
   'settings',
 ];
 
@@ -55,6 +55,12 @@ export default function App() {
           }
         >
           <Route index element={<DashboardHomePage />} />
+          <Route path="tournaments" element={<TournamentsPage />} />
+          <Route path="teams" element={<TeamsPage />} />
+          <Route path="players" element={<PlayersPage />} />
+          <Route path="fixtures" element={<FixturesPage />} />
+          <Route path="scorecards" element={<ScorecardsPage />} />
+          <Route path="points" element={<PointsPage />} />
           {placeholderRoutes.map((path) => (
             <Route key={path} path={path} element={<PlaceholderPage />} />
           ))}

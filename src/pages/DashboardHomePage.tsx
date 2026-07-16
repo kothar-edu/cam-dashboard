@@ -113,10 +113,10 @@ export default function DashboardHomePage() {
               >
                 <div>
                   <p className="font-medium text-[#12233D]">
-                    {fixture.team_a.name} vs {fixture.team_b.name}
+                    {fixture.opponent_a.team_name} vs {fixture.opponent_b.team_name}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {formatFixtureDate(fixture.scheduled_at)}
+                    {formatFixtureDate(fixture.time)}
                   </p>
                 </div>
               </div>

@@ -60,7 +60,7 @@ export function ShellSidebar() {
     : routes;
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r border-border bg-[#12233D] text-white">
+    <aside className="flex h-full w-64 shrink-0 flex-col border-r border-border bg-[#12233D] text-white">
       <div className="border-b border-white/10 px-4 py-5">
         <div className="flex items-center gap-2">
           <CricketBall className="h-6 w-6 text-[#E8A93B]" />

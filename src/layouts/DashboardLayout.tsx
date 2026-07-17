@@ -9,10 +9,10 @@ export default function DashboardLayout() {
   const { activeTenant } = useTenant();
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-gray-50">
       <ShellSidebar />
-      <div className="ml-64 flex flex-1 flex-col">
-        <header className="flex items-center justify-between border-b bg-white px-6 py-4">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <header className="flex shrink-0 items-center justify-between border-b bg-white px-6 py-4">
           <div>
             <h1 className="text-lg font-semibold text-[#12233D]">CAM Dashboard</h1>
             <p className="text-sm text-muted-foreground">
@@ -27,7 +27,7 @@ export default function DashboardLayout() {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="min-h-0 flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
       </div>

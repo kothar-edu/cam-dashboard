@@ -39,3 +39,7 @@ export async function updateSponsor(id: string, payload: SponsorPayload): Promis
   const { data } = await apiClient.patch<Sponsor>(`/game/sponsor/${id}/`, payload);
   return data;
 }
+
+export async function deleteSponsor(id: string): Promise<void> {
+  await apiClient.delete(`/game/sponsor/${id}/`);
+}

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createSponsor,
+  deleteSponsor,
   getSponsor,
   listSponsors,
   updateSponsor,
@@ -47,5 +48,14 @@ export function useUpdateSponsor() {
       qc.invalidateQueries({ queryKey: ['sponsors', activeTenantId] });
       qc.invalidateQueries({ queryKey: ['sponsor', activeTenantId, variables.id] });
     },
+  });
+}
+
+export function useDeleteSponsor() {
+  const qc = useQueryClient();
+  const { activeTenantId } = useTenant();
+  return useMutation({
+    mutationFn: (id: string) => deleteSponsor(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['sponsors', activeTenantId] }),
   });
 }

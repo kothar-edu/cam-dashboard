@@ -1,18 +1,24 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { DataTable } from '@/components/data-table/DataTable';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useTenant } from '@/contexts/TenantContext';
-import { useSponsors } from '@/hooks/useSponsors';
+import { useDeleteSponsor, useSponsors } from '@/hooks/useSponsors';
+import type { Sponsor } from '@/api/sponsors';
 
 const PAGE_SIZE = 20;
 
 export default function SponsorsPage() {
   const { activeTenant } = useTenant();
   const [pageIndex, setPageIndex] = useState(0);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [targetRow, setTargetRow] = useState<Sponsor | null>(null);
   const { data, isLoading, isError } = useSponsors({
     limit: PAGE_SIZE,
     offset: pageIndex * PAGE_SIZE,
   });
+  const deleteSponsor = useDeleteSponsor();
 
   if (!activeTenant) {
     return (
@@ -45,11 +51,19 @@ export default function SponsorsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Sponsors</h1>
-        <p className="text-sm text-muted-foreground">
-          {activeTenant.name} · league sponsors
-        </p>
+      <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Sponsors</h1>
+          <p className="text-sm text-muted-foreground">
+            {activeTenant.name} · league sponsors
+          </p>
+        </div>
+        <Link
+          to="/dashboard/sponsors/new"
+          className="inline-flex items-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white"
+        >
+          New Sponsor
+        </Link>
       </div>
 
       <DataTable
@@ -66,6 +80,27 @@ export default function SponsorsPage() {
             header: 'Extra info',
             cell: (row) => row.extra_info ?? '—',
           },
+          {
+            id: 'actions',
+            header: 'Actions',
+            cell: (row) => (
+              <>
+                <Link
+                  to={`/dashboard/sponsors/${row.id}`}
+                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D]"
+                >
+                  Edit
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => { setTargetRow(row); setConfirmOpen(true); }}
+                  className="ml-2 inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-red-600"
+                >
+                  Delete
+                </button>
+              </>
+            ),
+          },
         ]}
         data={sponsors}
         loading={isLoading}
@@ -74,6 +109,19 @@ export default function SponsorsPage() {
           data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined
         }
         onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
+      />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Delete this sponsor?"
+        description="This will permanently remove the sponsor. This action cannot be undone."
+        confirmLabel="Delete"
+        isLoading={deleteSponsor.isPending}
+        onConfirm={() => {
+          if (!targetRow) return;
+          deleteSponsor.mutate(targetRow.id, { onSuccess: () => setConfirmOpen(false) });
+        }}
       />
     </div>
   );

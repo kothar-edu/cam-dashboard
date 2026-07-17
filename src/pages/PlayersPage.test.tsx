@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import PlayersPage from './PlayersPage';
 
 vi.mock('@/hooks/usePlayers', () => ({
@@ -22,6 +23,10 @@ vi.mock('@/hooks/usePlayers', () => ({
     isLoading: false,
     isError: false,
   }),
+  useUpdatePlayer: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+  }),
 }));
 
 vi.mock('@/contexts/TenantContext', () => ({
@@ -36,7 +41,9 @@ describe('PlayersPage', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
-        <PlayersPage />
+        <MemoryRouter>
+          <PlayersPage />
+        </MemoryRouter>
       </QueryClientProvider>
     );
 

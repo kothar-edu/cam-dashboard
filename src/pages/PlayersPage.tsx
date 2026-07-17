@@ -1,18 +1,24 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { DataTable } from '@/components/data-table/DataTable';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useTenant } from '@/contexts/TenantContext';
-import { usePlayers } from '@/hooks/usePlayers';
+import { usePlayers, useUpdatePlayer } from '@/hooks/usePlayers';
+import type { Player, UpdatePlayerPayload } from '@/api/players';
 
 const PAGE_SIZE = 20;
 
 export default function PlayersPage() {
   const { activeTenant } = useTenant();
   const [pageIndex, setPageIndex] = useState(0);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [targetRow, setTargetRow] = useState<Player | null>(null);
   const { data, isLoading, isError } = usePlayers({
     limit: PAGE_SIZE,
     offset: pageIndex * PAGE_SIZE,
   });
+  const updatePlayerMutation = useUpdatePlayer();
 
   if (!activeTenant) {
     return (
@@ -45,9 +51,17 @@ export default function PlayersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Players</h1>
-        <p className="text-sm text-muted-foreground">{activeTenant.name} · player registry</p>
+      <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Players</h1>
+          <p className="text-sm text-muted-foreground">{activeTenant.name} · player registry</p>
+        </div>
+        <Link
+          to="/dashboard/players/new"
+          className="inline-flex items-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white"
+        >
+          New Player
+        </Link>
       </div>
 
       <DataTable
@@ -60,6 +74,30 @@ export default function PlayersPage() {
             header: 'Status',
             cell: (row) => (row.is_active ? 'Active' : 'Inactive'),
           },
+          {
+            id: 'actions',
+            header: 'Actions',
+            cell: (row) => (
+              <>
+                <Link
+                  to={`/dashboard/players/${row.id}`}
+                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D]"
+                >
+                  Edit
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTargetRow(row);
+                    setConfirmOpen(true);
+                  }}
+                  className="ml-2 inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-red-600"
+                >
+                  {row.is_active ? 'Deactivate' : 'Reactivate'}
+                </button>
+              </>
+            ),
+          },
         ]}
         data={players}
         loading={isLoading}
@@ -68,6 +106,26 @@ export default function PlayersPage() {
           data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined
         }
         onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
+      />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={targetRow?.is_active ? 'Deactivate player' : 'Reactivate player'}
+        description={
+          targetRow
+            ? `Are you sure you want to ${targetRow.is_active ? 'deactivate' : 'reactivate'} ${targetRow.full_name}?`
+            : ''
+        }
+        confirmLabel={targetRow?.is_active ? 'Deactivate' : 'Reactivate'}
+        isLoading={updatePlayerMutation.isPending}
+        onConfirm={() => {
+          if (!targetRow) return;
+          updatePlayerMutation.mutate(
+            { id: targetRow.id, payload: { is_active: !targetRow.is_active } as UpdatePlayerPayload },
+            { onSuccess: () => setConfirmOpen(false) }
+          );
+        }}
       />
     </div>
   );

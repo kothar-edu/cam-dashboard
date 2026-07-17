@@ -7,6 +7,7 @@ export type Tournament = {
   logo: string | null;
   start: string;
   total_teams: number;
+  is_active: boolean;
 };
 
 export async function listTournaments(params?: ListParams): Promise<Paginated<Tournament>> {
@@ -28,6 +29,7 @@ export type CreateTournamentPayload = {
   end: string;
   team_size: number;
   teams: string[];
+  is_active?: boolean;
 };
 
 export async function getTournament(id: string): Promise<TournamentDetail> {

@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import TournamentsPage from './TournamentsPage';
 
 vi.mock('@/hooks/useTournaments', () => ({
@@ -14,11 +15,16 @@ vi.mock('@/hooks/useTournaments', () => ({
           logo: null,
           start: '2026-06-01T00:00:00Z',
           total_teams: 8,
+          is_active: true,
         },
       ],
     },
     isLoading: false,
     isError: false,
+  }),
+  useUpdateTournament: () => ({
+    mutate: vi.fn(),
+    isPending: false,
   }),
 }));
 
@@ -34,7 +40,9 @@ describe('TournamentsPage', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
-        <TournamentsPage />
+        <MemoryRouter>
+          <TournamentsPage />
+        </MemoryRouter>
       </QueryClientProvider>
     );
 

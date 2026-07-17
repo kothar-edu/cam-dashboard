@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { DataTable } from '@/components/data-table/DataTable';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { mediaUrl, type TeamJoinApplication, type TenantRegistration } from '@/api/verification';
@@ -77,6 +78,11 @@ export default function VerificationPage() {
   const [joinPage, setJoinPage] = useState(0);
   const [rejectTarget, setRejectTarget] = useState<TenantRegistration | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [approveRegTarget, setApproveRegTarget] = useState<TenantRegistration | null>(null);
+  const [teamJoinTarget, setTeamJoinTarget] = useState<{
+    row: TeamJoinApplication;
+    action: 'approve' | 'reject';
+  } | null>(null);
   const [receiptTarget, setReceiptTarget] = useState<{
     title: string;
     receipt: string | null;
@@ -191,9 +197,7 @@ export default function VerificationPage() {
                         type="button"
                         size="sm"
                         disabled={reviewRegistration.isPending}
-                        onClick={() =>
-                          reviewRegistration.mutate({ id: row.id, action: 'approve' })
-                        }
+                        onClick={() => setApproveRegTarget(row)}
                       >
                         Approve
                       </Button>
@@ -279,7 +283,7 @@ export default function VerificationPage() {
                     type="button"
                     size="sm"
                     disabled={reviewTeamJoin.isPending}
-                    onClick={() => reviewTeamJoin.mutate({ id: row.id, action: 'approve' })}
+                    onClick={() => setTeamJoinTarget({ row, action: 'approve' })}
                   >
                     Approve
                   </Button>
@@ -288,7 +292,7 @@ export default function VerificationPage() {
                     size="sm"
                     variant="outline"
                     disabled={reviewTeamJoin.isPending}
-                    onClick={() => reviewTeamJoin.mutate({ id: row.id, action: 'reject' })}
+                    onClick={() => setTeamJoinTarget({ row, action: 'reject' })}
                   >
                     Reject
                   </Button>
@@ -347,6 +351,50 @@ export default function VerificationPage() {
           onClose={() => setReceiptTarget(null)}
         />
       ) : null}
+
+      <ConfirmDialog
+        open={approveRegTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setApproveRegTarget(null);
+        }}
+        title="Approve tenant registration?"
+        description={
+          approveRegTarget
+            ? `Approve ${approveRegTarget.user_name} (${approveRegTarget.user_email}) to join ${approveRegTarget.tenant_name}. Paid: ${approveRegTarget.is_paid ? 'Yes' : 'No'}.`
+            : ''
+        }
+        confirmLabel="Approve"
+        isLoading={reviewRegistration.isPending}
+        onConfirm={() => {
+          if (!approveRegTarget) return;
+          reviewRegistration.mutate(
+            { id: approveRegTarget.id, action: 'approve' },
+            { onSuccess: () => setApproveRegTarget(null) }
+          );
+        }}
+      />
+
+      <ConfirmDialog
+        open={teamJoinTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setTeamJoinTarget(null);
+        }}
+        title={teamJoinTarget?.action === 'approve' ? 'Approve team join request?' : 'Reject team join request?'}
+        description={
+          teamJoinTarget
+            ? `${teamJoinTarget.action === 'approve' ? 'Approve' : 'Reject'} ${teamJoinTarget.row.user_name} (${teamJoinTarget.row.user_email}) joining ${teamJoinTarget.row.team_name}. Paid: ${teamJoinTarget.row.is_paid ? 'Yes' : 'No'}.`
+            : ''
+        }
+        confirmLabel={teamJoinTarget?.action === 'approve' ? 'Approve' : 'Reject'}
+        isLoading={reviewTeamJoin.isPending}
+        onConfirm={() => {
+          if (!teamJoinTarget) return;
+          reviewTeamJoin.mutate(
+            { id: teamJoinTarget.row.id, action: teamJoinTarget.action },
+            { onSuccess: () => setTeamJoinTarget(null) }
+          );
+        }}
+      />
     </div>
   );
 }

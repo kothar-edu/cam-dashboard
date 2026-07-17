@@ -22,6 +22,6 @@ export async function login(email: string, password: string): Promise<LoginRespo
 }
 
 export async function fetchMyProfile(): Promise<AuthUser> {
-  const { data } = await apiClient.get<AuthUser>('/user/me/');
+  const { data } = await apiClient.get<AuthUser>('/user/profile/get_my_profile/');
   return data;
 }

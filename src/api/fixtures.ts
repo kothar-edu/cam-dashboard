@@ -17,6 +17,7 @@ export type Fixture = {
   ground: string | null;
   round: string | null;
   is_public?: boolean;
+  live_stream_url?: string | null;
 };
 
 export async function listFixtures(params?: ListParams): Promise<Paginated<Fixture>> {
@@ -107,6 +108,7 @@ export type UpdateFixturePayload = {
   bowling_limit?: number;
   status?: string;
   is_public?: boolean;
+  live_stream_url?: string | null;
 };
 
 export async function getFixture(id: string): Promise<FixtureDetail> {

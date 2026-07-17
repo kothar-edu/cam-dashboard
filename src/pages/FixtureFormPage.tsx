@@ -41,6 +41,7 @@ export default function FixtureFormPage() {
   const [round, setRound] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [isPublic, setIsPublic] = useState(true);
+  const [liveStreamUrl, setLiveStreamUrl] = useState('');
 
   const tournamentDetailQuery = useTournament(tournamentId || undefined);
   const opponents = tournamentDetailQuery.data?.opponents ?? [];
@@ -67,6 +68,7 @@ export default function FixtureFormPage() {
       setGround(fixtureQuery.data.ground ?? '');
       setRound(fixtureQuery.data.round ?? '');
       setIsPublic(fixtureQuery.data.is_public ?? true);
+      setLiveStreamUrl(fixtureQuery.data.live_stream_url ?? '');
     }
   }, [fixtureQuery.data]);
 
@@ -98,6 +100,7 @@ export default function FixtureFormPage() {
             ground,
             round,
             is_public: isPublic,
+            live_stream_url: liveStreamUrl.trim() || null,
           },
         },
         {
@@ -323,6 +326,18 @@ export default function FixtureFormPage() {
                 <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
                 Public match (visible to guests and non-members)
               </label>
+            ) : null}
+            {isEdit ? (
+              <Input
+                label="YouTube live stream URL (optional)"
+                value={liveStreamUrl}
+                onChange={(e) => {
+                  setLiveStreamUrl(e.target.value);
+                  clearFieldError('live_stream_url');
+                }}
+                error={fieldErrors.live_stream_url}
+                placeholder="https://www.youtube.com/watch?v=..."
+              />
             ) : null}
             <Button type="submit" disabled={pending}>
               {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create fixture'}

@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { useCreateFixture, useFixture, useUpdateFixture } from '@/hooks/useFixtures';
 import { useTeams } from '@/hooks/useTeams';
+import { useCreateTournamentFixture, useTournament, useTournaments } from '@/hooks/useTournaments';
 
 function toLocalInput(value: string) {
   const date = new Date(value);
@@ -20,15 +21,26 @@ export default function FixtureFormPage() {
   const navigate = useNavigate();
   const fixtureQuery = useFixture(id);
   const teamsQuery = useTeams();
+  const tournamentsQuery = useTournaments();
   const createMutation = useCreateFixture();
   const updateMutation = useUpdateFixture();
+  const createTournamentFixtureMutation = useCreateTournamentFixture();
 
   const [name, setName] = useState('');
+  const [tournamentId, setTournamentId] = useState('');
   const [teamA, setTeamA] = useState('');
   const [teamB, setTeamB] = useState('');
   const [time, setTime] = useState('');
   const [ground, setGround] = useState('');
   const [round, setRound] = useState('');
+
+  const tournamentDetailQuery = useTournament(tournamentId || undefined);
+  const opponents = tournamentDetailQuery.data?.opponents ?? [];
+
+  useEffect(() => {
+    setTeamA('');
+    setTeamB('');
+  }, [tournamentId]);
 
   useEffect(() => {
     if (fixtureQuery.data) {
@@ -57,6 +69,22 @@ export default function FixtureFormPage() {
       );
       return;
     }
+    if (tournamentId) {
+      createTournamentFixtureMutation.mutate(
+        {
+          tournamentId,
+          payload: {
+            opponent_a: teamA,
+            opponent_b: teamB,
+            round: round.trim() || undefined,
+            time: new Date(time).toISOString(),
+            ground: ground.trim(),
+          },
+        },
+        { onSuccess: () => navigate('/dashboard/fixtures') }
+      );
+      return;
+    }
     createMutation.mutate(
       {
         name: name.trim(),
@@ -69,8 +97,10 @@ export default function FixtureFormPage() {
     );
   };
 
-  const pending = createMutation.isPending || updateMutation.isPending;
+  const pending =
+    createMutation.isPending || updateMutation.isPending || createTournamentFixtureMutation.isPending;
   const teams = teamsQuery.data?.results ?? [];
+  const tournaments = tournamentsQuery.data?.results ?? [];
 
   return (
     <TenantRequired>
@@ -94,9 +124,40 @@ export default function FixtureFormPage() {
         ) : (
           <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-6">
             {!isEdit ? (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-[#12233D]">Tournament (optional)</label>
+                <select
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  value={tournamentId}
+                  onChange={(e) => setTournamentId(e.target.value)}
+                >
+                  <option value="">None — standalone/custom match</option>
+                  {tournaments.map((tournament) => (
+                    <option key={tournament.id} value={tournament.id}>
+                      {tournament.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-muted-foreground">
+                  Select a tournament to create this match within it (uses the tournament's registered
+                  teams). Leave unselected for a standalone/friendly match.
+                </p>
+              </div>
+            ) : null}
+            {!isEdit && !tournamentId ? (
               <Input label="Series name" value={name} onChange={(e) => setName(e.target.value)} required />
             ) : null}
-            {!isEdit ? (
+            {!isEdit && tournamentId ? (
+              tournamentDetailQuery.isLoading ? (
+                <LoadingSpinner className="h-6 w-6 text-[#12233D]" />
+              ) : (
+                <>
+                  <OpponentSelect label="Team A" opponents={opponents} value={teamA} onChange={setTeamA} />
+                  <OpponentSelect label="Team B" opponents={opponents} value={teamB} onChange={setTeamB} />
+                </>
+              )
+            ) : null}
+            {!isEdit && !tournamentId ? (
               <>
                 <TeamSelect label="Team A" teams={teams} value={teamA} onChange={setTeamA} />
                 <TeamSelect label="Team B" teams={teams} value={teamB} onChange={setTeamB} />
@@ -110,7 +171,7 @@ export default function FixtureFormPage() {
               required
             />
             <Input label="Ground" value={ground} onChange={(e) => setGround(e.target.value)} required={!isEdit} />
-            {isEdit ? (
+            {isEdit || tournamentId ? (
               <Input label="Round" value={round} onChange={(e) => setRound(e.target.value)} />
             ) : null}
             <Button type="submit" disabled={pending}>
@@ -147,6 +208,37 @@ function TeamSelect({
         {teams.map((team) => (
           <option key={team.id} value={team.id}>
             {team.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function OpponentSelect({
+  label,
+  opponents,
+  value,
+  onChange,
+}: {
+  label: string;
+  opponents: Array<{ id: string; team_id: string; team_name: string }>;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-[#12233D]">{label}</label>
+      <select
+        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required
+      >
+        <option value="">Select team</option>
+        {opponents.map((opponent) => (
+          <option key={opponent.id} value={opponent.id}>
+            {opponent.team_name}
           </option>
         ))}
       </select>

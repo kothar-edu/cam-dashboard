@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createTournament,
+  createTournamentFixture,
   getTournament,
   listTournaments,
   updateTournament,
+  type CreateTournamentFixturePayload,
   type CreateTournamentPayload,
 } from '@/api/tournaments';
 import type { ListParams } from '@/api/pagination';
@@ -47,5 +49,20 @@ export function useUpdateTournament() {
       qc.invalidateQueries({ queryKey: ['tournaments', activeTenantId] });
       qc.invalidateQueries({ queryKey: ['tournament', activeTenantId, variables.id] });
     },
+  });
+}
+
+export function useCreateTournamentFixture() {
+  const qc = useQueryClient();
+  const { activeTenantId } = useTenant();
+  return useMutation({
+    mutationFn: ({
+      tournamentId,
+      payload,
+    }: {
+      tournamentId: string;
+      payload: CreateTournamentFixturePayload;
+    }) => createTournamentFixture(tournamentId, payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['fixtures', activeTenantId] }),
   });
 }

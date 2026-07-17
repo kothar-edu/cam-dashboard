@@ -49,3 +49,22 @@ export async function updateTournament(
   const { data } = await apiClient.patch<TournamentDetail>(`/game/tournament/${id}/`, payload);
   return data;
 }
+
+export type CreateTournamentFixturePayload = {
+  opponent_a: string;
+  opponent_b: string;
+  round?: string;
+  time: string;
+  ground: string;
+};
+
+export async function createTournamentFixture(
+  tournamentId: string,
+  payload: CreateTournamentFixturePayload
+) {
+  const { data } = await apiClient.post(
+    `/game/tournament/${tournamentId}/create-fixture/`,
+    payload
+  );
+  return data;
+}

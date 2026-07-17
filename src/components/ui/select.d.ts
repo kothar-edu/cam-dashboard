@@ -21,6 +21,8 @@ export const SelectValue: React.FC<{
 export const SelectContent: React.FC<{
   className?: string;
   children?: React.ReactNode;
+  searchable?: boolean;
+  maxHeight?: number;
 }>;
 
 export const SelectItem: React.FC<{

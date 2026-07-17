@@ -1,19 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
+import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { useCreateFixture, useFixture, useUpdateFixture } from '@/hooks/useFixtures';
 import { useTeams } from '@/hooks/useTeams';
 import { useCreateTournamentFixture, useTournament, useTournaments } from '@/hooks/useTournaments';
+import { getApiErrorMessage, parseApiFieldErrors, type FieldErrors } from '@/lib/api-errors';
+import { ROUND_CHOICES } from '@/lib/game-stages';
 
 function toLocalInput(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
   return date.toISOString().slice(0, 16);
 }
+
+const TOURNAMENT_NONE_VALUE = '__none__';
 
 export default function FixtureFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -33,6 +39,7 @@ export default function FixtureFormPage() {
   const [time, setTime] = useState('');
   const [ground, setGround] = useState('');
   const [round, setRound] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const tournamentDetailQuery = useTournament(tournamentId || undefined);
   const opponents = tournamentDetailQuery.data?.opponents ?? [];
@@ -40,6 +47,14 @@ export default function FixtureFormPage() {
   useEffect(() => {
     setTeamA('');
     setTeamB('');
+    setFieldErrors((current) => {
+      const next = { ...current };
+      delete next.opponent_a;
+      delete next.opponent_b;
+      delete next.team_a;
+      delete next.team_b;
+      return next;
+    });
   }, [tournamentId]);
 
   useEffect(() => {
@@ -53,8 +68,25 @@ export default function FixtureFormPage() {
     }
   }, [fixtureQuery.data]);
 
+  const clearFieldError = (field: string) => {
+    setFieldErrors((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const handleMutationError = (error: unknown, fallback: string) => {
+    const errors = parseApiFieldErrors(error);
+    setFieldErrors(errors);
+    toast.error(getApiErrorMessage(error, fallback));
+  };
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+    setFieldErrors({});
+
     if (isEdit && id) {
       updateMutation.mutate(
         {
@@ -65,10 +97,17 @@ export default function FixtureFormPage() {
             round,
           },
         },
-        { onSuccess: () => navigate('/dashboard/fixtures') }
+        {
+          onSuccess: () => {
+            toast.success('Fixture updated');
+            navigate('/dashboard/fixtures');
+          },
+          onError: (error) => handleMutationError(error, 'Failed to update fixture.'),
+        }
       );
       return;
     }
+
     if (tournamentId) {
       createTournamentFixtureMutation.mutate(
         {
@@ -76,15 +115,22 @@ export default function FixtureFormPage() {
           payload: {
             opponent_a: teamA,
             opponent_b: teamB,
-            round: round.trim() || undefined,
+            round: round || undefined,
             time: new Date(time).toISOString(),
             ground: ground.trim(),
           },
         },
-        { onSuccess: () => navigate('/dashboard/fixtures') }
+        {
+          onSuccess: () => {
+            toast.success('Fixture created');
+            navigate('/dashboard/fixtures');
+          },
+          onError: (error) => handleMutationError(error, 'Failed to create fixture.'),
+        }
       );
       return;
     }
+
     createMutation.mutate(
       {
         name: name.trim(),
@@ -93,7 +139,13 @@ export default function FixtureFormPage() {
         time: new Date(time).toISOString(),
         ground: ground.trim(),
       },
-      { onSuccess: () => navigate('/dashboard/fixtures') }
+      {
+        onSuccess: () => {
+          toast.success('Fixture created');
+          navigate('/dashboard/fixtures');
+        },
+        onError: (error) => handleMutationError(error, 'Failed to create fixture.'),
+      }
     );
   };
 
@@ -101,6 +153,13 @@ export default function FixtureFormPage() {
     createMutation.isPending || updateMutation.isPending || createTournamentFixtureMutation.isPending;
   const teams = teamsQuery.data?.results ?? [];
   const tournaments = tournamentsQuery.data?.results ?? [];
+
+  const tournamentOptions = [
+    { value: TOURNAMENT_NONE_VALUE, label: 'None — standalone/custom match' },
+    ...tournaments.map((tournament) => ({ value: tournament.id, label: tournament.name })),
+  ];
+
+  const roundOptions = ROUND_CHOICES.map((choice) => ({ value: choice, label: choice }));
 
   return (
     <TenantRequired>
@@ -124,55 +183,137 @@ export default function FixtureFormPage() {
         ) : (
           <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-6">
             {!isEdit ? (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-[#12233D]">Tournament (optional)</label>
-                <select
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                  value={tournamentId}
-                  onChange={(e) => setTournamentId(e.target.value)}
-                >
-                  <option value="">None — standalone/custom match</option>
-                  {tournaments.map((tournament) => (
-                    <option key={tournament.id} value={tournament.id}>
-                      {tournament.name}
-                    </option>
-                  ))}
-                </select>
+              <>
+                <SearchableSelect
+                  label="Tournament (optional)"
+                  value={tournamentId || TOURNAMENT_NONE_VALUE}
+                  onChange={(value) => {
+                    setTournamentId(value === TOURNAMENT_NONE_VALUE ? '' : value);
+                    clearFieldError('tournament');
+                  }}
+                  options={tournamentOptions}
+                  placeholder="None — standalone/custom match"
+                  searchable
+                  error={fieldErrors.tournament}
+                />
                 <p className="text-xs text-muted-foreground">
                   Select a tournament to create this match within it (uses the tournament's registered
                   teams). Leave unselected for a standalone/friendly match.
                 </p>
-              </div>
+              </>
             ) : null}
             {!isEdit && !tournamentId ? (
-              <Input label="Series name" value={name} onChange={(e) => setName(e.target.value)} required />
+              <Input
+                label="Series name"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  clearFieldError('name');
+                }}
+                error={fieldErrors.name}
+                required
+              />
             ) : null}
             {!isEdit && tournamentId ? (
               tournamentDetailQuery.isLoading ? (
                 <LoadingSpinner className="h-6 w-6 text-[#12233D]" />
               ) : (
                 <>
-                  <OpponentSelect label="Team A" opponents={opponents} value={teamA} onChange={setTeamA} />
-                  <OpponentSelect label="Team B" opponents={opponents} value={teamB} onChange={setTeamB} />
+                  <SearchableSelect
+                    label="Team A"
+                    value={teamA}
+                    onChange={(value) => {
+                      setTeamA(value);
+                      clearFieldError('opponent_a');
+                    }}
+                    options={opponents.map((opponent) => ({
+                      value: opponent.id,
+                      label: opponent.team_name,
+                    }))}
+                    placeholder="Select team"
+                    searchable
+                    error={fieldErrors.opponent_a}
+                  />
+                  <SearchableSelect
+                    label="Team B"
+                    value={teamB}
+                    onChange={(value) => {
+                      setTeamB(value);
+                      clearFieldError('opponent_b');
+                    }}
+                    options={opponents.map((opponent) => ({
+                      value: opponent.id,
+                      label: opponent.team_name,
+                    }))}
+                    placeholder="Select team"
+                    searchable
+                    error={fieldErrors.opponent_b}
+                  />
                 </>
               )
             ) : null}
             {!isEdit && !tournamentId ? (
               <>
-                <TeamSelect label="Team A" teams={teams} value={teamA} onChange={setTeamA} />
-                <TeamSelect label="Team B" teams={teams} value={teamB} onChange={setTeamB} />
+                <SearchableSelect
+                  label="Team A"
+                  value={teamA}
+                  onChange={(value) => {
+                    setTeamA(value);
+                    clearFieldError('team_a');
+                  }}
+                  options={teams.map((team) => ({ value: team.id, label: team.name }))}
+                  placeholder="Select team"
+                  searchable
+                  error={fieldErrors.team_a}
+                />
+                <SearchableSelect
+                  label="Team B"
+                  value={teamB}
+                  onChange={(value) => {
+                    setTeamB(value);
+                    clearFieldError('team_b');
+                  }}
+                  options={teams.map((team) => ({ value: team.id, label: team.name }))}
+                  placeholder="Select team"
+                  searchable
+                  error={fieldErrors.team_b}
+                />
               </>
             ) : null}
             <Input
               label="Scheduled time"
               type="datetime-local"
               value={time}
-              onChange={(e) => setTime(e.target.value)}
+              onChange={(e) => {
+                setTime(e.target.value);
+                clearFieldError('time');
+              }}
+              error={fieldErrors.time}
               required
             />
-            <Input label="Ground" value={ground} onChange={(e) => setGround(e.target.value)} required={!isEdit} />
+            <Input
+              label="Ground"
+              value={ground}
+              onChange={(e) => {
+                setGround(e.target.value);
+                clearFieldError('ground');
+              }}
+              error={fieldErrors.ground}
+              required={!isEdit}
+            />
             {isEdit || tournamentId ? (
-              <Input label="Round" value={round} onChange={(e) => setRound(e.target.value)} />
+              <SearchableSelect
+                label="Round"
+                value={round}
+                onChange={(value) => {
+                  setRound(value);
+                  clearFieldError('round');
+                }}
+                options={roundOptions}
+                placeholder="Select round"
+                searchable={false}
+                error={fieldErrors.round}
+              />
             ) : null}
             <Button type="submit" disabled={pending}>
               {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create fixture'}
@@ -181,67 +322,5 @@ export default function FixtureFormPage() {
         )}
       </div>
     </TenantRequired>
-  );
-}
-
-function TeamSelect({
-  label,
-  teams,
-  value,
-  onChange,
-}: {
-  label: string;
-  teams: Array<{ id: string; name: string }>;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-[#12233D]">{label}</label>
-      <select
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required
-      >
-        <option value="">Select team</option>
-        {teams.map((team) => (
-          <option key={team.id} value={team.id}>
-            {team.name}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-function OpponentSelect({
-  label,
-  opponents,
-  value,
-  onChange,
-}: {
-  label: string;
-  opponents: Array<{ id: string; team_id: string; team_name: string }>;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-[#12233D]">{label}</label>
-      <select
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required
-      >
-        <option value="">Select team</option>
-        {opponents.map((opponent) => (
-          <option key={opponent.id} value={opponent.id}>
-            {opponent.team_name}
-          </option>
-        ))}
-      </select>
-    </div>
   );
 }

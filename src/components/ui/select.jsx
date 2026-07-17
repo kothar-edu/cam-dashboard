@@ -96,7 +96,7 @@ export function SelectTrigger({
     <button
       type="button" // Explicitly set type to button to prevent form submission
       className={cn(
-        "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        "flex h-11 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-base text-[#12233D] ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       onClick={handleClick}
@@ -126,7 +126,8 @@ export function SelectContent({
   value,
   onValueChange,
   onClose,
-  maxHeight = 300,
+  maxHeight = 320,
+  searchable = true,
   ...props
 }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -134,13 +135,14 @@ export function SelectContent({
 
   // Focus search input when dropdown opens
   useEffect(() => {
+    if (!searchable) return;
     if (searchInputRef.current) {
       // Small delay to ensure the dropdown is fully rendered
       setTimeout(() => {
         searchInputRef.current.focus();
       }, 10);
     }
-  }, []);
+  }, [searchable]);
 
   // Filter children based on search query
   const filteredChildren = React.Children.toArray(children).filter((child) => {
@@ -169,26 +171,28 @@ export function SelectContent({
       {...props}
     >
       {/* Search input */}
-      <div className="sticky top-0 p-2 bg-popover border-b">
-        <div className="flex items-center px-2 py-1 border rounded-md focus-within:ring-1 focus-within:ring-ring">
-          <Search className="h-4 w-4 mr-2 text-muted-foreground" />
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            placeholder="Search..."
-            className="w-full bg-transparent border-none outline-none text-sm"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => {
-              // Prevent form submission on Enter key
-              if (e.key === "Enter") {
-                e.preventDefault();
-              }
-            }}
-          />
+      {searchable ? (
+        <div className="sticky top-0 p-2 bg-popover border-b">
+          <div className="flex items-center rounded-md border px-3 py-2 focus-within:ring-1 focus-within:ring-ring">
+            <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search..."
+              className="w-full border-none bg-transparent text-base outline-none placeholder:text-muted-foreground"
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => {
+                // Prevent form submission on Enter key
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                }
+              }}
+            />
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {/* Options list with scrolling */}
       <div
@@ -212,7 +216,7 @@ export function SelectContent({
             return child;
           })
         ) : (
-          <div className="py-2 px-2 text-sm text-center text-muted-foreground">
+          <div className="px-3 py-3 text-center text-base text-muted-foreground">
             No results found
           </div>
         )}
@@ -240,8 +244,8 @@ export function SelectItem({
   return (
     <div
       className={cn(
-        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-        selected && "bg-accent text-accent-foreground",
+        "relative flex w-full cursor-pointer select-none items-center rounded-sm py-2.5 pl-9 pr-3 text-base text-popover-foreground outline-none hover:bg-[#12233D]/5 focus:bg-[#12233D]/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        selected && "bg-[#12233D]/10 font-medium text-[#12233D]",
         disabled && "pointer-events-none opacity-50",
         className
       )}

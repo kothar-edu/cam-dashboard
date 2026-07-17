@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { useCreatePlayer, usePlayer, useUpdatePlayer } from '@/hooks/usePlayers';
@@ -63,25 +64,19 @@ export default function PlayerFormPage() {
               disabled={isEdit}
               required
             />
-            <div className="space-y-2">
-              <label htmlFor="team-select" className="text-sm font-medium text-[#12233D]">
-                Team
-              </label>
-              <select
-                id="team-select"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                value={teamId}
-                onChange={(e) => setTeamId(e.target.value)}
-                required
-              >
-                <option value="">Select team</option>
-                {(teamsQuery.data?.results ?? []).map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SearchableSelect
+              id="team-select"
+              label="Team"
+              value={teamId}
+              onChange={setTeamId}
+              options={(teamsQuery.data?.results ?? []).map((team) => ({
+                value: team.id,
+                label: team.name,
+              }))}
+              placeholder="Select team"
+              searchable
+              required
+            />
             <Input label="Jersey number" type="number" value={jerseyNo} onChange={(e) => setJerseyNo(e.target.value)} />
             <Input label="Date of birth" type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
             <Button type="submit" disabled={pending}>

@@ -11,6 +11,7 @@ import {
   useRevokeTenantAdmin,
   useTenantMemberships,
 } from '@/hooks/useTenantAdmin';
+import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { UserEmailLookupField } from '@/components/forms/UserEmailLookupField';
 
 export default function TenantsPage() {
@@ -108,25 +109,21 @@ export default function TenantsPage() {
       <div className="space-y-4">
         <h2 className="text-lg font-semibold text-[#12233D]">Tenant admin assignments</h2>
 
-        <div className="max-w-md space-y-2">
-          <label htmlFor="tenant-select" className="text-sm font-medium text-[#12233D]">
-            Organization
-          </label>
-          <select
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            value={selectedTenantId?.toString() ?? ''}
-            onChange={(event) =>
-              setSelectedTenantId(event.target.value ? Number(event.target.value) : undefined)
-            }
-          >
-            <option value="">Select tenant</option>
-            {tenants.map((tenant) => (
-              <option key={tenant.id} value={tenant.id}>
-                {tenant.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <SearchableSelect
+          id="tenant-select"
+          label="Organization"
+          value={selectedTenantId?.toString() ?? ''}
+          onChange={(value) =>
+            setSelectedTenantId(value ? Number(value) : undefined)
+          }
+          options={tenants.map((tenant) => ({
+            value: String(tenant.id),
+            label: tenant.name,
+          }))}
+          placeholder="Select tenant"
+          searchable
+          className="max-w-md"
+        />
 
         {tenantsLoading ? (
           <LoadingSpinner className="h-6 w-6 text-[#12233D]" />

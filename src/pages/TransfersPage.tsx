@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { DataTable } from '@/components/data-table/DataTable';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -112,46 +113,31 @@ export default function TransfersPage() {
           <div className="w-full max-w-md rounded-lg border bg-white p-6 shadow-lg">
             <h3 className="text-lg font-semibold text-[#12233D]">Transfer player</h3>
             <div className="mt-4 space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="transfer-player" className="text-sm font-medium text-[#12233D]">
-                  Player
-                </label>
-                <select
-                  id="transfer-player"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                  value={selectedPlayerId}
-                  onChange={(event) => setSelectedPlayerId(event.target.value)}
-                >
-                  <option value="">Select player</option>
-                  {players.map((player) => (
-                    <option key={player.id} value={player.id}>
-                      {player.full_name} ({player.team_name ?? 'No team'})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <SearchableSelect
+                id="transfer-player"
+                label="Player"
+                value={selectedPlayerId}
+                onChange={setSelectedPlayerId}
+                options={players.map((player) => ({
+                  value: player.id,
+                  label: `${player.full_name} (${player.team_name ?? 'No team'})`,
+                }))}
+                placeholder="Select player"
+                searchable
+              />
 
               {selectedPlayer ? (
-                <div className="space-y-2">
-                  <label htmlFor="transfer-team" className="text-sm font-medium text-[#12233D]">
-                    New team
-                  </label>
-                  <select
-                    id="transfer-team"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                    value={selectedTeamId}
-                    onChange={(event) => setSelectedTeamId(event.target.value)}
-                  >
-                    <option value="">Select team</option>
-                    {teams
-                      .filter((team: Team) => team.id !== selectedPlayer.current_team)
-                      .map((team) => (
-                        <option key={team.id} value={team.id}>
-                          {team.name}
-                        </option>
-                      ))}
-                  </select>
-                </div>
+                <SearchableSelect
+                  id="transfer-team"
+                  label="New team"
+                  value={selectedTeamId}
+                  onChange={setSelectedTeamId}
+                  options={teams
+                    .filter((team: Team) => team.id !== selectedPlayer.current_team)
+                    .map((team) => ({ value: team.id, label: team.name }))}
+                  placeholder="Select team"
+                  searchable
+                />
               ) : null}
 
               {transferMutation.isError ? (

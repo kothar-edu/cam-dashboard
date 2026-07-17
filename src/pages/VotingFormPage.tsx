@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { usePlayers } from '@/hooks/usePlayers';
@@ -59,23 +60,19 @@ export default function VotingFormPage() {
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         ) : (
           <form onSubmit={handleSubmit} className="max-w-2xl space-y-4 rounded-lg border bg-white p-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-[#12233D]">Tournament</label>
-              <select
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                value={tournamentId}
-                onChange={(e) => setTournamentId(e.target.value)}
-                required
-                disabled={isEdit}
-              >
-                <option value="">Select tournament</option>
-                {(tournamentsQuery.data?.results ?? []).map((tournament) => (
-                  <option key={tournament.id} value={tournament.id}>
-                    {tournament.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SearchableSelect
+              label="Tournament"
+              value={tournamentId}
+              onChange={setTournamentId}
+              options={(tournamentsQuery.data?.results ?? []).map((tournament) => ({
+                value: tournament.id,
+                label: tournament.name,
+              }))}
+              placeholder="Select tournament"
+              searchable
+              disabled={isEdit}
+              required
+            />
             <div className="space-y-2">
               <p className="text-sm font-medium text-[#12233D]">Nominated players</p>
               <div className="max-h-64 space-y-2 overflow-y-auto rounded-md border p-3">

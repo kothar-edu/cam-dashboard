@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { useCreateSponsor, useSponsor, useUpdateSponsor } from '@/hooks/useSponsors';
@@ -61,20 +62,16 @@ export default function SponsorFormPage() {
             <Input label="Website URL" value={supportedUrl} onChange={(e) => setSupportedUrl(e.target.value)} />
             <Input label="Image URL" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
             <Input label="Extra info" value={extraInfo} onChange={(e) => setExtraInfo(e.target.value)} />
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-[#12233D]">Sponsor type</label>
-              <select
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                value={sponsorType}
-                onChange={(e) => setSponsorType(e.target.value)}
-              >
-                {['Gold', 'Silver', 'Bronze', 'Partner'].map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SearchableSelect
+              label="Sponsor type"
+              value={sponsorType}
+              onChange={setSponsorType}
+              options={['Gold', 'Silver', 'Bronze', 'Partner'].map((type) => ({
+                value: type,
+                label: type,
+              }))}
+              searchable={false}
+            />
             <Button type="submit" disabled={pending}>
               {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create sponsor'}
             </Button>

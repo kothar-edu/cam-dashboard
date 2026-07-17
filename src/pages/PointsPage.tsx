@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react';
 import { DataTable } from '@/components/data-table/DataTable';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { useTenant } from '@/contexts/TenantContext';
 import { useTournaments } from '@/hooks/useTournaments';
 import { usePointsTable } from '@/hooks/usePointsTable';
@@ -67,23 +61,17 @@ export default function PointsPage() {
         </div>
 
         {tournaments.length > 0 ? (
-          <div className="w-full md:w-72">
-            <Select
-              value={selectedTournamentId ?? undefined}
-              onValueChange={setSelectedTournamentId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select tournament" />
-              </SelectTrigger>
-              <SelectContent>
-                {tournaments.map((tournament) => (
-                  <SelectItem key={tournament.id} value={tournament.id}>
-                    {tournament.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <SearchableSelect
+            value={selectedTournamentId ?? ''}
+            onChange={setSelectedTournamentId}
+            options={tournaments.map((tournament) => ({
+              value: tournament.id,
+              label: tournament.name,
+            }))}
+            placeholder="Select tournament"
+            searchable
+            className="w-full md:w-72 space-y-0"
+          />
         ) : null}
       </div>
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { FileField } from '@/components/forms/FileField';
 import { useChangePassword } from '@/hooks/useSettings';
 import { useCreateAdminUser } from '@/hooks/useCreateAdmin';
@@ -164,20 +165,31 @@ function CreateAdminForm() {
       <Input label="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
       <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
       <Input label="Date of birth" type="date" value={dob} onChange={(e) => setDob(e.target.value)} required />
-      <SelectField label="Gender" value={gender} onChange={setGender} options={[
-        { value: 'm', label: 'Male' },
-        { value: 'f', label: 'Female' },
-        { value: 'o', label: 'Other' },
-      ]} />
-      <SelectField
+      <SearchableSelect
+        label="Gender"
+        value={gender}
+        onChange={setGender}
+        options={[
+          { value: 'm', label: 'Male' },
+          { value: 'f', label: 'Female' },
+          { value: 'o', label: 'Other' },
+        ]}
+        searchable={false}
+      />
+      <SearchableSelect
         label="Nationality"
         value={nationality}
         onChange={setNationality}
-        options={(countriesQuery.data ?? []).map((country) => ({ value: String(country.id), label: country.name }))}
+        options={(countriesQuery.data ?? []).map((country) => ({
+          value: String(country.id),
+          label: country.name,
+        }))}
+        placeholder="Select"
+        searchable
         required
       />
       <Input label="Other country (if applicable)" value={otherCountry} onChange={(e) => setOtherCountry(e.target.value)} />
-      <SelectField
+      <SearchableSelect
         label="Visa type"
         value={visaType}
         onChange={setVisaType}
@@ -187,12 +199,18 @@ function CreateAdminForm() {
           { value: 'student', label: 'Student' },
           { value: 'temporary', label: 'Temporary' },
         ]}
+        searchable={false}
       />
-      <SelectField
+      <SearchableSelect
         label="Role"
         value={role}
         onChange={setRole}
-        options={(rolesQuery.data ?? []).map((item) => ({ value: String(item.id), label: item.name }))}
+        options={(rolesQuery.data ?? []).map((item) => ({
+          value: String(item.id),
+          label: item.name,
+        }))}
+        placeholder="Select"
+        searchable
       />
       <FileField label="Profile picture (optional)" accept="image/*,.pdf" onChange={setPicture} />
       <FileField label="ID card (optional)" accept="image/*,.pdf" onChange={setIdCard} />
@@ -204,38 +222,5 @@ function CreateAdminForm() {
         {createMutation.isPending ? 'Creating…' : 'Create admin user'}
       </Button>
     </form>
-  );
-}
-
-function SelectField({
-  label,
-  value,
-  onChange,
-  options,
-  required,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: Array<{ value: string; label: string }>;
-  required?: boolean;
-}) {
-  return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-[#12233D]">{label}</label>
-      <select
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required={required}
-      >
-        <option value="">Select</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </div>
   );
 }

@@ -1,3 +1,4 @@
+import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { useTenant } from '@/contexts/TenantContext';
 
 export function TenantPicker() {
@@ -8,22 +9,20 @@ export function TenantPicker() {
   }
 
   return (
-    <label className="flex items-center gap-2 text-sm">
-      <span className="text-muted-foreground">Organization</span>
-      <select
-        className="rounded-md border border-border bg-background px-2 py-1 text-sm"
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-muted-foreground">Organization</span>
+      <SearchableSelect
         value={activeTenantId ?? ''}
-        onChange={(event) => setActiveTenantId(event.target.value)}
-      >
-        <option value="" disabled>
-          Select organization
-        </option>
-        {tenants.map((tenant) => (
-          <option key={tenant.id} value={tenant.schema_name}>
-            {tenant.name}
-          </option>
-        ))}
-      </select>
-    </label>
+        onChange={setActiveTenantId}
+        options={tenants.map((tenant) => ({
+          value: tenant.schema_name,
+          label: tenant.name,
+        }))}
+        placeholder="Select organization"
+        searchable
+        className="w-56 space-y-0"
+        triggerClassName="h-9"
+      />
+    </div>
   );
 }

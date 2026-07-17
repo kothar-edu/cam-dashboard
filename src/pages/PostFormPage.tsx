@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { useCreatePost, usePost, useUpdatePost } from '@/hooks/usePosts';
@@ -79,8 +80,26 @@ export default function PostFormPage() {
             <Input label="Cover image URL" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
             <Input label="Post date" type="date" value={postDate} onChange={(e) => setPostDate(e.target.value)} />
             <Input label="Post time" type="time" value={postTime.slice(0, 5)} onChange={(e) => setPostTime(`${e.target.value}:00`)} />
-            <SelectField label="Type" value={postType} onChange={setPostType} options={['Blog', 'News', 'Announcement']} />
-            <SelectField label="Status" value={status} onChange={setStatus} options={['Published', 'Draft']} />
+            <SearchableSelect
+              label="Type"
+              value={postType}
+              onChange={setPostType}
+              options={['Blog', 'News', 'Announcement'].map((option) => ({
+                value: option,
+                label: option,
+              }))}
+              searchable={false}
+            />
+            <SearchableSelect
+              label="Status"
+              value={status}
+              onChange={setStatus}
+              options={['Published', 'Draft'].map((option) => ({
+                value: option,
+                label: option,
+              }))}
+              searchable={false}
+            />
             <Button type="submit" disabled={pending}>
               {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create post'}
             </Button>
@@ -88,34 +107,5 @@ export default function PostFormPage() {
         )}
       </div>
     </TenantRequired>
-  );
-}
-
-function SelectField({
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: string[];
-}) {
-  return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-[#12233D]">{label}</label>
-      <select
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </div>
   );
 }

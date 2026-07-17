@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { useCreateFixturesBulk } from '@/hooks/useFixtures';
@@ -57,8 +58,22 @@ export default function BulkFixtureFormPage() {
                 value={row.name}
                 onChange={(e) => updateRow(row.key, 'name', e.target.value)}
               />
-              <TeamSelect teams={teams} value={row.team_a} onChange={(v) => updateRow(row.key, 'team_a', v)} />
-              <TeamSelect teams={teams} value={row.team_b} onChange={(v) => updateRow(row.key, 'team_b', v)} />
+              <SearchableSelect
+                label={`Row ${index + 1} team A`}
+                value={row.team_a}
+                onChange={(v) => updateRow(row.key, 'team_a', v)}
+                options={teams.map((team) => ({ value: team.id, label: team.name }))}
+                placeholder="Select"
+                searchable
+              />
+              <SearchableSelect
+                label={`Row ${index + 1} team B`}
+                value={row.team_b}
+                onChange={(v) => updateRow(row.key, 'team_b', v)}
+                options={teams.map((team) => ({ value: team.id, label: team.name }))}
+                placeholder="Select"
+                searchable
+              />
               <Input
                 label="Time"
                 type="datetime-local"
@@ -83,33 +98,5 @@ export default function BulkFixtureFormPage() {
         </form>
       </div>
     </TenantRequired>
-  );
-}
-
-function TeamSelect({
-  teams,
-  value,
-  onChange,
-}: {
-  teams: Array<{ id: string; name: string }>;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-[#12233D]">Team</label>
-      <select
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <option value="">Select</option>
-        {teams.map((team) => (
-          <option key={team.id} value={team.id}>
-            {team.name}
-          </option>
-        ))}
-      </select>
-    </div>
   );
 }

@@ -5,6 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 export type SelectOption = {
   value: string;
@@ -12,7 +13,8 @@ export type SelectOption = {
 };
 
 type SearchableSelectProps = {
-  label: string;
+  label?: string;
+  id?: string;
   value: string;
   onChange: (value: string) => void;
   options: SelectOption[];
@@ -20,26 +22,49 @@ type SearchableSelectProps = {
   error?: string;
   searchable?: boolean;
   disabled?: boolean;
+  required?: boolean;
+  className?: string;
+  triggerClassName?: string;
 };
+
+const SEARCH_THRESHOLD = 5;
 
 export function SearchableSelect({
   label,
+  id,
   value,
   onChange,
   options,
   placeholder = 'Select an option',
   error,
-  searchable = true,
+  searchable,
   disabled = false,
+  required = false,
+  className,
+  triggerClassName,
 }: SearchableSelectProps) {
+  const enableSearch = searchable ?? options.length > SEARCH_THRESHOLD;
+
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-[#12233D]">{label}</label>
+    <div className={cn('space-y-2', className)}>
+      {label ? (
+        <label htmlFor={id} className="text-sm font-medium text-[#12233D]">
+          {label}
+          {required ? <span className="text-red-600"> *</span> : null}
+        </label>
+      ) : null}
       <Select value={value} onValueChange={onChange} disabled={disabled}>
-        <SelectTrigger className={error ? 'border-red-500 focus:ring-red-500' : undefined}>
+        <SelectTrigger
+          id={id}
+          aria-required={required}
+          className={cn(
+            error ? 'border-red-500 focus:ring-red-500' : undefined,
+            triggerClassName
+          )}
+        >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent searchable={searchable}>
+        <SelectContent searchable={enableSearch}>
           {options.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
@@ -51,3 +76,6 @@ export function SearchableSelect({
     </div>
   );
 }
+
+/** Alias for SearchableSelect — use for all form and filter dropdowns. */
+export const FormSelect = SearchableSelect;

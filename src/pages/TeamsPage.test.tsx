@@ -15,11 +15,16 @@ vi.mock('@/hooks/useTeams', () => ({
           code: 'RST',
           logo: null,
           total_players: 15,
+          is_active: true,
         },
       ],
     },
     isLoading: false,
     isError: false,
+  }),
+  useSetTeamActive: () => ({
+    mutate: vi.fn(),
+    isPending: false,
   }),
 }));
 

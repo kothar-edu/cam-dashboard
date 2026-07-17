@@ -7,6 +7,7 @@ export type Team = {
   code: string;
   logo: string | null;
   total_players: number;
+  is_active: boolean;
 };
 
 export async function listTeams(params?: ListParams): Promise<Paginated<Team>> {
@@ -29,6 +30,7 @@ export type UpdateTeamPayload = {
   name?: string;
   code?: string;
   logo?: File | null;
+  is_active?: boolean;
 };
 
 function appendTeamFields(form: FormData, payload: CreateTeamPayload | UpdateTeamPayload) {
@@ -60,5 +62,10 @@ export async function updateTeam(id: string, payload: UpdateTeamPayload): Promis
     return data;
   }
   const { data } = await apiClient.patch<Team>(`/game/teams/${id}/`, payload);
+  return data;
+}
+
+export async function setTeamActive(id: string, isActive: boolean): Promise<Team> {
+  const { data } = await apiClient.patch<Team>(`/game/teams/${id}/`, { is_active: isActive });
   return data;
 }

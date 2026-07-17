@@ -34,9 +34,9 @@ export function clearStoredTenantId() {
   localStorage.removeItem(TENANT_KEY);
 }
 
-const viteBase = import.meta.env.VITE_URL ?? '/';
-const apiBaseURL = `${viteBase}api`;
-const newsfeedBaseURL = `${viteBase}newsfeed/api/v1`;
+const viteBase = (import.meta.env.VITE_URL ?? '/').replace(/\/+$/, '');
+const apiBaseURL = `${viteBase}/api`;
+const newsfeedBaseURL = `${viteBase}/newsfeed/api/v1`;
 
 export const apiClient = axios.create({ baseURL: apiBaseURL });
 export const newsfeedClient = axios.create({ baseURL: newsfeedBaseURL });

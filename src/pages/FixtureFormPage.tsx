@@ -40,6 +40,7 @@ export default function FixtureFormPage() {
   const [ground, setGround] = useState('');
   const [round, setRound] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [isPublic, setIsPublic] = useState(true);
 
   const tournamentDetailQuery = useTournament(tournamentId || undefined);
   const opponents = tournamentDetailQuery.data?.opponents ?? [];
@@ -65,6 +66,7 @@ export default function FixtureFormPage() {
       setTime(toLocalInput(fixtureQuery.data.time));
       setGround(fixtureQuery.data.ground ?? '');
       setRound(fixtureQuery.data.round ?? '');
+      setIsPublic(fixtureQuery.data.is_public ?? true);
     }
   }, [fixtureQuery.data]);
 
@@ -95,6 +97,7 @@ export default function FixtureFormPage() {
             time: new Date(time).toISOString(),
             ground,
             round,
+            is_public: isPublic,
           },
         },
         {
@@ -314,6 +317,12 @@ export default function FixtureFormPage() {
                 searchable={false}
                 error={fieldErrors.round}
               />
+            ) : null}
+            {isEdit ? (
+              <label className="flex items-center gap-2 text-sm text-[#12233D]">
+                <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
+                Public match (visible to guests and non-members)
+              </label>
             ) : null}
             <Button type="submit" disabled={pending}>
               {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create fixture'}

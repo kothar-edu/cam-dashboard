@@ -8,6 +8,7 @@ export type Tournament = {
   start: string;
   total_teams: number;
   is_active: boolean;
+  is_public?: boolean;
 };
 
 export async function listTournaments(params?: ListParams): Promise<Paginated<Tournament>> {
@@ -21,6 +22,7 @@ export type TournamentDetail = Tournament & {
   end: string;
   team_size: number;
   opponents: Array<{ id: string; team_id: string; team_name: string }>;
+  is_public?: boolean;
 };
 
 export type CreateTournamentPayload = {
@@ -30,6 +32,7 @@ export type CreateTournamentPayload = {
   team_size: number;
   teams: string[];
   is_active?: boolean;
+  is_public?: boolean;
 };
 
 export async function getTournament(id: string): Promise<TournamentDetail> {

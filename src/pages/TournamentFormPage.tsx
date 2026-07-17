@@ -29,6 +29,7 @@ export default function TournamentFormPage() {
   const [end, setEnd] = useState('');
   const [teamSize, setTeamSize] = useState('11');
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+  const [isPublic, setIsPublic] = useState(true);
 
   useEffect(() => {
     if (tournamentQuery.data) {
@@ -37,6 +38,7 @@ export default function TournamentFormPage() {
       setEnd(toLocalInput(tournamentQuery.data.end ?? tournamentQuery.data.start));
       setTeamSize(String(tournamentQuery.data.team_size ?? 11));
       setSelectedTeams(tournamentQuery.data.opponents?.map((o) => o.team_id) ?? []);
+      setIsPublic(tournamentQuery.data.is_public ?? true);
     }
   }, [tournamentQuery.data]);
 
@@ -48,6 +50,7 @@ export default function TournamentFormPage() {
       end: new Date(end).toISOString(),
       team_size: Number(teamSize),
       teams: selectedTeams,
+      is_public: isPublic,
     };
     if (isEdit && id) {
       const existingTeamIds = tournamentQuery.data?.opponents?.map((o) => o.team_id) ?? [];
@@ -60,6 +63,7 @@ export default function TournamentFormPage() {
             start: payload.start,
             end: payload.end,
             team_size: payload.team_size,
+            is_public: isPublic,
           },
         },
         {
@@ -138,6 +142,10 @@ export default function TournamentFormPage() {
                 ))}
               </div>
             </div>
+            <label className="flex items-center gap-2 text-sm text-[#12233D]">
+              <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
+              Public tournament (visible to guests and non-members)
+            </label>
             {failed ? <p className="text-sm text-red-600">Failed to save tournament.</p> : null}
             <Button type="submit" disabled={pending || selectedTeams.length < 2}>
               {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create tournament'}

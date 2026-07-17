@@ -8,6 +8,7 @@ export type Team = {
   logo: string | null;
   total_players: number;
   is_active: boolean;
+  maintainer?: string | null;
 };
 
 export async function listTeams(params?: ListParams): Promise<Paginated<Team>> {
@@ -31,12 +32,16 @@ export type UpdateTeamPayload = {
   code?: string;
   logo?: File | null;
   is_active?: boolean;
+  maintainer?: string | null;
 };
 
 function appendTeamFields(form: FormData, payload: CreateTeamPayload | UpdateTeamPayload) {
   if ('name' in payload && payload.name != null) form.append('name', payload.name);
   if ('code' in payload && payload.code != null) form.append('code', payload.code);
   if (payload.logo) form.append('logo', payload.logo);
+  if ('maintainer' in payload && payload.maintainer !== undefined) {
+    form.append('maintainer', payload.maintainer ?? '');
+  }
 }
 
 export async function createTeam(payload: CreateTeamPayload): Promise<Team> {

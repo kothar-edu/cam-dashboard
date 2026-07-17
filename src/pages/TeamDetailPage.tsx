@@ -1,3 +1,4 @@
+import { UserEmailLookupField } from '@/components/forms/UserEmailLookupField';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -27,11 +28,13 @@ export default function TeamDetailPage() {
   const [bankBranch, setBankBranch] = useState('');
   const [verificationFeeAmount, setVerificationFeeAmount] = useState('');
   const [requirePaymentVerification, setRequirePaymentVerification] = useState(true);
+  const [maintainerId, setMaintainerId] = useState<string | null>(null);
 
   useEffect(() => {
     if (teamQuery.data) {
       setName(teamQuery.data.name);
       setCode(teamQuery.data.code);
+      setMaintainerId(teamQuery.data.maintainer ?? null);
     }
   }, [teamQuery.data]);
 
@@ -45,6 +48,21 @@ export default function TeamDetailPage() {
       setRequirePaymentVerification(paymentQuery.data.require_payment_verification);
     }
   }, [paymentQuery.data]);
+
+  const handleMaintainerSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!id) return;
+    updateMutation.mutate(
+      {
+        id,
+        payload: { maintainer: maintainerId },
+      },
+      {
+        onSuccess: () => toast.success('Team maintainer updated.'),
+        onError: () => toast.error('Failed to update maintainer. User must be an approved org member.'),
+      }
+    );
+  };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -112,6 +130,21 @@ export default function TeamDetailPage() {
               ) : null}
               <Button type="submit" disabled={updateMutation.isPending}>
                 {updateMutation.isPending ? 'Saving…' : 'Save changes'}
+              </Button>
+            </form>
+
+            <form onSubmit={handleMaintainerSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-6">
+              <h2 className="text-lg font-semibold text-[#12233D]">Team maintainer</h2>
+              <p className="text-sm text-muted-foreground">
+                Assign a registered organization member as maintainer. They can manage roster join requests and edit
+                team name/logo.
+              </p>
+              <UserEmailLookupField
+                onResolved={(user) => setMaintainerId(user.id)}
+                onClear={() => setMaintainerId(null)}
+              />
+              <Button type="submit" disabled={updateMutation.isPending || !maintainerId}>
+                {updateMutation.isPending ? 'Saving…' : 'Reassign maintainer'}
               </Button>
             </form>
 

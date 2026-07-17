@@ -50,6 +50,17 @@ export async function updateTournament(
   return data;
 }
 
+export async function addTeamsToTournament(
+  tournamentId: string,
+  teamIds: string[]
+): Promise<TournamentDetail> {
+  const { data } = await apiClient.post<TournamentDetail>(
+    `/game/tournament/${tournamentId}/add-teams/`,
+    { teams: teamIds }
+  );
+  return data;
+}
+
 export type CreateTournamentFixturePayload = {
   opponent_a: string;
   opponent_b: string;

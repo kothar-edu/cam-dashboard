@@ -4,6 +4,7 @@ import {
   createTournamentFixture,
   getTournament,
   listTournaments,
+  addTeamsToTournament,
   updateTournament,
   type CreateTournamentFixturePayload,
   type CreateTournamentPayload,
@@ -48,6 +49,19 @@ export function useUpdateTournament() {
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['tournaments', activeTenantId] });
       qc.invalidateQueries({ queryKey: ['tournament', activeTenantId, variables.id] });
+    },
+  });
+}
+
+export function useAddTeamsToTournament() {
+  const qc = useQueryClient();
+  const { activeTenantId } = useTenant();
+  return useMutation({
+    mutationFn: ({ tournamentId, teamIds }: { tournamentId: string; teamIds: string[] }) =>
+      addTeamsToTournament(tournamentId, teamIds),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['tournaments', activeTenantId] });
+      qc.invalidateQueries({ queryKey: ['tournament', activeTenantId, variables.tournamentId] });
     },
   });
 }

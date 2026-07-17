@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
-import { useCreateTournament, useTournament, useUpdateTournament } from '@/hooks/useTournaments';
+import { useCreateTournament, useTournament, useUpdateTournament, useAddTeamsToTournament } from '@/hooks/useTournaments';
 import { useTeams } from '@/hooks/useTeams';
 
 function toLocalInput(value: string) {
@@ -22,6 +22,7 @@ export default function TournamentFormPage() {
   const teamsQuery = useTeams();
   const createMutation = useCreateTournament();
   const updateMutation = useUpdateTournament();
+  const addTeamsMutation = useAddTeamsToTournament();
 
   const [name, setName] = useState('');
   const [start, setStart] = useState('');
@@ -49,7 +50,31 @@ export default function TournamentFormPage() {
       teams: selectedTeams,
     };
     if (isEdit && id) {
-      updateMutation.mutate({ id, payload }, { onSuccess: () => navigate('/dashboard/tournaments') });
+      const existingTeamIds = tournamentQuery.data?.opponents?.map((o) => o.team_id) ?? [];
+      const newTeamIds = selectedTeams.filter((teamId) => !existingTeamIds.includes(teamId));
+      updateMutation.mutate(
+        {
+          id,
+          payload: {
+            name: payload.name,
+            start: payload.start,
+            end: payload.end,
+            team_size: payload.team_size,
+          },
+        },
+        {
+          onSuccess: () => {
+            if (newTeamIds.length === 0) {
+              navigate('/dashboard/tournaments');
+              return;
+            }
+            addTeamsMutation.mutate(
+              { tournamentId: id, teamIds: newTeamIds },
+              { onSuccess: () => navigate('/dashboard/tournaments') }
+            );
+          },
+        }
+      );
       return;
     }
     createMutation.mutate(payload, { onSuccess: () => navigate('/dashboard/tournaments') });
@@ -61,8 +86,8 @@ export default function TournamentFormPage() {
     );
   };
 
-  const pending = createMutation.isPending || updateMutation.isPending;
-  const failed = createMutation.isError || updateMutation.isError;
+  const pending = createMutation.isPending || updateMutation.isPending || addTeamsMutation.isPending;
+  const failed = createMutation.isError || updateMutation.isError || addTeamsMutation.isError;
 
   return (
     <TenantRequired>

@@ -32,3 +32,16 @@ export async function lookupUserByEmail(email: string): Promise<UserLookup> {
   const { data } = await apiClient.get<UserLookup>('/user/lookup/', { params: { email } });
   return data;
 }
+
+export type UpdateUserPaymentPayload = {
+  is_payment_verified?: boolean;
+  payment_status?: string;
+};
+
+export async function updateUserPayment(
+  userId: string,
+  payload: UpdateUserPaymentPayload
+): Promise<DashboardUser> {
+  const { data } = await apiClient.patch<DashboardUser>(`/user/${userId}/`, payload);
+  return data;
+}

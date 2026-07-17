@@ -1,7 +1,11 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { DataTable } from '@/components/data-table/DataTable';
+import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { useUpdateUserPayment } from '@/hooks/useUpdateUserPayment';
 import { useUsers } from '@/hooks/useUsers';
+import type { DashboardUser } from '@/api/users';
 
 const PAGE_SIZE = 20;
 
@@ -10,6 +14,59 @@ function VerifiedCell({ verified }: { verified: boolean }) {
     <span className={verified ? 'text-green-700' : 'text-red-600'}>
       {verified ? 'Yes' : 'No'}
     </span>
+  );
+}
+
+function PaymentActions({ user }: { user: DashboardUser }) {
+  const updateMutation = useUpdateUserPayment();
+  const pending = updateMutation.isPending;
+
+  const approve = () => {
+    if (!window.confirm(`Approve payment verification for ${user.full_name || user.email}?`)) {
+      return;
+    }
+    updateMutation.mutate(
+      { userId: user.id, payload: { is_payment_verified: true } },
+      {
+        onSuccess: () => toast.success('Payment approved.'),
+        onError: () => toast.error('Failed to approve payment.'),
+      }
+    );
+  };
+
+  const reject = () => {
+    if (!window.confirm(`Reject payment verification for ${user.full_name || user.email}?`)) {
+      return;
+    }
+    updateMutation.mutate(
+      {
+        userId: user.id,
+        payload: { is_payment_verified: false, payment_status: 'rejected' },
+      },
+      {
+        onSuccess: () => toast.success('Payment rejected.'),
+        onError: () => toast.error('Failed to reject payment.'),
+      }
+    );
+  };
+
+  if (user.is_payment_verified) {
+    return (
+      <Button type="button" variant="outline" size="sm" disabled={pending} onClick={reject}>
+        Reject
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex gap-2">
+      <Button type="button" size="sm" disabled={pending} onClick={approve}>
+        Approve
+      </Button>
+      <Button type="button" variant="outline" size="sm" disabled={pending} onClick={reject}>
+        Reject
+      </Button>
+    </div>
   );
 }
 
@@ -73,6 +130,11 @@ export default function UsersPage() {
             id: 'subscription',
             header: 'Subscription ends',
             cell: (row) => row.subscription_end_date ?? '—',
+          },
+          {
+            id: 'actions',
+            header: 'Payment actions',
+            cell: (row) => <PaymentActions user={row} />,
           },
         ]}
         data={users}

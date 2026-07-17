@@ -28,6 +28,8 @@ import TransfersPage from '@/pages/TransfersPage';
 import UsersPage from '@/pages/UsersPage';
 import TenantsPage from '@/pages/TenantsPage';
 import SettingsPage from '@/pages/SettingsPage';
+import GameSettingsPage from '@/pages/GameSettingsPage';
+import PaymentSettingsPage from '@/pages/PaymentSettingsPage';
 import VotingListPage from '@/pages/VotingListPage';
 import VotingFormPage from '@/pages/VotingFormPage';
 
@@ -71,6 +73,8 @@ export default function App() {
           <Route path="sponsors/new" element={<SponsorFormPage />} />
           <Route path="sponsors/:id" element={<SponsorFormPage />} />
           <Route path="boundary-labels" element={<BoundaryLabelsPage />} />
+          <Route path="game-settings" element={<GameSettingsPage />} />
+          <Route path="payment-settings" element={<PaymentSettingsPage />} />
           <Route path="verification" element={<VerificationPage />} />
           <Route path="transfers" element={<TransfersPage />} />
           <Route path="users" element={<UsersPage />} />

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getGameConfig, updateGameConfig, type BoundaryLabelsUpdate } from '@/api/gameConfig';
+import { getGameConfig, updateGameConfig, type GameConfigUpdate } from '@/api/gameConfig';
 import { useTenant } from '@/contexts/TenantContext';
 
 export function useGameConfig() {
@@ -17,7 +17,7 @@ export function useUpdateGameConfig() {
   const { activeTenantId } = useTenant();
 
   return useMutation({
-    mutationFn: (data: BoundaryLabelsUpdate) => updateGameConfig(data),
+    mutationFn: (data: GameConfigUpdate) => updateGameConfig(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gameConfig', activeTenantId] });
     },

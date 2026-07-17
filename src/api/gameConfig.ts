@@ -9,12 +9,16 @@ export type GameConfig = {
 
 export type BoundaryLabelsUpdate = Pick<GameConfig, 'four_boundary_label' | 'six_boundary_label'>;
 
+export type GameFeatureTogglesUpdate = Pick<GameConfig, 'is_registration_open' | 'is_voting_open'>;
+
+export type GameConfigUpdate = Partial<GameConfig>;
+
 export async function getGameConfig(): Promise<GameConfig> {
   const response = await apiClient.get<GameConfig>('/game/config/');
   return response.data;
 }
 
-export async function updateGameConfig(data: BoundaryLabelsUpdate): Promise<GameConfig> {
+export async function updateGameConfig(data: GameConfigUpdate): Promise<GameConfig> {
   const response = await apiClient.patch<GameConfig>('/game/config/', data);
   return response.data;
 }

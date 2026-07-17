@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { DataTable } from '@/components/data-table/DataTable';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useTenant } from '@/contexts/TenantContext';
-import { useFixtures } from '@/hooks/useFixtures';
+import { useFixtures, useUpdateFixture } from '@/hooks/useFixtures';
+import type { Fixture } from '@/api/fixtures';
 
 const PAGE_SIZE = 20;
 
@@ -23,10 +26,13 @@ function matchLabel(fixture: { opponent_a: { team_name: string }; opponent_b: { 
 export default function FixturesPage() {
   const { activeTenant } = useTenant();
   const [pageIndex, setPageIndex] = useState(0);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [targetRow, setTargetRow] = useState<Fixture | null>(null);
   const { data, isLoading, isError } = useFixtures({
     limit: PAGE_SIZE,
     offset: pageIndex * PAGE_SIZE,
   });
+  const updateFixture = useUpdateFixture();
 
   if (!activeTenant) {
     return (
@@ -59,9 +65,17 @@ export default function FixturesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Fixtures</h1>
-        <p className="text-sm text-muted-foreground">{activeTenant.name} · scheduled matches</p>
+      <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Fixtures</h1>
+          <p className="text-sm text-muted-foreground">{activeTenant.name} · scheduled matches</p>
+        </div>
+        <Link
+          to="/dashboard/fixtures/new"
+          className="inline-flex items-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white"
+        >
+          New Fixture
+        </Link>
       </div>
 
       <DataTable
@@ -78,6 +92,29 @@ export default function FixturesPage() {
             header: 'Scheduled',
             cell: (row) => formatDateTime(row.time),
           },
+          {
+            id: 'actions',
+            header: 'Actions',
+            cell: (row) => (
+              <>
+                <Link
+                  to={`/dashboard/fixtures/${row.id}`}
+                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D]"
+                >
+                  Edit
+                </Link>
+                {(row.status === 'Upcoming' || row.status === 'Live') ? (
+                  <button
+                    type="button"
+                    onClick={() => { setTargetRow(row); setConfirmOpen(true); }}
+                    className="ml-2 inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-red-600"
+                  >
+                    Cancel match
+                  </button>
+                ) : null}
+              </>
+            ),
+          },
         ]}
         data={fixtures}
         loading={isLoading}
@@ -86,6 +123,22 @@ export default function FixturesPage() {
           data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined
         }
         onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
+      />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Cancel this fixture?"
+        description="This marks the match as Cancelled. It will no longer appear as scheduled, but no data is deleted — you can reverse this later by editing the fixture's status back."
+        confirmLabel="Cancel match"
+        isLoading={updateFixture.isPending}
+        onConfirm={() => {
+          if (!targetRow) return;
+          updateFixture.mutate(
+            { id: targetRow.id, payload: { status: 'Cancelled' } },
+            { onSuccess: () => setConfirmOpen(false) }
+          );
+        }}
       />
     </div>
   );

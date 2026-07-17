@@ -104,6 +104,7 @@ export type UpdateFixturePayload = {
   ground?: string;
   over_limit?: number;
   bowling_limit?: number;
+  status?: string;
 };
 
 export async function getFixture(id: string): Promise<FixtureDetail> {

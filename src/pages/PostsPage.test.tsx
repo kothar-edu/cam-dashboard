@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import PostsPage from './PostsPage';
 
 vi.mock('@/hooks/usePosts', () => ({
@@ -25,6 +26,10 @@ vi.mock('@/hooks/usePosts', () => ({
     isLoading: false,
     isError: false,
   }),
+  useDeletePost: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+  }),
 }));
 
 vi.mock('@/contexts/TenantContext', () => ({
@@ -39,7 +44,9 @@ describe('PostsPage', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
-        <PostsPage />
+        <MemoryRouter>
+          <PostsPage />
+        </MemoryRouter>
       </QueryClientProvider>
     );
 

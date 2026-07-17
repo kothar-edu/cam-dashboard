@@ -51,3 +51,7 @@ export async function updatePost(id: string, payload: PostPayload): Promise<Post
   const { data } = await newsfeedClient.patch<PostDetail>(`/post/${id}/`, payload);
   return data;
 }
+
+export async function deletePost(id: string): Promise<void> {
+  await newsfeedClient.delete(`/post/${id}/`);
+}

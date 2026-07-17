@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createPost, getPost, listPosts, updatePost, type PostPayload } from '@/api/posts';
+import { createPost, deletePost, getPost, listPosts, updatePost, type PostPayload } from '@/api/posts';
 import type { ListParams } from '@/api/pagination';
 import { useTenant } from '@/contexts/TenantContext';
 
@@ -40,5 +40,14 @@ export function useUpdatePost() {
       qc.invalidateQueries({ queryKey: ['posts', activeTenantId] });
       qc.invalidateQueries({ queryKey: ['post', activeTenantId, variables.id] });
     },
+  });
+}
+
+export function useDeletePost() {
+  const qc = useQueryClient();
+  const { activeTenantId } = useTenant();
+  return useMutation({
+    mutationFn: (id: string) => deletePost(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['posts', activeTenantId] }),
   });
 }

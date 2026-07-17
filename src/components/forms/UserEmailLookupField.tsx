@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { isAxiosError } from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLookupUserByEmailMutation } from '@/hooks/useUserLookup';
@@ -7,6 +8,22 @@ type UserEmailLookupFieldProps = {
   onResolved: (user: { id: string; email: string; full_name: string }) => void;
   onClear?: () => void;
 };
+
+function lookupErrorMessage(error: unknown): string {
+  if (isAxiosError(error)) {
+    const status = error.response?.status;
+    if (status === 403) {
+      return 'You do not have permission to look up users.';
+    }
+    if (status === 404) {
+      return 'No user found for that email.';
+    }
+    if (status && status >= 500) {
+      return 'Lookup failed due to a server error. Please try again.';
+    }
+  }
+  return 'Lookup failed. Please try again.';
+}
 
 export function UserEmailLookupField({ onResolved, onClear }: UserEmailLookupFieldProps) {
   const [email, setEmail] = useState('');
@@ -20,9 +37,9 @@ export function UserEmailLookupField({ onResolved, onClear }: UserEmailLookupFie
         onResolved(user);
         setMessage(`Found ${user.full_name} (${user.email})`);
       },
-      onError: () => {
+      onError: (error) => {
         onClear?.();
-        setMessage('No user found for that email.');
+        setMessage(lookupErrorMessage(error));
       },
     });
   };

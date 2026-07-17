@@ -1,6 +1,12 @@
 import { apiClient } from './client';
 import { ListParams, Paginated, parsePaginated } from './pagination';
 
+export type TeamMaintainer = {
+  id: string;
+  email: string;
+  full_name: string;
+};
+
 export type Team = {
   id: string;
   name: string;
@@ -8,7 +14,7 @@ export type Team = {
   logo: string | null;
   total_players: number;
   is_active: boolean;
-  maintainer?: string | null;
+  maintainer?: TeamMaintainer | null;
 };
 
 export async function listTeams(params?: ListParams): Promise<Paginated<Team>> {

@@ -29,12 +29,17 @@ export default function TeamDetailPage() {
   const [verificationFeeAmount, setVerificationFeeAmount] = useState('');
   const [requirePaymentVerification, setRequirePaymentVerification] = useState(true);
   const [maintainerId, setMaintainerId] = useState<string | null>(null);
+  const [maintainerLabel, setMaintainerLabel] = useState<string | null>(null);
 
   useEffect(() => {
     if (teamQuery.data) {
       setName(teamQuery.data.name);
       setCode(teamQuery.data.code);
-      setMaintainerId(teamQuery.data.maintainer ?? null);
+      const maintainer = teamQuery.data.maintainer;
+      setMaintainerId(maintainer?.id ?? null);
+      setMaintainerLabel(
+        maintainer ? `${maintainer.full_name} (${maintainer.email})` : null
+      );
     }
   }, [teamQuery.data]);
 
@@ -139,9 +144,22 @@ export default function TeamDetailPage() {
                 Assign a registered organization member as maintainer. They can manage roster join requests and edit
                 team name/logo.
               </p>
+              {maintainerLabel ? (
+                <p className="text-sm text-[#12233D]">
+                  Current maintainer: <span className="font-medium">{maintainerLabel}</span>
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">No maintainer assigned yet.</p>
+              )}
               <UserEmailLookupField
-                onResolved={(user) => setMaintainerId(user.id)}
-                onClear={() => setMaintainerId(null)}
+                onResolved={(user) => {
+                  setMaintainerId(user.id);
+                  setMaintainerLabel(`${user.full_name} (${user.email})`);
+                }}
+                onClear={() => {
+                  setMaintainerId(null);
+                  setMaintainerLabel(null);
+                }}
               />
               <Button type="submit" disabled={updateMutation.isPending || !maintainerId}>
                 {updateMutation.isPending ? 'Saving…' : 'Reassign maintainer'}

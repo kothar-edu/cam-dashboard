@@ -23,6 +23,7 @@ export type PostDetail = Post & {
   description: string;
   post_type: string;
   status: string;
+  is_public: boolean;
   images?: Array<{ image_url: string; is_cover: boolean }>;
 };
 
@@ -33,6 +34,7 @@ export type PostPayload = {
   post_date: string;
   post_time: string;
   status: string;
+  is_public: boolean;
   tags?: string[];
   images?: Array<{ image_url: string; is_cover: boolean }>;
 };

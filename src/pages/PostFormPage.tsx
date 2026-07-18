@@ -23,6 +23,7 @@ export default function PostFormPage() {
   const [postDate, setPostDate] = useState('');
   const [postTime, setPostTime] = useState('12:00:00');
   const [imageUrl, setImageUrl] = useState('');
+  const [isPublic, setIsPublic] = useState(true);
 
   useEffect(() => {
     if (postQuery.data) {
@@ -33,6 +34,7 @@ export default function PostFormPage() {
       setPostDate(postQuery.data.post_date ?? '');
       setPostTime(postQuery.data.post_time ?? '12:00:00');
       setImageUrl(postQuery.data.images?.[0]?.image_url ?? postQuery.data.cover_image ?? '');
+      setIsPublic(postQuery.data.is_public ?? true);
     }
   }, [postQuery.data]);
 
@@ -43,6 +45,7 @@ export default function PostFormPage() {
     post_date: postDate || new Date().toISOString().slice(0, 10),
     post_time: postTime,
     status,
+    is_public: isPublic,
     tags: [] as string[],
     images: imageUrl ? [{ image_url: imageUrl, is_cover: true }] : undefined,
   });
@@ -100,6 +103,12 @@ export default function PostFormPage() {
               }))}
               searchable={false}
             />
+            {isEdit ? (
+              <label className="flex items-center gap-2 text-sm text-[#12233D]">
+                <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
+                Public post (visible to guests and non-members)
+              </label>
+            ) : null}
             <Button type="submit" disabled={pending}>
               {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create post'}
             </Button>

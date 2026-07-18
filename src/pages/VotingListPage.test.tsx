@@ -17,7 +17,7 @@ vi.mock('@/hooks/useVoting', () => ({
       count: 1,
       results: [
         {
-          id: 1,
+          id: 'a7096220-0000-4000-8000-000000000001',
           tournament: { id: 't1', name: 'Premier League', logo: null, start: '', total_teams: 4 },
           player: [{ id: 'p1', full_name: 'Player One' }],
         },

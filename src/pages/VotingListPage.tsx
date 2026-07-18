@@ -68,10 +68,6 @@ export default function VotingListPage() {
               loading={isLoading}
               emptyMessage="No voting nominations yet."
             />
-            <p className="text-sm text-muted-foreground">
-              Admin manages nominee lists via this dashboard. End-user voting happens in the mobile app using the
-              newsfeed voting API — not the legacy mock poll model.
-            </p>
           </>
         )}
       </div>

@@ -29,7 +29,7 @@ export function useNomineeVotingPlayers(params?: ListParams & { tournament?: str
   });
 }
 
-export function useNomineeVotingPlayer(id?: number) {
+export function useNomineeVotingPlayer(id?: string) {
   const { activeTenantId } = useTenant();
   return useQuery({
     queryKey: ['nominee-voting-player', activeTenantId, id],
@@ -54,7 +54,7 @@ export function useUpdateNomineeVotingPlayer() {
   const qc = useQueryClient();
   const { activeTenantId } = useTenant();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: NomineeVotingPlayerPayload }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: NomineeVotingPlayerPayload }) =>
       updateNomineeVotingPlayer(id, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['voting-polls', activeTenantId] });
@@ -67,7 +67,7 @@ export function useDeleteNomineeVotingPlayer() {
   const qc = useQueryClient();
   const { activeTenantId } = useTenant();
   return useMutation({
-    mutationFn: (id: number) => deleteNomineeVotingPlayer(id),
+    mutationFn: (id: string) => deleteNomineeVotingPlayer(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['voting-polls', activeTenantId] });
       qc.invalidateQueries({ queryKey: ['nominee-voting-players', activeTenantId] });

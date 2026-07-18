@@ -14,7 +14,7 @@ export type VotingPlayerResult = Player & {
 };
 
 export type NomineeVotingPlayer = {
-  id: number;
+  id: string;
   tournament: Tournament;
   player: Player[];
 };
@@ -31,7 +31,7 @@ export async function listVotingPolls(params?: ListParams): Promise<Paginated<Vo
   return parsePaginated(response.data);
 }
 
-export async function getNomineeVotingPlayer(id: number): Promise<NomineeVotingPlayer> {
+export async function getNomineeVotingPlayer(id: string): Promise<NomineeVotingPlayer> {
   const { data } = await apiClient.get<NomineeVotingPlayer>(`/game/nominee-voting-player/${id}/`);
   return data;
 }
@@ -54,7 +54,7 @@ export async function createNomineeVotingPlayer(
 }
 
 export async function updateNomineeVotingPlayer(
-  id: number,
+  id: string,
   payload: NomineeVotingPlayerPayload
 ): Promise<NomineeVotingPlayer> {
   const { data } = await apiClient.patch<NomineeVotingPlayer>(
@@ -64,6 +64,6 @@ export async function updateNomineeVotingPlayer(
   return data;
 }
 
-export async function deleteNomineeVotingPlayer(id: number): Promise<void> {
+export async function deleteNomineeVotingPlayer(id: string): Promise<void> {
   await apiClient.delete(`/game/nominee-voting-player/${id}/`);
 }

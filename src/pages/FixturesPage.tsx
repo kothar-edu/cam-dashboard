@@ -1,13 +1,19 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DataTable } from '@/components/data-table/DataTable';
+import { SearchableSelect } from '@/components/forms/SearchableSelect';
+import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useTenant } from '@/contexts/TenantContext';
 import { useFixtures, useUpdateFixture } from '@/hooks/useFixtures';
+import { useTeams } from '@/hooks/useTeams';
 import type { Fixture } from '@/api/fixtures';
 
 const PAGE_SIZE = 20;
+const STATUS_TABS = ['Live', 'Upcoming', 'Ended'] as const;
+type StatusTab = (typeof STATUS_TABS)[number];
+const ANY_TEAM_VALUE = '__any__';
 
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString(undefined, {
@@ -25,14 +31,48 @@ function matchLabel(fixture: { opponent_a: { team_name: string }; opponent_b: { 
 
 export default function FixturesPage() {
   const { activeTenant } = useTenant();
+  const [status, setStatus] = useState<StatusTab>('Upcoming');
   const [pageIndex, setPageIndex] = useState(0);
+  const [teamAId, setTeamAId] = useState('');
+  const [teamBId, setTeamBId] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [targetRow, setTargetRow] = useState<Fixture | null>(null);
+
+  const teamsQuery = useTeams();
+  const teamOptions = (teamsQuery.data?.results ?? []).map((team) => ({
+    value: team.id,
+    label: team.name,
+  }));
+
   const { data, isLoading, isError } = useFixtures({
     limit: PAGE_SIZE,
     offset: pageIndex * PAGE_SIZE,
+    status,
+    ...(teamAId ? { team: teamAId } : {}),
+    ...(teamBId ? { opponent_team: teamBId } : {}),
   });
   const updateFixture = useUpdateFixture();
+
+  const changeStatus = (next: StatusTab) => {
+    setStatus(next);
+    setPageIndex(0);
+  };
+
+  const changeTeamA = (value: string) => {
+    setTeamAId(value === ANY_TEAM_VALUE ? '' : value);
+    setPageIndex(0);
+  };
+
+  const changeTeamB = (value: string) => {
+    setTeamBId(value === ANY_TEAM_VALUE ? '' : value);
+    setPageIndex(0);
+  };
+
+  const clearTeamFilters = () => {
+    setTeamAId('');
+    setTeamBId('');
+    setPageIndex(0);
+  };
 
   if (!activeTenant) {
     return (
@@ -62,6 +102,7 @@ export default function FixturesPage() {
   }
 
   const fixtures = data?.results ?? [];
+  const hasTeamFilter = Boolean(teamAId || teamBId);
 
   return (
     <div className="space-y-6">
@@ -76,6 +117,43 @@ export default function FixturesPage() {
         >
           New Fixture
         </Link>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {STATUS_TABS.map((tab) => (
+          <Button
+            key={tab}
+            type="button"
+            variant={status === tab ? 'primary' : 'outline'}
+            onClick={() => changeStatus(tab)}
+          >
+            {tab}
+          </Button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 rounded-lg border bg-white p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+        <SearchableSelect
+          label="Team A"
+          value={teamAId || ANY_TEAM_VALUE}
+          onChange={changeTeamA}
+          options={[{ value: ANY_TEAM_VALUE, label: 'Any team' }, ...teamOptions]}
+          placeholder="Any team"
+          searchable
+        />
+        <SearchableSelect
+          label="Team B"
+          value={teamBId || ANY_TEAM_VALUE}
+          onChange={changeTeamB}
+          options={[{ value: ANY_TEAM_VALUE, label: 'Any team' }, ...teamOptions]}
+          placeholder="Any team"
+          searchable
+        />
+        {hasTeamFilter ? (
+          <Button type="button" variant="outline" onClick={clearTeamFilters}>
+            Clear team filter
+          </Button>
+        ) : null}
       </div>
 
       <DataTable
@@ -118,7 +196,11 @@ export default function FixturesPage() {
         ]}
         data={fixtures}
         loading={isLoading}
-        emptyMessage="No fixtures found."
+        emptyMessage={
+          hasTeamFilter
+            ? `No ${status.toLowerCase()} fixtures found for the selected team(s).`
+            : `No ${status.toLowerCase()} fixtures found.`
+        }
         pagination={
           data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined
         }

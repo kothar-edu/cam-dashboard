@@ -72,7 +72,8 @@ export default function GameSettingsPage() {
               <div>
                 <p className="text-sm font-medium text-[#12233D]">Voting open</p>
                 <p className="text-xs text-muted-foreground">
-                  Show voting banner and allow users to cast votes.
+                  Show the voting banner in the mobile app and allow ballots only when both this switch and an
+                  individual poll are open.
                 </p>
               </div>
               <input

@@ -27,6 +27,7 @@ export default function VotingFormPage() {
 
   const [tournamentId, setTournamentId] = useState('');
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
+  const [isVotingOpen, setIsVotingOpen] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function VotingFormPage() {
     }
     setTournamentId(String(nominationQuery.data.tournament.id));
     setSelectedPlayers(nominationQuery.data.player.map((player) => String(player.id)));
+    setIsVotingOpen(nominationQuery.data.is_voting_open);
   }, [nominationQuery.data]);
 
   const tournamentOptions = useMemo(() => {
@@ -84,7 +86,11 @@ export default function VotingFormPage() {
       return;
     }
 
-    const payload = { tournament: tournamentId, player: selectedPlayers };
+    const payload = {
+      tournament: tournamentId,
+      player: selectedPlayers,
+      is_voting_open: isVotingOpen,
+    };
 
     if (isEdit && id) {
       updateMutation.mutate(
@@ -152,6 +158,19 @@ export default function VotingFormPage() {
                 Tournament cannot be changed after a nomination is created.
               </p>
             ) : null}
+            <label className="flex items-center justify-between gap-4 rounded-md border p-4">
+              <div>
+                <p className="text-sm font-medium text-[#12233D]">Poll voting open</p>
+                <p className="text-xs text-muted-foreground">
+                  When enabled, this poll appears on the mobile Vote screen (if organization voting is also open).
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={isVotingOpen}
+                onChange={(event) => setIsVotingOpen(event.target.checked)}
+              />
+            </label>
             <div className="space-y-2">
               <p className="text-sm font-medium text-[#12233D]">Nominated players</p>
               {fieldErrors.player ? (

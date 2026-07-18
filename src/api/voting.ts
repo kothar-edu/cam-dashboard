@@ -17,11 +17,13 @@ export type NomineeVotingPlayer = {
   id: string;
   tournament: Tournament;
   player: Player[];
+  is_voting_open: boolean;
 };
 
 export type NomineeVotingPlayerPayload = {
-  tournament: string;
-  player: string[];
+  tournament?: string;
+  player?: string[];
+  is_voting_open?: boolean;
 };
 
 export async function listVotingPolls(params?: ListParams): Promise<Paginated<VotingPoll>> {

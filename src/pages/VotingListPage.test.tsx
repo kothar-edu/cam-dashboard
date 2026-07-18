@@ -18,6 +18,7 @@ vi.mock('@/hooks/useVoting', () => ({
       results: [
         {
           id: 'a7096220-0000-4000-8000-000000000001',
+          is_voting_open: true,
           tournament: { id: 't1', name: 'Premier League', logo: null, start: '', total_teams: 4 },
           player: [{ id: 'p1', full_name: 'Player One' }],
         },
@@ -39,6 +40,10 @@ vi.mock('@/hooks/useVoting', () => ({
     isLoading: false,
     isError: false,
   }),
+  useUpdateNomineeVotingPlayer: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+  }),
 }));
 
 describe('VotingListPage', () => {
@@ -56,5 +61,7 @@ describe('VotingListPage', () => {
     expect(screen.getByText('Premier League')).toBeInTheDocument();
     expect(screen.getByText('Player One (12)')).toBeInTheDocument();
     expect(screen.getByText('Create nomination')).toBeInTheDocument();
+    expect(screen.getByText('Open')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Close voting' })).toBeInTheDocument();
   });
 });

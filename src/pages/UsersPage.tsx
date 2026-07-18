@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { DataTable } from '@/components/data-table/DataTable';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useUpdateUserPayment } from '@/hooks/useUpdateUserPayment';
 import { useUsers } from '@/hooks/useUsers';
 import type { DashboardUser } from '@/api/users';
 
 const PAGE_SIZE = 20;
+const SEARCH_DEBOUNCE_MS = 300;
 
 function VerifiedCell({ verified }: { verified: boolean }) {
   return (
@@ -72,9 +75,21 @@ function PaymentActions({ user }: { user: DashboardUser }) {
 
 export default function UsersPage() {
   const [pageIndex, setPageIndex] = useState(0);
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearch(searchInput.trim());
+      setPageIndex(0);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timeout);
+  }, [searchInput]);
+
   const { data, isLoading, isError } = useUsers({
     limit: PAGE_SIZE,
     offset: pageIndex * PAGE_SIZE,
+    ...(search ? { search } : {}),
   });
 
   if (isLoading && !data) {
@@ -99,8 +114,17 @@ export default function UsersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Users</h1>
-        <p className="text-sm text-muted-foreground">Global user directory (not tenant-scoped)</p>
+        <p className="text-sm text-muted-foreground">
+          Global user directory. Tenant admins only see users in the tenants they administer.
+        </p>
       </div>
+
+      <Input
+        placeholder="Search by name, email, or phone…"
+        value={searchInput}
+        onChange={(e) => setSearchInput(e.target.value)}
+        className="max-w-sm"
+      />
 
       <DataTable
         columns={[
@@ -135,6 +159,18 @@ export default function UsersPage() {
             id: 'actions',
             header: 'Payment actions',
             cell: (row) => <PaymentActions user={row} />,
+          },
+          {
+            id: 'edit',
+            header: '',
+            cell: (row) => (
+              <Link
+                to={`/dashboard/users/${row.id}`}
+                className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D]"
+              >
+                Edit
+              </Link>
+            ),
           },
         ]}
         data={users}

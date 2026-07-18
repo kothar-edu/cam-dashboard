@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import UsersPage from './UsersPage';
 
 vi.mock('@/hooks/useUsers', () => ({
@@ -33,7 +34,9 @@ describe('UsersPage', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
-        <UsersPage />
+        <MemoryRouter>
+          <UsersPage />
+        </MemoryRouter>
       </QueryClientProvider>
     );
 
@@ -41,5 +44,9 @@ describe('UsersPage', () => {
     expect(screen.getByText('Anish Shrestha')).toBeInTheDocument();
     expect(screen.getByText('anish@example.com')).toBeInTheDocument();
     expect(screen.getByText('verified')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Edit' })).toHaveAttribute(
+      'href',
+      '/dashboard/users/u1'
+    );
   });
 });

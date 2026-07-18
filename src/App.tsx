@@ -26,6 +26,7 @@ import BoundaryLabelsPage from '@/pages/BoundaryLabelsPage';
 import VerificationPage from '@/pages/VerificationPage';
 import TransfersPage from '@/pages/TransfersPage';
 import UsersPage from '@/pages/UsersPage';
+import UserFormPage from '@/pages/UserFormPage';
 import TenantsPage from '@/pages/TenantsPage';
 import SettingsPage from '@/pages/SettingsPage';
 import GameSettingsPage from '@/pages/GameSettingsPage';
@@ -78,6 +79,7 @@ export default function App() {
           <Route path="verification" element={<VerificationPage />} />
           <Route path="transfers" element={<TransfersPage />} />
           <Route path="users" element={<UsersPage />} />
+          <Route path="users/:id" element={<UserFormPage />} />
           <Route path="tenants" element={<TenantsPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="voting" element={<VotingListPage />} />

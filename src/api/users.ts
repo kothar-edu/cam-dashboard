@@ -15,6 +15,18 @@ export type DashboardUser = {
   subscription_end_date: string | null;
 };
 
+export type UserDetail = {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  gender: string;
+  roles: string[];
+  payment_status: string;
+  subscription_end_date: string | null;
+  is_payment_verified: boolean;
+};
+
 export type UserLookup = {
   id: string;
   email: string;
@@ -43,5 +55,25 @@ export async function updateUserPayment(
   payload: UpdateUserPaymentPayload
 ): Promise<DashboardUser> {
   const { data } = await apiClient.patch<DashboardUser>(`/user/${userId}/`, payload);
+  return data;
+}
+
+export async function getUser(userId: string): Promise<UserDetail> {
+  const { data } = await apiClient.get<UserDetail>(`/user/${userId}/`);
+  return data;
+}
+
+export type UpdateUserPayload = {
+  full_name?: string;
+  phone?: string;
+  gender?: string;
+  payment_status?: string;
+  subscription_end_date?: string | null;
+  is_payment_verified?: boolean;
+  groups?: number[];
+};
+
+export async function updateUser(userId: string, payload: UpdateUserPayload): Promise<UserDetail> {
+  const { data } = await apiClient.patch<UserDetail>(`/user/${userId}/`, payload);
   return data;
 }

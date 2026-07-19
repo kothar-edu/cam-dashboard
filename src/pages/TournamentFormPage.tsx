@@ -5,8 +5,13 @@ import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
+import {
+  LivestreamOverlayFields,
+  type LivestreamOverlayFormValues,
+} from '@/components/forms/LivestreamOverlayFields';
 import { useCreateTournament, useTournament, useUpdateTournament, useAddTeamsToTournament } from '@/hooks/useTournaments';
 import { useTeams } from '@/hooks/useTeams';
+import { updateTournamentLivestreamOverlay } from '@/api/tournaments';
 
 function toLocalInput(value: string) {
   const date = new Date(value);
@@ -30,6 +35,13 @@ export default function TournamentFormPage() {
   const [teamSize, setTeamSize] = useState('11');
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [isPublic, setIsPublic] = useState(true);
+  const [overlayValues, setOverlayValues] = useState<LivestreamOverlayFormValues>({
+    sponsorText: '',
+    topLeftFile: null,
+    topRightFile: null,
+    clearTopLeft: false,
+    clearTopRight: false,
+  });
 
   useEffect(() => {
     if (tournamentQuery.data) {
@@ -39,10 +51,17 @@ export default function TournamentFormPage() {
       setTeamSize(String(tournamentQuery.data.team_size ?? 11));
       setSelectedTeams(tournamentQuery.data.opponents?.map((o) => o.team_id) ?? []);
       setIsPublic(tournamentQuery.data.is_public ?? true);
+      setOverlayValues({
+        sponsorText: tournamentQuery.data.livestream_sponsor_text ?? '',
+        topLeftFile: null,
+        topRightFile: null,
+        clearTopLeft: false,
+        clearTopRight: false,
+      });
     }
   }, [tournamentQuery.data]);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const payload = {
       name: name.trim(),
@@ -51,6 +70,25 @@ export default function TournamentFormPage() {
       team_size: Number(teamSize),
       teams: selectedTeams,
       is_public: isPublic,
+      livestream_sponsor_text: overlayValues.sponsorText.trim(),
+    };
+    const saveOverlay = async (tournamentId: string) => {
+      const hasOverlayChanges =
+        overlayValues.topLeftFile ||
+        overlayValues.topRightFile ||
+        overlayValues.clearTopLeft ||
+        overlayValues.clearTopRight ||
+        overlayValues.sponsorText.trim() !== (tournamentQuery.data?.livestream_sponsor_text ?? '');
+      if (!hasOverlayChanges) {
+        return;
+      }
+      await updateTournamentLivestreamOverlay(tournamentId, {
+        sponsorText: overlayValues.sponsorText,
+        topLeftFile: overlayValues.topLeftFile,
+        topRightFile: overlayValues.topRightFile,
+        clearTopLeft: overlayValues.clearTopLeft,
+        clearTopRight: overlayValues.clearTopRight,
+      });
     };
     if (isEdit && id) {
       const existingTeamIds = tournamentQuery.data?.opponents?.map((o) => o.team_id) ?? [];
@@ -64,24 +102,39 @@ export default function TournamentFormPage() {
             end: payload.end,
             team_size: payload.team_size,
             is_public: isPublic,
+            livestream_sponsor_text: payload.livestream_sponsor_text,
           },
         },
         {
-          onSuccess: () => {
-            if (newTeamIds.length === 0) {
-              navigate('/dashboard/tournaments');
-              return;
+          onSuccess: async () => {
+            try {
+              await saveOverlay(id);
+              if (newTeamIds.length === 0) {
+                navigate('/dashboard/tournaments');
+                return;
+              }
+              addTeamsMutation.mutate(
+                { tournamentId: id, teamIds: newTeamIds },
+                { onSuccess: () => navigate('/dashboard/tournaments') }
+              );
+            } catch {
+              // overlay save failed but tournament saved
             }
-            addTeamsMutation.mutate(
-              { tournamentId: id, teamIds: newTeamIds },
-              { onSuccess: () => navigate('/dashboard/tournaments') }
-            );
           },
         }
       );
       return;
     }
-    createMutation.mutate(payload, { onSuccess: () => navigate('/dashboard/tournaments') });
+    createMutation.mutate(payload, {
+      onSuccess: async (created) => {
+        try {
+          await saveOverlay(created.id);
+        } catch {
+          // overlay save failed but tournament created
+        }
+        navigate('/dashboard/tournaments');
+      },
+    });
   };
 
   const toggleTeam = (teamId: string) => {
@@ -146,6 +199,14 @@ export default function TournamentFormPage() {
               <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
               Public tournament (visible to guests and non-members)
             </label>
+            <LivestreamOverlayFields
+              description="Default OBS overlay branding for all matches in this tournament. Matches can override these settings individually."
+              values={overlayValues}
+              onChange={setOverlayValues}
+              topLeftPreview={tournamentQuery.data?.livestream_top_left_image ?? null}
+              topRightPreview={tournamentQuery.data?.livestream_top_right_image ?? null}
+              disabled={pending}
+            />
             {failed ? <p className="text-sm text-red-600">Failed to save tournament.</p> : null}
             <Button type="submit" disabled={pending || selectedTeams.length < 2}>
               {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create tournament'}

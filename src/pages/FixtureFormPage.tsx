@@ -10,8 +10,13 @@ import { TenantRequired } from '@/components/forms/TenantRequired';
 import { useCreateFixture, useFixture, useUpdateFixture } from '@/hooks/useFixtures';
 import { useTeams } from '@/hooks/useTeams';
 import { useCreateTournamentFixture, useTournament, useTournaments } from '@/hooks/useTournaments';
+import { updateMatchLivestreamOverlay } from '@/api/tournaments';
 import { getApiErrorMessage, parseApiFieldErrors, type FieldErrors } from '@/lib/api-errors';
 import { ROUND_CHOICES } from '@/lib/game-stages';
+import {
+  LivestreamOverlayFields,
+  type LivestreamOverlayFormValues,
+} from '@/components/forms/LivestreamOverlayFields';
 
 function toLocalInput(value: string) {
   const date = new Date(value);
@@ -42,6 +47,14 @@ export default function FixtureFormPage() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [isPublic, setIsPublic] = useState(true);
   const [liveStreamUrl, setLiveStreamUrl] = useState('');
+  const [overlayCustom, setOverlayCustom] = useState(false);
+  const [overlayValues, setOverlayValues] = useState<LivestreamOverlayFormValues>({
+    sponsorText: '',
+    topLeftFile: null,
+    topRightFile: null,
+    clearTopLeft: false,
+    clearTopRight: false,
+  });
 
   const tournamentDetailQuery = useTournament(tournamentId || undefined);
   const opponents = tournamentDetailQuery.data?.opponents ?? [];
@@ -69,6 +82,14 @@ export default function FixtureFormPage() {
       setRound(fixtureQuery.data.round ?? '');
       setIsPublic(fixtureQuery.data.is_public ?? true);
       setLiveStreamUrl(fixtureQuery.data.live_stream_url ?? '');
+      setOverlayCustom(fixtureQuery.data.livestream_overlay_custom ?? false);
+      setOverlayValues({
+        sponsorText: fixtureQuery.data.livestream_sponsor_text ?? '',
+        topLeftFile: null,
+        topRightFile: null,
+        clearTopLeft: false,
+        clearTopRight: false,
+      });
     }
   }, [fixtureQuery.data]);
 
@@ -101,10 +122,32 @@ export default function FixtureFormPage() {
             round,
             is_public: isPublic,
             live_stream_url: liveStreamUrl.trim() || null,
+            livestream_overlay_custom: overlayCustom,
+            livestream_sponsor_text: overlayCustom ? overlayValues.sponsorText.trim() : undefined,
           },
         },
         {
-          onSuccess: () => {
+          onSuccess: async () => {
+            try {
+              const hasOverlayUpload =
+                overlayCustom &&
+                (overlayValues.topLeftFile ||
+                  overlayValues.topRightFile ||
+                  overlayValues.clearTopLeft ||
+                  overlayValues.clearTopRight);
+              if (hasOverlayUpload || overlayCustom !== (fixtureQuery.data?.livestream_overlay_custom ?? false)) {
+                await updateMatchLivestreamOverlay(id, {
+                  overlayCustom,
+                  sponsorText: overlayValues.sponsorText,
+                  topLeftFile: overlayValues.topLeftFile,
+                  topRightFile: overlayValues.topRightFile,
+                  clearTopLeft: overlayValues.clearTopLeft,
+                  clearTopRight: overlayValues.clearTopRight,
+                });
+              }
+            } catch {
+              // overlay save failed but fixture saved
+            }
             toast.success('Fixture updated');
             navigate('/dashboard/fixtures');
           },
@@ -159,6 +202,7 @@ export default function FixtureFormPage() {
     createMutation.isPending || updateMutation.isPending || createTournamentFixtureMutation.isPending;
   const teams = teamsQuery.data?.results ?? [];
   const tournaments = tournamentsQuery.data?.results ?? [];
+  const tournamentDefaults = fixtureQuery.data?.tournament;
 
   const tournamentOptions = [
     { value: TOURNAMENT_NONE_VALUE, label: 'None — standalone/custom match' },
@@ -338,6 +382,41 @@ export default function FixtureFormPage() {
                 error={fieldErrors.live_stream_url}
                 placeholder="https://www.youtube.com/watch?v=..."
               />
+            ) : null}
+            {isEdit ? (
+              <section className="space-y-3 rounded-lg border bg-[#12233D]/[0.03] p-4">
+                <label className="flex items-center gap-2 text-sm font-medium text-[#12233D]">
+                  <input
+                    type="checkbox"
+                    checked={overlayCustom}
+                    onChange={(event) => setOverlayCustom(event.target.checked)}
+                  />
+                  Use custom livestream overlay for this match
+                </label>
+                {overlayCustom ? (
+                  <LivestreamOverlayFields
+                    title="Match overlay"
+                    description="These settings replace the tournament defaults for this match only."
+                    values={overlayValues}
+                    onChange={setOverlayValues}
+                    topLeftPreview={fixtureQuery.data?.livestream_top_left_image ?? null}
+                    topRightPreview={fixtureQuery.data?.livestream_top_right_image ?? null}
+                    disabled={pending}
+                  />
+                ) : (
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <p>Using tournament defaults:</p>
+                    <ul className="list-disc space-y-1 pl-5">
+                      <li>
+                        Sponsor text:{' '}
+                        {tournamentDefaults?.livestream_sponsor_text?.trim() || 'None'}
+                      </li>
+                      <li>Top-left logo: {tournamentDefaults?.livestream_top_left_image ? 'Set' : 'None'}</li>
+                      <li>Top-right logo: {tournamentDefaults?.livestream_top_right_image ? 'Set' : 'None'}</li>
+                    </ul>
+                  </div>
+                )}
+              </section>
             ) : null}
             <Button type="submit" disabled={pending}>
               {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create fixture'}

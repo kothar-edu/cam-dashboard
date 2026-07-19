@@ -39,6 +39,21 @@ export type FixtureDetail = Fixture & {
   result: string | null;
   lineups_a?: LineupEntry[];
   lineups_b?: LineupEntry[];
+  livestream_overlay_custom?: boolean;
+  livestream_sponsor_text?: string;
+  livestream_top_left_image?: string | null;
+  livestream_top_right_image?: string | null;
+  livestream_overlay?: {
+    sponsor_text: string | null;
+    top_left_image: string | null;
+    top_right_image: string | null;
+    source: 'match' | 'tournament';
+  };
+  tournament?: Tournament & {
+    livestream_sponsor_text?: string;
+    livestream_top_left_image?: string | null;
+    livestream_top_right_image?: string | null;
+  };
 };
 
 export type LineupEntry = {
@@ -109,6 +124,8 @@ export type UpdateFixturePayload = {
   status?: string;
   is_public?: boolean;
   live_stream_url?: string | null;
+  livestream_overlay_custom?: boolean;
+  livestream_sponsor_text?: string;
 };
 
 export async function getFixture(id: string): Promise<FixtureDetail> {

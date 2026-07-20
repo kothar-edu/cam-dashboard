@@ -1,40 +1,47 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { DataTable } from '@/components/data-table/DataTable';
-import { SearchableSelect } from '@/components/forms/SearchableSelect';
-import { Button } from '@/components/ui/button';
-import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { useTenant } from '@/contexts/TenantContext';
-import { useFixtures, useUpdateFixture } from '@/hooks/useFixtures';
-import { useTeams } from '@/hooks/useTeams';
-import type { Fixture } from '@/api/fixtures';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ExternalLink } from "lucide-react";
+import { DataTable } from "@/components/data-table/DataTable";
+import { SearchableSelect } from "@/components/forms/SearchableSelect";
+import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useTenant } from "@/contexts/TenantContext";
+import { useFixtures, useUpdateFixture } from "@/hooks/useFixtures";
+import { useTeams } from "@/hooks/useTeams";
+import type { Fixture } from "@/api/fixtures";
 
 const PAGE_SIZE = 20;
-const STATUS_TABS = ['Live', 'Upcoming', 'Ended'] as const;
+const STATUS_TABS = ["Live", "Upcoming", "Ended"] as const;
 type StatusTab = (typeof STATUS_TABS)[number];
-const ANY_TEAM_VALUE = '__any__';
+const ANY_TEAM_VALUE = "__any__";
+
+const LIVESCORE_ADMIN_URL =
+  import.meta.env.VITE_LIVESCORE_ADMIN_URL || "http://localhost:3000";
 
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
 }
 
-function matchLabel(fixture: { opponent_a: { team_name: string }; opponent_b: { team_name: string } }) {
+function matchLabel(fixture: {
+  opponent_a: { team_name: string };
+  opponent_b: { team_name: string };
+}) {
   return `${fixture.opponent_a.team_name} vs ${fixture.opponent_b.team_name}`;
 }
 
 export default function FixturesPage() {
   const { activeTenant } = useTenant();
-  const [status, setStatus] = useState<StatusTab>('Upcoming');
+  const [status, setStatus] = useState<StatusTab>("Upcoming");
   const [pageIndex, setPageIndex] = useState(0);
-  const [teamAId, setTeamAId] = useState('');
-  const [teamBId, setTeamBId] = useState('');
+  const [teamAId, setTeamAId] = useState("");
+  const [teamBId, setTeamBId] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [targetRow, setTargetRow] = useState<Fixture | null>(null);
 
@@ -59,25 +66,27 @@ export default function FixturesPage() {
   };
 
   const changeTeamA = (value: string) => {
-    setTeamAId(value === ANY_TEAM_VALUE ? '' : value);
+    setTeamAId(value === ANY_TEAM_VALUE ? "" : value);
     setPageIndex(0);
   };
 
   const changeTeamB = (value: string) => {
-    setTeamBId(value === ANY_TEAM_VALUE ? '' : value);
+    setTeamBId(value === ANY_TEAM_VALUE ? "" : value);
     setPageIndex(0);
   };
 
   const clearTeamFilters = () => {
-    setTeamAId('');
-    setTeamBId('');
+    setTeamAId("");
+    setTeamBId("");
     setPageIndex(0);
   };
 
   if (!activeTenant) {
     return (
       <div className="rounded-lg border bg-white p-8 text-center">
-        <h2 className="text-lg font-semibold text-[#12233D]">Select an organization</h2>
+        <h2 className="text-lg font-semibold text-[#12233D]">
+          Select an organization
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Choose a tenant from the header to load fixtures.
         </p>
@@ -108,8 +117,12 @@ export default function FixturesPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Fixtures</h1>
-          <p className="text-sm text-muted-foreground">{activeTenant.name} · scheduled matches</p>
+          <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">
+            Fixtures
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {activeTenant.name} · scheduled matches
+          </p>
         </div>
         <Link
           to="/dashboard/fixtures/new"
@@ -124,7 +137,7 @@ export default function FixturesPage() {
           <Button
             key={tab}
             type="button"
-            variant={status === tab ? 'primary' : 'outline'}
+            variant={status === tab ? "primary" : "outline"}
             onClick={() => changeStatus(tab)}
           >
             {tab}
@@ -137,7 +150,10 @@ export default function FixturesPage() {
           label="Team A"
           value={teamAId || ANY_TEAM_VALUE}
           onChange={changeTeamA}
-          options={[{ value: ANY_TEAM_VALUE, label: 'Any team' }, ...teamOptions]}
+          options={[
+            { value: ANY_TEAM_VALUE, label: "Any team" },
+            ...teamOptions,
+          ]}
           placeholder="Any team"
           searchable
         />
@@ -145,7 +161,10 @@ export default function FixturesPage() {
           label="Team B"
           value={teamBId || ANY_TEAM_VALUE}
           onChange={changeTeamB}
-          options={[{ value: ANY_TEAM_VALUE, label: 'Any team' }, ...teamOptions]}
+          options={[
+            { value: ANY_TEAM_VALUE, label: "Any team" },
+            ...teamOptions,
+          ]}
           placeholder="Any team"
           searchable
         />
@@ -158,33 +177,47 @@ export default function FixturesPage() {
 
       <DataTable
         columns={[
-          { id: 'match', header: 'Match', cell: (row) => matchLabel(row) },
+          { id: "match", header: "Match", cell: (row) => matchLabel(row) },
           {
-            id: 'tournament',
-            header: 'Tournament',
-            cell: (row) => row.tournament?.name ?? '—',
+            id: "tournament",
+            header: "Tournament",
+            cell: (row) => row.tournament?.name ?? "—",
           },
-          { id: 'status', header: 'Status', cell: (row) => row.status },
+          { id: "status", header: "Status", cell: (row) => row.status },
           {
-            id: 'scheduled',
-            header: 'Scheduled',
+            id: "scheduled",
+            header: "Scheduled",
             cell: (row) => formatDateTime(row.time),
           },
           {
-            id: 'actions',
-            header: 'Actions',
+            id: "actions",
+            header: "Actions",
             cell: (row) => (
               <>
+                {(row.status === "Live" || row.status === "Upcoming") && (
+                  <a
+                    href={`${LIVESCORE_ADMIN_URL}/livestream/${row.id}?tenant=${activeTenant?.schema_name}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D] hover:bg-gray-50"
+                    title="OBS overlay"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                )}
                 <Link
                   to={`/dashboard/fixtures/${row.id}`}
-                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D]"
+                  className="ml-2 inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D]"
                 >
                   Edit
                 </Link>
-                {(row.status === 'Upcoming' || row.status === 'Live') ? (
+                {row.status === "Upcoming" || row.status === "Live" ? (
                   <button
                     type="button"
-                    onClick={() => { setTargetRow(row); setConfirmOpen(true); }}
+                    onClick={() => {
+                      setTargetRow(row);
+                      setConfirmOpen(true);
+                    }}
                     className="ml-2 inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-red-600"
                   >
                     Cancel match
@@ -202,7 +235,9 @@ export default function FixturesPage() {
             : `No ${status.toLowerCase()} fixtures found.`
         }
         pagination={
-          data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined
+          data
+            ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count }
+            : undefined
         }
         onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
       />
@@ -217,8 +252,8 @@ export default function FixturesPage() {
         onConfirm={() => {
           if (!targetRow) return;
           updateFixture.mutate(
-            { id: targetRow.id, payload: { status: 'Cancelled' } },
-            { onSuccess: () => setConfirmOpen(false) }
+            { id: targetRow.id, payload: { status: "Cancelled" } },
+            { onSuccess: () => setConfirmOpen(false) },
           );
         }}
       />

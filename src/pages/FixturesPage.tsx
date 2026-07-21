@@ -5,9 +5,15 @@ import { DataTable } from "@/components/data-table/DataTable";
 import { SearchableSelect } from "@/components/forms/SearchableSelect";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ForfeitDialog } from "@/components/ui/forfeit-dialog";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useTenant } from "@/contexts/TenantContext";
-import { useFixtures, useUpdateFixture } from "@/hooks/useFixtures";
+import {
+  useFixtures,
+  useUpdateFixture,
+  useForfeitFixture,
+  useAbandonFixture,
+} from "@/hooks/useFixtures";
 import { useTeams } from "@/hooks/useTeams";
 import type { Fixture } from "@/api/fixtures";
 
@@ -44,6 +50,12 @@ export default function FixturesPage() {
   const [teamBId, setTeamBId] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [targetRow, setTargetRow] = useState<Fixture | null>(null);
+  const [forfeitOpen, setForfeitOpen] = useState(false);
+  const [forfeitRow, setForfeitRow] = useState<Fixture | null>(null);
+  const [forfeitedOpponentId, setForfeitedOpponentId] = useState("");
+  const [pointsToAward, setPointsToAward] = useState(2);
+  const [abandonOpen, setAbandonOpen] = useState(false);
+  const [abandonRow, setAbandonRow] = useState<Fixture | null>(null);
 
   const teamsQuery = useTeams();
   const teamOptions = (teamsQuery.data?.results ?? []).map((team) => ({
@@ -59,6 +71,8 @@ export default function FixturesPage() {
     ...(teamBId ? { opponent_team: teamBId } : {}),
   });
   const updateFixture = useUpdateFixture();
+  const forfeitFixture = useForfeitFixture();
+  const abandonFixture = useAbandonFixture();
 
   const changeStatus = (next: StatusTab) => {
     setStatus(next);
@@ -193,7 +207,7 @@ export default function FixturesPage() {
             id: "actions",
             header: "Actions",
             cell: (row) => (
-              <>
+              <div className="flex items-center gap-2">
                 {(row.status === "Live" || row.status === "Upcoming") && (
                   <a
                     href={`${LIVESCORE_ADMIN_URL}/livestream/${row.id}?tenant=${activeTenant?.schema_name}`}
@@ -207,23 +221,47 @@ export default function FixturesPage() {
                 )}
                 <Link
                   to={`/dashboard/fixtures/${row.id}`}
-                  className="ml-2 inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D]"
+                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D] hover:bg-gray-50"
                 >
                   Edit
                 </Link>
-                {row.status === "Upcoming" || row.status === "Live" ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTargetRow(row);
-                      setConfirmOpen(true);
-                    }}
-                    className="ml-2 inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-red-600"
-                  >
-                    Cancel match
-                  </button>
-                ) : null}
-              </>
+                {(row.status === "Upcoming" || row.status === "Live") && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForfeitRow(row);
+                        setForfeitedOpponentId("");
+                        setPointsToAward(2);
+                        setForfeitOpen(true);
+                      }}
+                      className="inline-flex items-center rounded-md border border-orange-300 bg-orange-50 px-3 py-1 text-sm text-orange-700 hover:bg-orange-100"
+                    >
+                      Forfeit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAbandonRow(row);
+                        setAbandonOpen(true);
+                      }}
+                      className="inline-flex items-center rounded-md border border-yellow-300 bg-yellow-50 px-3 py-1 text-sm text-yellow-700 hover:bg-yellow-100"
+                    >
+                      Abandon
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTargetRow(row);
+                        setConfirmOpen(true);
+                      }}
+                      className="inline-flex items-center rounded-md border border-red-300 bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                )}
+              </div>
             ),
           },
         ]}
@@ -255,6 +293,70 @@ export default function FixturesPage() {
             { id: targetRow.id, payload: { status: "Cancelled" } },
             { onSuccess: () => setConfirmOpen(false) },
           );
+        }}
+      />
+
+      <ForfeitDialog
+        open={forfeitOpen}
+        onOpenChange={(open) => {
+          setForfeitOpen(open);
+          if (!open) {
+            setForfeitRow(null);
+            setForfeitedOpponentId("");
+            setPointsToAward(2);
+          }
+        }}
+        isLoading={forfeitFixture.isPending}
+        onConfirm={() => {
+          if (!forfeitRow || !forfeitedOpponentId) return;
+          forfeitFixture.mutate(
+            {
+              id: forfeitRow.id,
+              payload: {
+                forfeited_opponent_id: forfeitedOpponentId,
+                points_to_award: pointsToAward,
+              },
+            },
+            {
+              onSuccess: () => {
+                setForfeitOpen(false);
+                setForfeitRow(null);
+                setForfeitedOpponentId("");
+                setPointsToAward(2);
+              },
+            },
+          );
+        }}
+        teamAName={forfeitRow?.opponent_a.team_name ?? ""}
+        teamBName={forfeitRow?.opponent_b.team_name ?? ""}
+        teamAId={forfeitRow?.opponent_a.id ?? ""}
+        teamBId={forfeitRow?.opponent_b.id ?? ""}
+        forfeitedOpponentId={forfeitedOpponentId}
+        setForfeitedOpponentId={setForfeitedOpponentId}
+        pointsToAward={pointsToAward}
+        setPointsToAward={setPointsToAward}
+      />
+
+      <ConfirmDialog
+        open={abandonOpen}
+        onOpenChange={(open) => {
+          setAbandonOpen(open);
+          if (!open) {
+            setAbandonRow(null);
+          }
+        }}
+        title="Abandon this match?"
+        description="This marks the match as abandoned with no result. Both teams will receive 1 point (in group stage), lineups will be cleared, and no winner will be declared. This cannot be easily reversed."
+        confirmLabel="Abandon match"
+        isLoading={abandonFixture.isPending}
+        onConfirm={() => {
+          if (!abandonRow) return;
+          abandonFixture.mutate(abandonRow.id, {
+            onSuccess: () => {
+              setAbandonOpen(false);
+              setAbandonRow(null);
+            },
+          });
         }}
       />
     </div>

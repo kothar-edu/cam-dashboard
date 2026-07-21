@@ -6,14 +6,14 @@ Tenant-aware web admin for CAM Cricket. Rebuilt on Vite + React 18 + TypeScript 
 ## Prerequisites
 
 - Node.js 18+
-- Local `cam-backend` running on port **3030** (see `cam-backend` README)
+- Local `cam-backend` running on port **8000** (see `cam-backend` README)
 
 ## Local development
 
 ```bash
 cd cam-dashboard
 npm install
-VITE_URL=http://127.0.0.1:3030/ npm run dev
+VITE_URL=http://127.0.0.1:8000/ npm run dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173).
@@ -22,7 +22,7 @@ Open [http://localhost:5173](http://localhost:5173).
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `VITE_URL` | `http://127.0.0.1:3030/` | Django API base URL |
+| `VITE_URL` | `http://127.0.0.1:8000/` | Django API base URL |
 
 ## Scripts
 

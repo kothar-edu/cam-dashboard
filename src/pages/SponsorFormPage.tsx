@@ -5,8 +5,11 @@ import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { PageHeader } from '@/components/forms/PageHeader';
+import { FileField } from '@/components/forms/FileField';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { useCreateSponsor, useSponsor, useUpdateSponsor } from '@/hooks/useSponsors';
+
+const SPONSOR_TYPES = ['Title', 'Gold', 'Silver', 'Bronze', 'General'];
 
 export default function SponsorFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,7 +22,7 @@ export default function SponsorFormPage() {
   const [name, setName] = useState('');
   const [supportedUrl, setSupportedUrl] = useState('');
   const [extraInfo, setExtraInfo] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [image, setImage] = useState<File | null>(null);
   const [sponsorType, setSponsorType] = useState('Gold');
 
   useEffect(() => {
@@ -27,7 +30,6 @@ export default function SponsorFormPage() {
       setName(sponsorQuery.data.name);
       setSupportedUrl(sponsorQuery.data.supported_url ?? '');
       setExtraInfo(sponsorQuery.data.extra_info ?? '');
-      setImageUrl(sponsorQuery.data.image ?? '');
       setSponsorType(sponsorQuery.data.sponsor_type);
     }
   }, [sponsorQuery.data]);
@@ -38,7 +40,7 @@ export default function SponsorFormPage() {
       name: name.trim(),
       supported_url: supportedUrl || null,
       extra_info: extraInfo || null,
-      image: imageUrl || null,
+      image,
       sponsor_type: sponsorType,
     };
     if (isEdit && id) {
@@ -60,13 +62,17 @@ export default function SponsorFormPage() {
           <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-6">
             <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} required />
             <Input label="Website URL" value={supportedUrl} onChange={(e) => setSupportedUrl(e.target.value)} />
-            <Input label="Image URL" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
+            <FileField
+              label="Sponsor logo"
+              onChange={setImage}
+              currentUrl={sponsorQuery.data?.image}
+            />
             <Input label="Extra info" value={extraInfo} onChange={(e) => setExtraInfo(e.target.value)} />
             <SearchableSelect
               label="Sponsor type"
               value={sponsorType}
               onChange={setSponsorType}
-              options={['Gold', 'Silver', 'Bronze', 'Partner'].map((type) => ({
+              options={SPONSOR_TYPES.map((type) => ({
                 value: type,
                 label: type,
               }))}

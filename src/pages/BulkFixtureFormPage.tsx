@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,10 +29,10 @@ type BulkRow = {
   ground: string;
 };
 
-function emptyRow(): BulkRow {
+function emptyRow(defaultTournamentId?: string): BulkRow {
   return {
     key: crypto.randomUUID(),
-    tournamentId: '',
+    tournamentId: defaultTournamentId ?? '',
     opponentA: '',
     opponentB: '',
     round: '',
@@ -71,6 +71,8 @@ function toPayloadRow(row: BulkRow): BulkFixtureRowPayload {
   };
 }
 
+type Opponent = { id: string; team_name: string };
+
 function BulkFixtureRowFields({
   row,
   index,
@@ -79,17 +81,20 @@ function BulkFixtureRowFields({
   onChange,
   onRemove,
   canRemove,
+  lockedOpponents,
 }: {
   row: BulkRow;
   index: number;
   teams: Array<{ id: string; name: string }>;
-  tournamentOptions: Array<{ value: string; label: string }>;
+  tournamentOptions: Array<{ value: string; label: string }> | null;
   onChange: (patch: Partial<BulkRow>) => void;
   onRemove: () => void;
   canRemove: boolean;
+  lockedOpponents: Opponent[] | null;
 }) {
-  const tournamentDetail = useTournament(row.tournamentId || undefined);
-  const opponents = tournamentDetail.data?.opponents ?? [];
+  const locked = lockedOpponents !== null;
+  const tournamentDetail = useTournament(!locked && row.tournamentId ? row.tournamentId : undefined);
+  const opponents = locked ? lockedOpponents : (tournamentDetail.data?.opponents ?? []);
 
   return (
     <div className="space-y-3 rounded-lg border bg-white p-4">
@@ -102,23 +107,25 @@ function BulkFixtureRowFields({
         ) : null}
       </div>
       <div className="grid gap-3 md:grid-cols-5">
-        <SearchableSelect
-          label="Tournament"
-          value={row.tournamentId || TOURNAMENT_NONE_VALUE}
-          onChange={(value) =>
-            onChange({
-              tournamentId: value === TOURNAMENT_NONE_VALUE ? '' : value,
-              opponentA: '',
-              opponentB: '',
-              round: '',
-            })
-          }
-          options={tournamentOptions}
-          placeholder="None — custom match"
-          searchable
-        />
+        {locked ? null : (
+          <SearchableSelect
+            label="Tournament"
+            value={row.tournamentId || TOURNAMENT_NONE_VALUE}
+            onChange={(value) =>
+              onChange({
+                tournamentId: value === TOURNAMENT_NONE_VALUE ? '' : value,
+                opponentA: '',
+                opponentB: '',
+                round: '',
+              })
+            }
+            options={tournamentOptions ?? []}
+            placeholder="None — custom match"
+            searchable
+          />
+        )}
         {row.tournamentId ? (
-          tournamentDetail.isLoading ? (
+          !locked && tournamentDetail.isLoading ? (
             <div className="flex items-center md:col-span-2">
               <LoadingSpinner className="h-5 w-5 text-[#12233D]" />
             </div>
@@ -198,10 +205,16 @@ function BulkFixtureRowFields({
 
 export default function BulkFixtureFormPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const lockedTournamentId = searchParams.get('tournamentId') || undefined;
   const teamsQuery = useTeams();
-  const tournamentsQuery = useTournaments();
+  const tournamentsQuery = useTournaments(undefined, { enabled: !lockedTournamentId });
+  const lockedTournamentQuery = useTournament(lockedTournamentId);
   const bulkMutation = useCreateFixturesBulk();
-  const [rows, setRows] = useState<BulkRow[]>([emptyRow(), emptyRow()]);
+  const [rows, setRows] = useState<BulkRow[]>([
+    emptyRow(lockedTournamentId),
+    emptyRow(lockedTournamentId),
+  ]);
 
   const updateRow = (key: string, patch: Partial<BulkRow>) => {
     setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch } : row)));
@@ -233,21 +246,53 @@ export default function BulkFixtureFormPage() {
   };
 
   const teams = teamsQuery.data?.results ?? [];
-  const tournamentOptions = [
-    { value: TOURNAMENT_NONE_VALUE, label: 'None — custom match' },
-    ...(tournamentsQuery.data?.results ?? []).map((tournament) => ({
-      value: tournament.id,
-      label: tournament.name,
-    })),
-  ];
+  const tournamentOptions = lockedTournamentId
+    ? null
+    : [
+        { value: TOURNAMENT_NONE_VALUE, label: 'None — custom match' },
+        ...(tournamentsQuery.data?.results ?? []).map((tournament) => ({
+          value: tournament.id,
+          label: tournament.name,
+        })),
+      ];
+  const lockedOpponents = lockedTournamentId ? (lockedTournamentQuery.data?.opponents ?? []) : null;
+
+  if (lockedTournamentId && lockedTournamentQuery.isLoading) {
+    return (
+      <TenantRequired>
+        <div className="flex min-h-[30vh] items-center justify-center">
+          <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
+        </div>
+      </TenantRequired>
+    );
+  }
+
+  if (lockedTournamentId && lockedTournamentQuery.isError) {
+    return (
+      <TenantRequired>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
+          Unable to load this tournament.
+        </div>
+      </TenantRequired>
+    );
+  }
 
   return (
     <TenantRequired>
       <div className="space-y-6">
-        <PageHeader title="Bulk fixture upload" backTo="/dashboard/fixtures/new" backLabel="Single fixture" />
+        <PageHeader
+          title={
+            lockedTournamentId
+              ? `Add matches — ${lockedTournamentQuery.data?.name ?? ''}`
+              : 'Bulk fixture upload'
+          }
+          backTo={lockedTournamentId ? '/dashboard/tournaments' : '/dashboard/fixtures/new'}
+          backLabel={lockedTournamentId ? 'Tournaments' : 'Single fixture'}
+        />
         <p className="text-sm text-muted-foreground">
-          Pick a tournament per row to schedule it there using that tournament's registered teams, or leave it
-          as "None" for a standalone custom match. Mix both freely in the same batch.
+          {lockedTournamentId
+            ? `Every row below is scheduled under ${lockedTournamentQuery.data?.name ?? 'this tournament'} using its registered teams.`
+            : 'Pick a tournament per row to schedule it there using that tournament\'s registered teams, or leave it as "None" for a standalone custom match. Mix both freely in the same batch.'}
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           {rows.map((row, index) => (
@@ -260,10 +305,15 @@ export default function BulkFixtureFormPage() {
               onChange={(patch) => updateRow(row.key, patch)}
               onRemove={() => removeRow(row.key)}
               canRemove={rows.length > 1}
+              lockedOpponents={lockedOpponents}
             />
           ))}
           <div className="flex flex-wrap items-center gap-3">
-            <Button type="button" variant="outline" onClick={() => setRows((r) => [...r, emptyRow()])}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setRows((r) => [...r, emptyRow(lockedTournamentId)])}
+            >
               Add row
             </Button>
             <Button type="submit" disabled={bulkMutation.isPending || !completeRows.length}>

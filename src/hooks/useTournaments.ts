@@ -12,13 +12,13 @@ import {
 import type { ListParams } from '@/api/pagination';
 import { useTenant } from '@/contexts/TenantContext';
 
-export function useTournaments(params?: ListParams) {
+export function useTournaments(params?: ListParams, options?: { enabled?: boolean }) {
   const { activeTenantId } = useTenant();
 
   return useQuery({
     queryKey: ['tournaments', activeTenantId, params],
     queryFn: () => listTournaments(params),
-    enabled: !!activeTenantId,
+    enabled: !!activeTenantId && (options?.enabled ?? true),
   });
 }
 

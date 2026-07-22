@@ -99,6 +99,12 @@ export default function TournamentsPage() {
                 >
                   Edit
                 </Link>
+                <Link
+                  to={`/dashboard/fixtures/new/bulk?tournamentId=${row.id}`}
+                  className="ml-2 inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D]"
+                >
+                  Add matches
+                </Link>
                 <button
                   type="button"
                   onClick={() => {

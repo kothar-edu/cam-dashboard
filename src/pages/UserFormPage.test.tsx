@@ -3,19 +3,21 @@ import { describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import UserFormPage from './UserFormPage';
 
+const USER_DATA = {
+  id: 'user-1',
+  full_name: 'Original Name',
+  email: 'user@example.com',
+  phone: '9800000000',
+  gender: 'f',
+  roles: ['Player'],
+  payment_status: 'verified',
+  subscription_end_date: '2026-09-11',
+  is_payment_verified: true,
+};
+
 vi.mock('@/hooks/useUser', () => ({
   useUser: () => ({
-    data: {
-      id: 'user-1',
-      full_name: 'Original Name',
-      email: 'user@example.com',
-      phone: '9800000000',
-      gender: 'f',
-      roles: ['Player'],
-      payment_status: 'verified',
-      subscription_end_date: '2026-09-11',
-      is_payment_verified: true,
-    },
+    data: USER_DATA,
     isLoading: false,
     isError: false,
   }),

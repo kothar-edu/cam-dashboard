@@ -11,18 +11,20 @@ vi.mock('react-hot-toast', () => ({
   },
 }));
 
+const FIXTURE_DATA = {
+  id: 'fixture-1',
+  time: '2026-07-17T12:00:00Z',
+  ground: 'Main Ground',
+  round: 'Final',
+  is_public: false,
+  live_stream_url: 'https://www.youtube.com/watch?v=abc123',
+  opponent_a: { id: 'team-1', team_name: 'Team Alpha' },
+  opponent_b: { id: 'team-2', team_name: 'Team Beta' },
+};
+
 vi.mock('@/hooks/useFixtures', () => ({
   useFixture: () => ({
-    data: {
-      id: 'fixture-1',
-      time: '2026-07-17T12:00:00Z',
-      ground: 'Main Ground',
-      round: 'Final',
-      is_public: false,
-      live_stream_url: 'https://www.youtube.com/watch?v=abc123',
-      opponent_a: { team_id: 'team-1' },
-      opponent_b: { team_id: 'team-2' },
-    },
+    data: FIXTURE_DATA,
     isLoading: false,
   }),
   useCreateFixture: () => ({ mutate: vi.fn(), isPending: false }),

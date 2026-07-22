@@ -18,6 +18,9 @@ export default function PaymentSettingsPage() {
   const [bankBranch, setBankBranch] = useState('');
   const [verificationFeeAmount, setVerificationFeeAmount] = useState('');
   const [requirePaymentVerification, setRequirePaymentVerification] = useState(true);
+  const [requireIdVerification, setRequireIdVerification] = useState(false);
+  const [studentFeeEnabled, setStudentFeeEnabled] = useState(false);
+  const [studentFeeAmount, setStudentFeeAmount] = useState('');
 
   useEffect(() => {
     if (data) {
@@ -27,6 +30,9 @@ export default function PaymentSettingsPage() {
       setBankBranch(data.bank_branch ?? '');
       setVerificationFeeAmount(data.verification_fee_amount ?? '');
       setRequirePaymentVerification(data.require_payment_verification);
+      setRequireIdVerification(data.require_id_verification);
+      setStudentFeeEnabled(data.student_fee_enabled);
+      setStudentFeeAmount(data.student_fee_amount ?? '');
     }
   }, [data]);
 
@@ -40,6 +46,9 @@ export default function PaymentSettingsPage() {
         bank_branch: bankBranch,
         verification_fee_amount: verificationFeeAmount.trim() ? verificationFeeAmount : null,
         require_payment_verification: requirePaymentVerification,
+        require_id_verification: requireIdVerification,
+        student_fee_enabled: studentFeeEnabled,
+        student_fee_amount: studentFeeAmount.trim() ? studentFeeAmount : null,
       },
       {
         onSuccess: () => toast.success('Payment settings saved.'),
@@ -96,6 +105,33 @@ export default function PaymentSettingsPage() {
               />
               Require payment verification
             </label>
+            <label className="flex items-center gap-2 text-sm text-[#12233D]">
+              <input
+                type="checkbox"
+                checked={requireIdVerification}
+                onChange={(e) => setRequireIdVerification(e.target.checked)}
+              />
+              Require ID verification
+            </label>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm text-[#12233D]">
+                <input
+                  type="checkbox"
+                  checked={studentFeeEnabled}
+                  onChange={(e) => setStudentFeeEnabled(e.target.checked)}
+                />
+                Enable student fee
+              </label>
+              <Input
+                label="Student fee amount"
+                type="number"
+                min="0"
+                step="0.01"
+                value={studentFeeAmount}
+                onChange={(e) => setStudentFeeAmount(e.target.value)}
+                disabled={!studentFeeEnabled}
+              />
+            </div>
             <Button type="submit" disabled={updateMutation.isPending}>
               {updateMutation.isPending ? 'Saving…' : 'Save payment settings'}
             </Button>

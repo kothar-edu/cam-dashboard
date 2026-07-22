@@ -7,6 +7,9 @@ export type PaymentSettings = {
   bank_branch: string;
   verification_fee_amount: string | null;
   require_payment_verification: boolean;
+  require_id_verification: boolean;
+  student_fee_enabled: boolean;
+  student_fee_amount: string | null;
 };
 
 export type PaymentSettingsUpdate = Partial<PaymentSettings>;

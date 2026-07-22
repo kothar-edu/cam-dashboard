@@ -30,6 +30,14 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+function StudentFeeBadge() {
+  return (
+    <span className="inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+      Student fee
+    </span>
+  );
+}
+
 function ReceiptPanel({
   title,
   receipt,
@@ -188,6 +196,55 @@ export default function VerificationPage() {
                   ),
               },
               {
+                id: 'idDocument',
+                header: 'ID document',
+                cell: (row) =>
+                  row.id_document ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setReceiptTarget({
+                          title: `${row.user_name} — ID document`,
+                          receipt: row.id_document,
+                        })
+                      }
+                    >
+                      View
+                    </Button>
+                  ) : (
+                    '—'
+                  ),
+              },
+              {
+                id: 'studentFee',
+                header: 'Student fee',
+                cell: (row) => (row.is_student_fee ? <StudentFeeBadge /> : '—'),
+              },
+              {
+                id: 'studyDocument',
+                header: 'Study document',
+                cell: (row) =>
+                  row.study_document ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setReceiptTarget({
+                          title: `${row.user_name} — study document`,
+                          receipt: row.study_document,
+                        })
+                      }
+                    >
+                      View
+                    </Button>
+                  ) : (
+                    '—'
+                  ),
+              },
+              {
                 id: 'actions',
                 header: 'Actions',
                 cell: (row) =>
@@ -265,6 +322,55 @@ export default function VerificationPage() {
                       setReceiptTarget({
                         title: `${row.user_name} — team join receipt`,
                         receipt: row.receipt,
+                      })
+                    }
+                  >
+                    View
+                  </Button>
+                ) : (
+                  '—'
+                ),
+            },
+            {
+              id: 'idDocument',
+              header: 'ID document',
+              cell: (row) =>
+                row.resolved_id_document_url ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setReceiptTarget({
+                        title: `${row.user_name} — ID document`,
+                        receipt: row.resolved_id_document_url,
+                      })
+                    }
+                  >
+                    View
+                  </Button>
+                ) : (
+                  '—'
+                ),
+            },
+            {
+              id: 'studentFee',
+              header: 'Student fee',
+              cell: (row) => (row.is_student_fee ? <StudentFeeBadge /> : '—'),
+            },
+            {
+              id: 'studyDocument',
+              header: 'Study document',
+              cell: (row) =>
+                row.study_document ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setReceiptTarget({
+                        title: `${row.user_name} — study document`,
+                        receipt: row.study_document,
                       })
                     }
                   >

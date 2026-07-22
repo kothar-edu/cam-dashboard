@@ -11,6 +11,11 @@ export type TenantRegistration = {
   tenant_schema_name: string;
   is_paid: boolean;
   receipt: string | null;
+  id_document: string | null;
+  id_document_verified_at: string | null;
+  id_document_verified_by: string | null;
+  is_student_fee: boolean;
+  study_document: string | null;
   status: 'pending' | 'approved' | 'rejected';
   rejection_reason: string | null;
   created: string;
@@ -26,6 +31,11 @@ export type TeamJoinApplication = {
   team_code: string;
   is_paid: boolean;
   receipt: string | null;
+  id_document: string | null;
+  reuse_tenant_id_document: boolean;
+  resolved_id_document_url: string | null;
+  is_student_fee: boolean;
+  study_document: string | null;
   is_approved: boolean;
   created: string;
 };

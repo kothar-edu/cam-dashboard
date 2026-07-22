@@ -13,6 +13,14 @@ vi.mock('@/hooks/useFixtures', () => ({
     mutate: vi.fn(),
     isPending: false,
   }),
+  useForfeitFixture: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+  }),
+  useAbandonFixture: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+  }),
 }));
 
 vi.mock('@/hooks/useTeams', () => ({

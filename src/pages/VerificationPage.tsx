@@ -79,28 +79,53 @@ function ReceiptPanel({
   );
 }
 
-const REGISTRATION_STATUS_TABS = [
+const STATUS_TABS = [
   { value: 'pending', label: 'Pending' },
   { value: 'approved', label: 'Approved' },
   { value: 'rejected', label: 'Rejected' },
   { value: 'all', label: 'All' },
 ] as const;
 
-type RegistrationStatusFilter = (typeof REGISTRATION_STATUS_TABS)[number]['value'];
+type StatusFilter = (typeof STATUS_TABS)[number]['value'];
+
+function StatusFilterTabs({
+  value,
+  onChange,
+}: {
+  value: StatusFilter;
+  onChange: (value: StatusFilter) => void;
+}) {
+  return (
+    <div className="flex gap-1 rounded-lg border bg-gray-50 p-1 w-fit">
+      {STATUS_TABS.map((option) => (
+        <Button
+          key={option.value}
+          type="button"
+          size="sm"
+          variant={value === option.value ? 'default' : 'outline'}
+          onClick={() => onChange(option.value)}
+          className={value === option.value ? undefined : 'border-transparent'}
+        >
+          {option.label}
+        </Button>
+      ))}
+    </div>
+  );
+}
 
 export default function VerificationPage() {
   const { activeTenant } = useTenant();
   const [tab, setTab] = useState<'registrations' | 'team-joins'>('registrations');
-  const [regStatus, setRegStatus] = useState<RegistrationStatusFilter>('pending');
+  const [regStatus, setRegStatus] = useState<StatusFilter>('pending');
+  const [joinStatus, setJoinStatus] = useState<StatusFilter>('pending');
   const [regPage, setRegPage] = useState(0);
   const [joinPage, setJoinPage] = useState(0);
   const [rejectTarget, setRejectTarget] = useState<TenantRegistration | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [approveRegTarget, setApproveRegTarget] = useState<TenantRegistration | null>(null);
-  const [teamJoinTarget, setTeamJoinTarget] = useState<{
-    row: TeamJoinApplication;
-    action: 'approve' | 'reject';
-  } | null>(null);
+  const [approveJoinTarget, setApproveJoinTarget] = useState<TeamJoinApplication | null>(null);
+  const [rejectJoinTarget, setRejectJoinTarget] = useState<TeamJoinApplication | null>(null);
+  const [rejectJoinReason, setRejectJoinReason] = useState('');
   const [receiptTarget, setReceiptTarget] = useState<{
     title: string;
     receipt: string | null;
@@ -114,15 +139,21 @@ export default function VerificationPage() {
   const teamJoins = useTeamJoinApplications({
     limit: PAGE_SIZE,
     offset: joinPage * PAGE_SIZE,
+    ...(joinStatus === 'all' ? {} : { status: joinStatus }),
   });
   const reviewRegistration = useReviewTenantRegistration();
   const reviewTeamJoin = useReviewTeamJoinApplication();
 
   const registrationRows = registrations.data?.results ?? [];
 
-  const handleRegStatusChange = (status: RegistrationStatusFilter) => {
+  const handleRegStatusChange = (status: StatusFilter) => {
     setRegStatus(status);
     setRegPage(0);
+  };
+
+  const handleJoinStatusChange = (status: StatusFilter) => {
+    setJoinStatus(status);
+    setJoinPage(0);
   };
 
   const handleRejectRegistration = () => {
@@ -133,6 +164,19 @@ export default function VerificationPage() {
         onSuccess: () => {
           setRejectTarget(null);
           setRejectReason('');
+        },
+      }
+    );
+  };
+
+  const handleRejectTeamJoin = () => {
+    if (!rejectJoinTarget) return;
+    reviewTeamJoin.mutate(
+      { id: rejectJoinTarget.id, action: 'reject', reason: rejectJoinReason },
+      {
+        onSuccess: () => {
+          setRejectJoinTarget(null);
+          setRejectJoinReason('');
         },
       }
     );
@@ -166,20 +210,9 @@ export default function VerificationPage() {
       </div>
 
       {tab === 'registrations' ? (
-        <div className="flex gap-1 rounded-lg border bg-gray-50 p-1 w-fit">
-          {REGISTRATION_STATUS_TABS.map((option) => (
-            <Button
-              key={option.value}
-              type="button"
-              size="sm"
-              variant={regStatus === option.value ? 'default' : 'outline'}
-              onClick={() => handleRegStatusChange(option.value)}
-              className={regStatus === option.value ? undefined : 'border-transparent'}
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
+        <StatusFilterTabs value={regStatus} onChange={handleRegStatusChange} />
+      ) : activeTenant ? (
+        <StatusFilterTabs value={joinStatus} onChange={handleJoinStatusChange} />
       ) : null}
 
       {tab === 'registrations' ? (
@@ -344,6 +377,11 @@ export default function VerificationPage() {
             { id: 'team', header: 'Team', cell: (row) => row.team_name },
             { id: 'paid', header: 'Paid', cell: (row) => (row.is_paid ? 'Yes' : 'No') },
             {
+              id: 'status',
+              header: 'Status',
+              cell: (row) => <StatusBadge status={row.status} />,
+            },
+            {
               id: 'receipt',
               header: 'Receipt',
               cell: (row) =>
@@ -417,32 +455,42 @@ export default function VerificationPage() {
             {
               id: 'actions',
               header: 'Actions',
-              cell: (row) => (
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={reviewTeamJoin.isPending}
-                    onClick={() => setTeamJoinTarget({ row, action: 'approve' })}
-                  >
-                    Approve
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={reviewTeamJoin.isPending}
-                    onClick={() => setTeamJoinTarget({ row, action: 'reject' })}
-                  >
-                    Reject
-                  </Button>
-                </div>
-              ),
+              cell: (row) =>
+                row.status === 'pending' ? (
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={reviewTeamJoin.isPending}
+                      onClick={() => setApproveJoinTarget(row)}
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={reviewTeamJoin.isPending}
+                      onClick={() => {
+                        setRejectJoinTarget(row);
+                        setRejectJoinReason('');
+                      }}
+                    >
+                      Reject
+                    </Button>
+                  </div>
+                ) : (
+                  '—'
+                ),
             },
           ]}
           data={teamJoins.data?.results ?? []}
           loading={teamJoins.isLoading}
-          emptyMessage="No pending team join requests."
+          emptyMessage={
+            joinStatus === 'all'
+              ? 'No team join requests found.'
+              : `No ${joinStatus} team join requests found.`
+          }
           pagination={
             teamJoins.data
               ? { pageIndex: joinPage, pageSize: PAGE_SIZE, totalCount: teamJoins.data.count }
@@ -514,24 +562,56 @@ export default function VerificationPage() {
         }}
       />
 
+      {rejectJoinTarget ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-lg border bg-white p-6 shadow-lg">
+            <h3 className="text-lg font-semibold text-[#12233D]">Reject team join request</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Rejecting {rejectJoinTarget.user_name}&apos;s request to join {rejectJoinTarget.team_name}.
+            </p>
+            <div className="mt-4 space-y-4">
+              <Input
+                label="Reason (optional)"
+                value={rejectJoinReason}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  setRejectJoinReason(event.target.value)
+                }
+              />
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setRejectJoinTarget(null)}>
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  disabled={reviewTeamJoin.isPending}
+                  onClick={handleRejectTeamJoin}
+                >
+                  Reject
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <ConfirmDialog
-        open={teamJoinTarget !== null}
+        open={approveJoinTarget !== null}
         onOpenChange={(open) => {
-          if (!open) setTeamJoinTarget(null);
+          if (!open) setApproveJoinTarget(null);
         }}
-        title={teamJoinTarget?.action === 'approve' ? 'Approve team join request?' : 'Reject team join request?'}
+        title="Approve team join request?"
         description={
-          teamJoinTarget
-            ? `${teamJoinTarget.action === 'approve' ? 'Approve' : 'Reject'} ${teamJoinTarget.row.user_name} (${teamJoinTarget.row.user_email}) joining ${teamJoinTarget.row.team_name}. Paid: ${teamJoinTarget.row.is_paid ? 'Yes' : 'No'}.`
+          approveJoinTarget
+            ? `Approve ${approveJoinTarget.user_name} (${approveJoinTarget.user_email}) joining ${approveJoinTarget.team_name}. Paid: ${approveJoinTarget.is_paid ? 'Yes' : 'No'}.`
             : ''
         }
-        confirmLabel={teamJoinTarget?.action === 'approve' ? 'Approve' : 'Reject'}
+        confirmLabel="Approve"
         isLoading={reviewTeamJoin.isPending}
         onConfirm={() => {
-          if (!teamJoinTarget) return;
+          if (!approveJoinTarget) return;
           reviewTeamJoin.mutate(
-            { id: teamJoinTarget.row.id, action: teamJoinTarget.action },
-            { onSuccess: () => setTeamJoinTarget(null) }
+            { id: approveJoinTarget.id, action: 'approve' },
+            { onSuccess: () => setApproveJoinTarget(null) }
           );
         }}
       />

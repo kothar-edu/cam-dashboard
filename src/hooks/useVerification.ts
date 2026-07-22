@@ -56,11 +56,19 @@ export function useReviewTeamJoinApplication() {
   const { activeTenantId } = useTenant();
 
   return useMutation({
-    mutationFn: async ({ id, action }: { id: number; action: 'approve' | 'reject' }) => {
+    mutationFn: async ({
+      id,
+      action,
+      reason,
+    }: {
+      id: number;
+      action: 'approve' | 'reject';
+      reason?: string;
+    }) => {
       if (action === 'approve') {
         return approveTeamJoinApplication(id);
       }
-      return rejectTeamJoinApplication(id);
+      return rejectTeamJoinApplication(id, reason);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teamJoinApplications', activeTenantId] });

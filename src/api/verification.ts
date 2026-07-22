@@ -36,7 +36,8 @@ export type TeamJoinApplication = {
   resolved_id_document_url: string | null;
   is_student_fee: boolean;
   study_document: string | null;
-  is_approved: boolean;
+  status: 'pending' | 'approved' | 'rejected';
+  rejection_reason: string | null;
   created: string;
 };
 
@@ -85,9 +86,13 @@ export async function approveTeamJoinApplication(id: number): Promise<{ message:
   return data;
 }
 
-export async function rejectTeamJoinApplication(id: number): Promise<{ message: string }> {
+export async function rejectTeamJoinApplication(
+  id: number,
+  reason?: string
+): Promise<{ message: string }> {
   const { data } = await apiClient.post<{ message: string }>(
-    `/game/my-team/applications/${id}/reject/`
+    `/game/my-team/applications/${id}/reject/`,
+    { reason: reason ?? '' }
   );
   return data;
 }

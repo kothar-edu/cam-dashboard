@@ -26,7 +26,22 @@ export function getApiErrorMessage(error: unknown, fallback: string): string {
   const data = error.response.data;
   if (typeof data === 'string') return data;
 
-  if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
+  // Bulk/many=True endpoints 400 with one error object per submitted row -
+  // report the first row that actually failed, not just a generic fallback.
+  if (Array.isArray(data)) {
+    for (let index = 0; index < data.length; index += 1) {
+      const row = data[index];
+      if (!row || typeof row !== 'object' || Array.isArray(row) || Object.keys(row).length === 0) continue;
+      const [field, value] = Object.entries(row as Record<string, unknown>)[0];
+      const message = Array.isArray(value) ? String(value[0]) : String(value);
+      return field === 'non_field_errors' || field === 'detail'
+        ? `Row ${index + 1}: ${message}`
+        : `Row ${index + 1}: ${field} — ${message}`;
+    }
+    return fallback;
+  }
+
+  if (typeof data === 'object' && data !== null) {
     if ('detail' in data) {
       const detail = data.detail;
       if (typeof detail === 'string') return detail;

@@ -38,6 +38,23 @@ export type CreateFixturePayload = {
   logo?: string;
 };
 
+export type BulkFixtureRowPayload =
+  | {
+      tournament: string;
+      opponent_a: string;
+      opponent_b: string;
+      round?: string;
+      time: string;
+      ground: string;
+    }
+  | {
+      name: string;
+      team_a: string;
+      team_b: string;
+      time: string;
+      ground: string;
+    };
+
 export type FixtureDetail = Fixture & {
   round: string | null;
   result: string | null;
@@ -151,9 +168,9 @@ export async function createFixture(
 }
 
 export async function createFixturesBulk(
-  payload: CreateFixturePayload[],
-): Promise<unknown> {
-  const { data } = await apiClient.post(
+  payload: BulkFixtureRowPayload[],
+): Promise<Fixture[]> {
+  const { data } = await apiClient.post<Fixture[]>(
     "/game/match/create-multiple-match/",
     payload,
   );

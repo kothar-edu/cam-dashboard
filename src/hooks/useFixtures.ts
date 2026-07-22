@@ -7,6 +7,7 @@ import {
   updateFixture,
   forfeitFixture,
   abandonFixture,
+  type BulkFixtureRowPayload,
   type CreateFixturePayload,
   type UpdateFixturePayload,
   type ForfeitFixturePayload,
@@ -47,7 +48,7 @@ export function useCreateFixturesBulk() {
   const qc = useQueryClient();
   const { activeTenantId } = useTenant();
   return useMutation({
-    mutationFn: (payload: CreateFixturePayload[]) =>
+    mutationFn: (payload: BulkFixtureRowPayload[]) =>
       createFixturesBulk(payload),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: ["fixtures", activeTenantId] }),

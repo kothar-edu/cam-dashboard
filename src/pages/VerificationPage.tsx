@@ -79,9 +79,19 @@ function ReceiptPanel({
   );
 }
 
+const REGISTRATION_STATUS_TABS = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'approved', label: 'Approved' },
+  { value: 'rejected', label: 'Rejected' },
+  { value: 'all', label: 'All' },
+] as const;
+
+type RegistrationStatusFilter = (typeof REGISTRATION_STATUS_TABS)[number]['value'];
+
 export default function VerificationPage() {
   const { activeTenant } = useTenant();
   const [tab, setTab] = useState<'registrations' | 'team-joins'>('registrations');
+  const [regStatus, setRegStatus] = useState<RegistrationStatusFilter>('pending');
   const [regPage, setRegPage] = useState(0);
   const [joinPage, setJoinPage] = useState(0);
   const [rejectTarget, setRejectTarget] = useState<TenantRegistration | null>(null);
@@ -99,6 +109,7 @@ export default function VerificationPage() {
   const registrations = useTenantRegistrations({
     limit: PAGE_SIZE,
     offset: regPage * PAGE_SIZE,
+    ...(regStatus === 'all' ? {} : { status: regStatus }),
   });
   const teamJoins = useTeamJoinApplications({
     limit: PAGE_SIZE,
@@ -107,10 +118,12 @@ export default function VerificationPage() {
   const reviewRegistration = useReviewTenantRegistration();
   const reviewTeamJoin = useReviewTeamJoinApplication();
 
-  const registrationRows =
-    registrations.data?.results.filter((row) => row.status === 'pending') ??
-    registrations.data?.results ??
-    [];
+  const registrationRows = registrations.data?.results ?? [];
+
+  const handleRegStatusChange = (status: RegistrationStatusFilter) => {
+    setRegStatus(status);
+    setRegPage(0);
+  };
 
   const handleRejectRegistration = () => {
     if (!rejectTarget) return;
@@ -151,6 +164,23 @@ export default function VerificationPage() {
           Team join requests
         </Button>
       </div>
+
+      {tab === 'registrations' ? (
+        <div className="flex gap-1 rounded-lg border bg-gray-50 p-1 w-fit">
+          {REGISTRATION_STATUS_TABS.map((option) => (
+            <Button
+              key={option.value}
+              type="button"
+              size="sm"
+              variant={regStatus === option.value ? 'default' : 'outline'}
+              onClick={() => handleRegStatusChange(option.value)}
+              className={regStatus === option.value ? undefined : 'border-transparent'}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      ) : null}
 
       {tab === 'registrations' ? (
         registrations.isLoading && !registrations.data ? (
@@ -278,7 +308,11 @@ export default function VerificationPage() {
             ]}
             data={registrationRows}
             loading={registrations.isLoading}
-            emptyMessage="No registration requests found."
+            emptyMessage={
+              regStatus === 'all'
+                ? 'No registration requests found.'
+                : `No ${regStatus} registration requests found.`
+            }
             pagination={
               registrations.data
                 ? { pageIndex: regPage, pageSize: PAGE_SIZE, totalCount: registrations.data.count }

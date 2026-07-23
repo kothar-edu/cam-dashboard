@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import MDEditor from '@uiw/react-md-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -77,14 +78,18 @@ export default function PostFormPage() {
         ) : (
           <form onSubmit={handleSubmit} className="max-w-2xl space-y-4 rounded-lg border bg-white p-6">
             <Input label="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-            <div className="space-y-2">
+            <div className="space-y-2" data-color-mode="light">
               <label className="text-sm font-medium text-[#12233D]">Description</label>
-              <textarea
-                className="min-h-28 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              <MDEditor
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
+                onChange={(value) => setDescription(value ?? '')}
+                height={240}
+                preview="live"
+                textareaProps={{ required: true }}
               />
+              <p className="text-xs text-gray-500">
+                Supports Markdown (headings, bold, lists, links) - the mobile app renders it formatted.
+              </p>
             </div>
             <FileField label="Cover image" onChange={setCoverImage} currentUrl={currentCoverUrl} />
             <Input label="Post date" type="date" value={postDate} onChange={(e) => setPostDate(e.target.value)} />

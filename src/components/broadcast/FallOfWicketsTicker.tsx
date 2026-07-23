@@ -1,4 +1,4 @@
-import type { FallOfWicketEntry } from '@/types/liveMatch';
+import type { FallOfWicketEntry } from '@/lib/liveMatchReducer';
 
 type FallOfWicketsTickerProps = {
   entries: FallOfWicketEntry[];

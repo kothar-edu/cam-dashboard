@@ -1,4 +1,5 @@
-import type { CurrentData, LiveMatchPlayer, PartnershipState } from '@/types/liveMatch';
+import type { CurrentData, LiveMatchPlayer } from '@/types/liveMatch';
+import type { PartnershipState } from '@/lib/liveMatchReducer';
 
 type PartnershipStripProps = {
   partnership: PartnershipState;

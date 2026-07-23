@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { AllScoreValue, MilestoneEvent } from '@/types/liveMatch';
+import type { AllScoreValue } from '@/types/liveMatch';
+import type { MilestoneEvent } from '@/lib/liveMatchReducer';
 
 const CELEBRATE_VALUES = new Set<AllScoreValue>([4, 6, 'BOWLED', 'LBW', 'STUMPED', 'CAUGHT', 'RUN_OUT', 'HANDLED', 'WIDE_STUMPED']);
 const FLASH_DURATION_MS = 5000;

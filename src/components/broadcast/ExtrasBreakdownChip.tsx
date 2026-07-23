@@ -1,4 +1,4 @@
-import type { ExtrasBreakdown } from '@/types/liveMatch';
+import type { ExtrasBreakdown } from '@/lib/liveMatchReducer';
 
 const CATEGORY_LABEL: Array<{ key: keyof ExtrasBreakdown; label: string }> = [
   { key: 'wide', label: 'wd' },

@@ -24,7 +24,7 @@ export type PostDetail = Post & {
   post_type: string;
   status: string;
   is_public: boolean;
-  images?: Array<{ image_url: string; is_cover: boolean }>;
+  images?: Array<{ id: number; image: string | null; is_cover: boolean }>;
 };
 
 export type PostPayload = {
@@ -36,7 +36,7 @@ export type PostPayload = {
   status: string;
   is_public: boolean;
   tags?: string[];
-  images?: Array<{ image_url: string; is_cover: boolean }>;
+  cover_image?: File | null;
 };
 
 export async function getPost(id: string): Promise<PostDetail> {
@@ -44,13 +44,59 @@ export async function getPost(id: string): Promise<PostDetail> {
   return data;
 }
 
+function appendPostFields(form: FormData, payload: PostPayload) {
+  form.append('post_type', payload.post_type);
+  form.append('title', payload.title);
+  form.append('description', payload.description);
+  form.append('post_date', payload.post_date);
+  form.append('post_time', payload.post_time);
+  form.append('status', payload.status);
+  form.append('is_public', String(payload.is_public));
+  (payload.tags ?? []).forEach((tag) => form.append('tags', tag));
+  if (payload.cover_image) form.append('cover_image', payload.cover_image);
+}
+
 export async function createPost(payload: PostPayload): Promise<PostDetail> {
-  const { data } = await newsfeedClient.post<PostDetail>('/post/', payload);
+  if (payload.cover_image) {
+    const form = new FormData();
+    appendPostFields(form, payload);
+    const { data } = await newsfeedClient.post<PostDetail>('/post/', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  }
+  const { data } = await newsfeedClient.post<PostDetail>('/post/', {
+    post_type: payload.post_type,
+    title: payload.title,
+    description: payload.description,
+    post_date: payload.post_date,
+    post_time: payload.post_time,
+    status: payload.status,
+    is_public: payload.is_public,
+    tags: payload.tags ?? [],
+  });
   return data;
 }
 
 export async function updatePost(id: string, payload: PostPayload): Promise<PostDetail> {
-  const { data } = await newsfeedClient.patch<PostDetail>(`/post/${id}/`, payload);
+  if (payload.cover_image) {
+    const form = new FormData();
+    appendPostFields(form, payload);
+    const { data } = await newsfeedClient.patch<PostDetail>(`/post/${id}/`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  }
+  const { data } = await newsfeedClient.patch<PostDetail>(`/post/${id}/`, {
+    post_type: payload.post_type,
+    title: payload.title,
+    description: payload.description,
+    post_date: payload.post_date,
+    post_time: payload.post_time,
+    status: payload.status,
+    is_public: payload.is_public,
+    tags: payload.tags ?? [],
+  });
   return data;
 }
 

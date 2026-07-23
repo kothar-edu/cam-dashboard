@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { PageHeader } from '@/components/forms/PageHeader';
+import { FileField } from '@/components/forms/FileField';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { useCreatePost, usePost, useUpdatePost } from '@/hooks/usePosts';
 
@@ -22,7 +23,7 @@ export default function PostFormPage() {
   const [status, setStatus] = useState('Published');
   const [postDate, setPostDate] = useState('');
   const [postTime, setPostTime] = useState('12:00:00');
-  const [imageUrl, setImageUrl] = useState('');
+  const [coverImage, setCoverImage] = useState<File | null>(null);
   const [isPublic, setIsPublic] = useState(true);
 
   useEffect(() => {
@@ -33,10 +34,15 @@ export default function PostFormPage() {
       setStatus(postQuery.data.status);
       setPostDate(postQuery.data.post_date ?? '');
       setPostTime(postQuery.data.post_time ?? '12:00:00');
-      setImageUrl(postQuery.data.images?.[0]?.image_url ?? postQuery.data.cover_image ?? '');
       setIsPublic(postQuery.data.is_public ?? true);
     }
   }, [postQuery.data]);
+
+  const currentCoverUrl =
+    postQuery.data?.images?.find((img) => img.is_cover)?.image ??
+    postQuery.data?.images?.[0]?.image ??
+    postQuery.data?.cover_image ??
+    null;
 
   const buildPayload = () => ({
     post_type: postType,
@@ -47,7 +53,7 @@ export default function PostFormPage() {
     status,
     is_public: isPublic,
     tags: [] as string[],
-    images: imageUrl ? [{ image_url: imageUrl, is_cover: true }] : undefined,
+    cover_image: coverImage,
   });
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -80,7 +86,7 @@ export default function PostFormPage() {
                 required
               />
             </div>
-            <Input label="Cover image URL" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
+            <FileField label="Cover image" onChange={setCoverImage} currentUrl={currentCoverUrl} />
             <Input label="Post date" type="date" value={postDate} onChange={(e) => setPostDate(e.target.value)} />
             <Input label="Post time" type="time" value={postTime.slice(0, 5)} onChange={(e) => setPostTime(`${e.target.value}:00`)} />
             <SearchableSelect

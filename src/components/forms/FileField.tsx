@@ -12,7 +12,7 @@ export function FileField({ label, accept = 'image/*', onChange, currentUrl }: F
       {currentUrl ? (
         <div className="flex items-center gap-3">
           <img src={currentUrl} alt="" className="h-12 w-12 rounded border object-contain" />
-          <span className="text-xs text-muted-foreground">Current logo</span>
+          <span className="text-xs text-muted-foreground">Current image</span>
         </div>
       ) : null}
       <input

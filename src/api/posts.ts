@@ -31,8 +31,11 @@ export type PostPayload = {
   post_type: string;
   title: string;
   description: string;
-  post_date: string;
-  post_time: string;
+  // Left undefined when the admin doesn't set a date/time - the backend
+  // defaults both to the server clock at creation time rather than have
+  // the dashboard guess using the browser's own timezone.
+  post_date?: string;
+  post_time?: string;
   status: string;
   is_public: boolean;
   tags?: string[];
@@ -48,12 +51,25 @@ function appendPostFields(form: FormData, payload: PostPayload) {
   form.append('post_type', payload.post_type);
   form.append('title', payload.title);
   form.append('description', payload.description);
-  form.append('post_date', payload.post_date);
-  form.append('post_time', payload.post_time);
+  if (payload.post_date) form.append('post_date', payload.post_date);
+  if (payload.post_time) form.append('post_time', payload.post_time);
   form.append('status', payload.status);
   form.append('is_public', String(payload.is_public));
   (payload.tags ?? []).forEach((tag) => form.append('tags', tag));
   if (payload.cover_image) form.append('cover_image', payload.cover_image);
+}
+
+function jsonPostFields(payload: PostPayload) {
+  return {
+    post_type: payload.post_type,
+    title: payload.title,
+    description: payload.description,
+    ...(payload.post_date ? { post_date: payload.post_date } : {}),
+    ...(payload.post_time ? { post_time: payload.post_time } : {}),
+    status: payload.status,
+    is_public: payload.is_public,
+    tags: payload.tags ?? [],
+  };
 }
 
 export async function createPost(payload: PostPayload): Promise<PostDetail> {
@@ -65,16 +81,7 @@ export async function createPost(payload: PostPayload): Promise<PostDetail> {
     });
     return data;
   }
-  const { data } = await newsfeedClient.post<PostDetail>('/post/', {
-    post_type: payload.post_type,
-    title: payload.title,
-    description: payload.description,
-    post_date: payload.post_date,
-    post_time: payload.post_time,
-    status: payload.status,
-    is_public: payload.is_public,
-    tags: payload.tags ?? [],
-  });
+  const { data } = await newsfeedClient.post<PostDetail>('/post/', jsonPostFields(payload));
   return data;
 }
 
@@ -87,16 +94,7 @@ export async function updatePost(id: string, payload: PostPayload): Promise<Post
     });
     return data;
   }
-  const { data } = await newsfeedClient.patch<PostDetail>(`/post/${id}/`, {
-    post_type: payload.post_type,
-    title: payload.title,
-    description: payload.description,
-    post_date: payload.post_date,
-    post_time: payload.post_time,
-    status: payload.status,
-    is_public: payload.is_public,
-    tags: payload.tags ?? [],
-  });
+  const { data } = await newsfeedClient.patch<PostDetail>(`/post/${id}/`, jsonPostFields(payload));
   return data;
 }
 

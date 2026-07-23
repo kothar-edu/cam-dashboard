@@ -20,10 +20,13 @@ export default function PostFormPage() {
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [postType, setPostType] = useState('Blog');
+  const [postType, setPostType] = useState('News');
   const [status, setStatus] = useState('Published');
+  // Left blank on create - the backend stamps the server's current date/time
+  // when these are omitted, rather than the dashboard guessing with the
+  // browser's own timezone. See the hint text next to the fields.
   const [postDate, setPostDate] = useState('');
-  const [postTime, setPostTime] = useState('12:00:00');
+  const [postTime, setPostTime] = useState('');
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [isPublic, setIsPublic] = useState(true);
 
@@ -34,7 +37,7 @@ export default function PostFormPage() {
       setPostType(postQuery.data.post_type);
       setStatus(postQuery.data.status);
       setPostDate(postQuery.data.post_date ?? '');
-      setPostTime(postQuery.data.post_time ?? '12:00:00');
+      setPostTime(postQuery.data.post_time ?? '');
       setIsPublic(postQuery.data.is_public ?? true);
     }
   }, [postQuery.data]);
@@ -49,8 +52,8 @@ export default function PostFormPage() {
     post_type: postType,
     title: title.trim(),
     description,
-    post_date: postDate || new Date().toISOString().slice(0, 10),
-    post_time: postTime,
+    post_date: postDate || undefined,
+    post_time: postTime || undefined,
     status,
     is_public: isPublic,
     tags: [] as string[],
@@ -76,7 +79,7 @@ export default function PostFormPage() {
         {isEdit && postQuery.isLoading ? (
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         ) : (
-          <form onSubmit={handleSubmit} className="max-w-2xl space-y-4 rounded-lg border bg-white p-6">
+          <form onSubmit={handleSubmit} className="w-full space-y-4 rounded-lg border bg-white p-6">
             <Input label="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
             <div className="space-y-2" data-color-mode="light">
               <label className="text-sm font-medium text-[#12233D]">Description</label>
@@ -92,28 +95,50 @@ export default function PostFormPage() {
               </p>
             </div>
             <FileField label="Cover image" onChange={setCoverImage} currentUrl={currentCoverUrl} />
-            <Input label="Post date" type="date" value={postDate} onChange={(e) => setPostDate(e.target.value)} />
-            <Input label="Post time" type="time" value={postTime.slice(0, 5)} onChange={(e) => setPostTime(`${e.target.value}:00`)} />
-            <SearchableSelect
-              label="Type"
-              value={postType}
-              onChange={setPostType}
-              options={['Blog', 'News', 'Announcement'].map((option) => ({
-                value: option,
-                label: option,
-              }))}
-              searchable={false}
-            />
-            <SearchableSelect
-              label="Status"
-              value={status}
-              onChange={setStatus}
-              options={['Published', 'Draft'].map((option) => ({
-                value: option,
-                label: option,
-              }))}
-              searchable={false}
-            />
+            {/* Short-value fields stay reading-width even though the card
+                itself is full-width - a date picker stretched across a wide
+                monitor is its own kind of broken. */}
+            <div className="max-w-2xl space-y-2">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Input
+                  label="Post date (optional)"
+                  type="date"
+                  value={postDate}
+                  onChange={(e) => setPostDate(e.target.value)}
+                />
+                <Input
+                  label="Post time (optional)"
+                  type="time"
+                  value={postTime.slice(0, 5)}
+                  onChange={(e) => setPostTime(e.target.value ? `${e.target.value}:00` : '')}
+                />
+              </div>
+              <p className="text-xs text-gray-500">
+                Leave blank to publish with the current date and time.
+              </p>
+            </div>
+            <div className="grid max-w-2xl gap-4 sm:grid-cols-2">
+              <SearchableSelect
+                label="Type"
+                value={postType}
+                onChange={setPostType}
+                options={['Blog', 'News', 'Event', 'Match Update'].map((option) => ({
+                  value: option,
+                  label: option,
+                }))}
+                searchable={false}
+              />
+              <SearchableSelect
+                label="Status"
+                value={status}
+                onChange={setStatus}
+                options={['Published', 'Draft'].map((option) => ({
+                  value: option,
+                  label: option,
+                }))}
+                searchable={false}
+              />
+            </div>
             {isEdit ? (
               <label className="flex items-center gap-2 text-sm text-[#12233D]">
                 <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />

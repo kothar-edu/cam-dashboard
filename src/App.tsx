@@ -14,6 +14,7 @@ import PlayerFormPage from '@/pages/PlayerFormPage';
 import PlayerStatsPage from '@/pages/PlayerStatsPage';
 import FixturesPage from '@/pages/FixturesPage';
 import FixtureFormPage from '@/pages/FixtureFormPage';
+import ScoreLivePage from '@/pages/live/ScoreLivePage';
 import BulkFixtureFormPage from '@/pages/BulkFixtureFormPage';
 import ScorecardsPage from '@/pages/ScorecardsPage';
 import ScorecardDetailPage from '@/pages/ScorecardDetailPage';
@@ -64,6 +65,7 @@ export default function App() {
           <Route path="fixtures/new/bulk" element={<BulkFixtureFormPage />} />
           <Route path="fixtures/new" element={<FixtureFormPage />} />
           <Route path="fixtures/:id" element={<FixtureFormPage />} />
+          <Route path="fixtures/:id/score" element={<ScoreLivePage />} />
           <Route path="scorecards" element={<ScorecardsPage />} />
           <Route path="scorecards/:id" element={<ScorecardDetailPage />} />
           <Route path="points" element={<PointsPage />} />

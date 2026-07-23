@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Radio } from "lucide-react";
 import { DataTable } from "@/components/data-table/DataTable";
 import { SearchableSelect } from "@/components/forms/SearchableSelect";
 import { Button } from "@/components/ui/button";
@@ -209,15 +209,25 @@ export default function FixturesPage() {
             cell: (row) => (
               <div className="flex items-center gap-2">
                 {(row.status === "Live" || row.status === "Upcoming") && (
-                  <a
-                    href={`${LIVESCORE_ADMIN_URL}/livestream/${row.id}?tenant=${activeTenant?.schema_name}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D] hover:bg-gray-50"
-                    title="OBS overlay"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
+                  <>
+                    <Link
+                      to={`/dashboard/fixtures/${row.id}/score`}
+                      className="inline-flex items-center gap-1 rounded-md border border-green-300 bg-green-50 px-3 py-1 text-sm text-green-700 hover:bg-green-100"
+                      title="Score Live"
+                    >
+                      <Radio className="h-4 w-4" />
+                      Score Live
+                    </Link>
+                    <a
+                      href={`${LIVESCORE_ADMIN_URL}/livestream/${row.id}?tenant=${activeTenant?.schema_name}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D] hover:bg-gray-50"
+                      title="OBS overlay (legacy)"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </>
                 )}
                 <Link
                   to={`/dashboard/fixtures/${row.id}`}

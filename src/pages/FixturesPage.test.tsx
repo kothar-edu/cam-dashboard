@@ -134,4 +134,10 @@ describe('FixturesPage', () => {
     expect(lastCall).not.toHaveProperty('team');
     expect(lastCall).not.toHaveProperty('opponent_team');
   });
+
+  it('shows a Score Live link to the new console for Live and Upcoming fixtures', () => {
+    renderPage();
+    const scoreLiveLinks = screen.getAllByRole('link', { name: /score live/i });
+    expect(scoreLiveLinks[0]).toHaveAttribute('href', expect.stringContaining('/score'));
+  });
 });

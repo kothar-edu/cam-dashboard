@@ -8,8 +8,8 @@ import { createInitialLiveMatchState } from '@/lib/liveMatchReducer';
 
 const FIXTURE_DATA = {
   id: 'match-1',
-  opponent_a: { id: 'team-1', team_name: 'Team Alpha' },
-  opponent_b: { id: 'team-2', team_name: 'Team Beta' },
+  opponent_a: { id: 'team-1', team: { id: 'team-1', name: 'Team Alpha', code: 'ALP', logo: null } },
+  opponent_b: { id: 'team-2', team: { id: 'team-2', name: 'Team Beta', code: 'BET', logo: null } },
 };
 
 vi.mock('@/hooks/useLiveMatch');
@@ -48,6 +48,11 @@ describe('ScoreLivePage', () => {
     renderPage();
     expect(screen.getByText(/reconnecting/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '4' })).toBeDisabled();
+  });
+
+  it('renders the fixture opponent team names in the page title', () => {
+    renderPage();
+    expect(screen.getByText('Team Alpha vs Team Beta')).toBeInTheDocument();
   });
 
   it('enables controls once connectionStatus is open', () => {

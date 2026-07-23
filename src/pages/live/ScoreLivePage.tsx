@@ -46,7 +46,7 @@ export default function ScoreLivePage() {
     <TenantRequired>
       <div className="space-y-4">
         <PageHeader
-          title={`${fixture.opponent_a.team_name} vs ${fixture.opponent_b.team_name}`}
+          title={`${fixture.opponent_a.team.name} vs ${fixture.opponent_b.team.name}`}
           backTo="/dashboard/fixtures"
         />
 
@@ -134,8 +134,8 @@ export default function ScoreLivePage() {
               },
             );
           }}
-          teamAName={fixture.opponent_a.team_name}
-          teamBName={fixture.opponent_b.team_name}
+          teamAName={fixture.opponent_a.team.name}
+          teamBName={fixture.opponent_b.team.name}
           teamAId={fixture.opponent_a.id}
           teamBId={fixture.opponent_b.id}
           forfeitedOpponentId={forfeitedOpponentId}

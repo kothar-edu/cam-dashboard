@@ -55,7 +55,19 @@ export type BulkFixtureRowPayload =
       ground: string;
     };
 
-export type FixtureDetail = Fixture & {
+export type FixtureDetailOpponent = {
+  id: string;
+  team: {
+    id: string;
+    name: string;
+    code: string;
+    logo: string | null;
+  };
+};
+
+export type FixtureDetail = Omit<Fixture, 'opponent_a' | 'opponent_b'> & {
+  opponent_a: FixtureDetailOpponent;
+  opponent_b: FixtureDetailOpponent;
   round: string | null;
   result: string | null;
   lineups_a?: LineupEntry[];

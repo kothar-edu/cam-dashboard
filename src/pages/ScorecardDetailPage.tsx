@@ -83,7 +83,7 @@ export default function ScorecardDetailPage() {
           <div className="space-y-6">
             <div className="rounded-lg border bg-white p-6">
               <h2 className="text-lg font-semibold text-[#12233D]">
-                {data.opponent_a.team_name} vs {data.opponent_b.team_name}
+                {data.opponent_a.team.name} vs {data.opponent_b.team.name}
               </h2>
               <p className="text-sm text-muted-foreground">
                 {data.tournament?.name ?? 'Custom match'} · {data.status} · {data.ground ?? 'Venue TBC'}
@@ -92,37 +92,37 @@ export default function ScorecardDetailPage() {
             </div>
 
             <LineupEditor
-              title={`${data.opponent_a.team_name} — batting`}
+              title={`${data.opponent_a.team.name} — batting`}
               lineups={lineupsA}
               onChange={setLineupsA}
               mode="batting"
             />
             <LineupEditor
-              title={`${data.opponent_b.team_name} — batting`}
+              title={`${data.opponent_b.team.name} — batting`}
               lineups={lineupsB}
               onChange={setLineupsB}
               mode="batting"
             />
             <LineupEditor
-              title={`${data.opponent_a.team_name} — bowling`}
+              title={`${data.opponent_a.team.name} — bowling`}
               lineups={lineupsA}
               onChange={setLineupsA}
               mode="bowling"
             />
             <LineupEditor
-              title={`${data.opponent_b.team_name} — bowling`}
+              title={`${data.opponent_b.team.name} — bowling`}
               lineups={lineupsB}
               onChange={setLineupsB}
               mode="bowling"
             />
             <LineupEditor
-              title={`${data.opponent_a.team_name} — fielding`}
+              title={`${data.opponent_a.team.name} — fielding`}
               lineups={lineupsA}
               onChange={setLineupsA}
               mode="fielding"
             />
             <LineupEditor
-              title={`${data.opponent_b.team_name} — fielding`}
+              title={`${data.opponent_b.team.name} — fielding`}
               lineups={lineupsB}
               onChange={setLineupsB}
               mode="fielding"

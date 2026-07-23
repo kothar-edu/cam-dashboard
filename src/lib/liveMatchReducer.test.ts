@@ -83,3 +83,129 @@ describe('liveMatchReducer', () => {
     expect(JSON.stringify(state)).toBe(frozen);
   });
 });
+
+describe('derived broadcast stats', () => {
+  const baseCurrent = {
+    over: 0,
+    ball: 0,
+    inning: 1,
+    runs: 0,
+    wickets: 0,
+    target: 0,
+    crr: 0,
+    balls_remaining: 120,
+    required_runs: 0,
+    rrr: 0,
+    status: 'IN_PROGRESS',
+    projected: 0,
+  };
+
+  function withPlayers(overrides: Partial<Record<'striker' | 'non_striker' | 'bowler', any>> = {}) {
+    return {
+      bowler: overrides.bowler ?? { id: 'b1', full_name: 'Bowler', picture: null, reserve: false, stats: zeroStats() },
+      wicket_keeper: null,
+      striker: overrides.striker ?? { id: 's1', full_name: 'Striker', picture: null, reserve: false, stats: zeroStats() },
+      non_striker: overrides.non_striker ?? { id: 's2', full_name: 'Non-Striker', picture: null, reserve: false, stats: zeroStats() },
+    };
+  }
+
+  function zeroStats() {
+    return {
+      runs_scored: 0,
+      balls_faced: 0,
+      fours: 0,
+      sixes: 0,
+      is_out: false,
+      crr: 0,
+      srr: 0,
+      runs_conceded: 0,
+      overs_bowled: 0,
+      wickets_taken: 0,
+      wickets_lost: 0,
+      maidens: 0,
+      err: 0,
+    };
+  }
+
+  it('accumulates extras by category', () => {
+    let state = createInitialLiveMatchState();
+    state = liveMatchReducer(state, {
+      event_type: 'SCORE',
+      detail: {
+        current: { ...baseCurrent, runs: 1 },
+        game: { this_over: [scoreEvent({ value: 'WIDE_BALL', extras: 1, runs: 0 })], current_players: withPlayers() },
+      },
+    });
+    state = liveMatchReducer(state, {
+      event_type: 'SCORE',
+      detail: {
+        current: { ...baseCurrent, runs: 2 },
+        game: { this_over: [scoreEvent({ value: 'WIDE_BALL', extras: 1, runs: 0 }), scoreEvent({ value: 'LEG_BYE', extras: 1, runs: 0 })], current_players: withPlayers() },
+      },
+    });
+
+    // Note: extras accumulate from `lastBall` (the newest element of `this_over`) only,
+    // consistent with how `lastEvent` already treats `this_over[length - 1]` as "the ball
+    // that just happened". The WIDE_BALL from message 1 is not recounted when message 2's
+    // `this_over` re-includes it alongside the new LEG_BYE ball, so `wide` stays at 1.
+    expect(state.extras).toEqual({ wide: 1, no_ball: 0, bye: 0, leg_bye: 1, penalty: 0 });
+  });
+
+  it('resets partnership and records a fall-of-wicket entry on WICKET', () => {
+    let state = createInitialLiveMatchState();
+    state = liveMatchReducer(state, {
+      event_type: 'WICKET',
+      detail: {
+        current: { ...baseCurrent, runs: 23, wickets: 1, over: 4, ball: 2 },
+        game: {
+          this_over: [scoreEvent({ value: 'BOWLED', dismissed: 's1', runs: 0 })],
+          current_players: withPlayers({ striker: { id: 's3', full_name: 'New Batter', picture: null, reserve: false, stats: zeroStats() } }),
+        },
+      },
+    });
+
+    expect(state.fallOfWickets).toEqual([
+      { wicketNumber: 1, scoreAtWicket: 23, over: 4, ball: 2, playerId: 's1', dismissalType: 'BOWLED' },
+    ]);
+    expect(state.partnership.runsAtStart).toBe(23);
+    expect(state.partnership.ballsSinceWicket).toBe(0);
+  });
+
+  it('fires a 50-run milestone exactly once when a batter crosses the threshold', () => {
+    let state = createInitialLiveMatchState();
+    const strikerAt49 = { id: 's1', full_name: 'Striker', picture: null, reserve: false, stats: { ...zeroStats(), runs_scored: 49 } };
+    const strikerAt50 = { id: 's1', full_name: 'Striker', picture: null, reserve: false, stats: { ...zeroStats(), runs_scored: 50 } };
+
+    state = liveMatchReducer(state, {
+      event_type: 'SCORE',
+      detail: {
+        current: { ...baseCurrent, runs: 49 },
+        game: { this_over: [scoreEvent({ value: 1, runs: 1 })], current_players: withPlayers({ striker: strikerAt49 }) },
+      },
+    });
+    expect(state.milestones).toEqual([]);
+
+    state = liveMatchReducer(state, {
+      event_type: 'SCORE',
+      detail: {
+        current: { ...baseCurrent, runs: 50 },
+        game: { this_over: [scoreEvent({ value: 1, runs: 1 })], current_players: withPlayers({ striker: strikerAt50 }) },
+      },
+    });
+    expect(state.milestones).toEqual([{ key: 's1:50', playerId: 's1', kind: '50', atOver: 0, atBall: 0 }]);
+
+    // Sending the same 50-run state again must not refire the milestone.
+    state = liveMatchReducer(state, {
+      event_type: 'LIVE',
+      detail: { viewers: 1, current: state.current, game: { this_over: [], current_players: withPlayers({ striker: strikerAt50 }) } },
+    });
+    state = liveMatchReducer(state, {
+      event_type: 'SCORE',
+      detail: {
+        current: { ...baseCurrent, runs: 51 },
+        game: { this_over: [scoreEvent({ value: 1, runs: 1 })], current_players: withPlayers({ striker: strikerAt50 }) },
+      },
+    });
+    expect(state.milestones).toHaveLength(1);
+  });
+});

@@ -13,41 +13,58 @@ export function useLiveMatch(matchId: string | undefined, mode: LiveMatchMode) {
   const [state, setState] = useState<LiveMatchState>(createInitialLiveMatchState);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('connecting');
   const socketRef = useRef<WebSocket | null>(null);
-  const attemptsRef = useRef(0);
-  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const unmountedRef = useRef(false);
 
   useEffect(() => {
-    unmountedRef.current = false;
     if (!matchId) return undefined;
 
+    // These are intentionally local to this effect invocation (not hook-level
+    // refs) so each matchId "generation" gets its own isolated closure. If
+    // this effect is cleaned up (matchId change or unmount) before the old
+    // socket's async onclose fires, `cancelled` for THIS generation is
+    // captured by that stale handler and can never be reset by a later
+    // effect run - preventing the stale handler from reconnecting into the
+    // new generation's socketRef or acting on a stale attempt count.
+    let cancelled = false;
+    let attempts = 0;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
     function connect() {
+      if (cancelled) return;
       setConnectionStatus((prev) => (prev === 'open' ? prev : 'connecting'));
       const socket = new WebSocket(buildLiveScoreWsUrl(matchId as string));
       socketRef.current = socket;
 
       socket.onopen = () => {
-        attemptsRef.current = 0;
+        if (cancelled) return;
+        attempts = 0;
         setConnectionStatus('open');
       };
 
+      // Guarded (unlike onopen/onclose/onerror, this one is *not* optional to
+      // skip): `state` is shared across matchId generations and is not reset
+      // when matchId changes, so a message that arrives from a superseded
+      // socket after cleanup (e.g. already in flight when close() was
+      // called) would otherwise silently merge stale/wrong-match data into
+      // the state the new matchId's UI is reading.
       socket.onmessage = (event) => {
+        if (cancelled) return;
         const message = JSON.parse(event.data) as IncomingLiveScoreMessage;
         setState((prev) => liveMatchReducer(prev, message));
       };
 
       socket.onclose = () => {
-        if (unmountedRef.current) return;
-        if (attemptsRef.current >= MAX_RECONNECT_ATTEMPTS) {
+        if (cancelled) return;
+        if (attempts >= MAX_RECONNECT_ATTEMPTS) {
           setConnectionStatus('closed');
           return;
         }
         setConnectionStatus('reconnecting');
-        attemptsRef.current += 1;
-        reconnectTimerRef.current = setTimeout(connect, RECONNECT_DELAY_MS);
+        attempts += 1;
+        reconnectTimer = setTimeout(connect, RECONNECT_DELAY_MS);
       };
 
       socket.onerror = () => {
+        if (cancelled) return;
         socket.close();
       };
     }
@@ -55,8 +72,8 @@ export function useLiveMatch(matchId: string | undefined, mode: LiveMatchMode) {
     connect();
 
     return () => {
-      unmountedRef.current = true;
-      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+      cancelled = true;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
       socketRef.current?.close();
       socketRef.current = null;
     };

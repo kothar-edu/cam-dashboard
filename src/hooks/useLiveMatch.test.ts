@@ -108,4 +108,47 @@ describe('useLiveMatch', () => {
 
     expect(() => result.current.sendEvent({ event_type: 'SCORE', detail: { value: 4 } })).toThrow();
   });
+
+  it('ignores late close/message events from a socket superseded by a matchId change', async () => {
+    const { result, rerender } = renderHook(
+      ({ matchId }: { matchId: string }) => useLiveMatch(matchId, 'view'),
+      { initialProps: { matchId: 'match-1' } },
+    );
+
+    const first = FakeWebSocket.instances[0];
+    act(() => first.simulateOpen());
+    await waitFor(() => expect(result.current.connectionStatus).toBe('open'));
+
+    // Switch matches. React runs the old effect's cleanup (which closes
+    // `first`) and then immediately runs the new effect for 'match-2' in the
+    // same commit, before `first`'s own onclose would fire in a real browser.
+    rerender({ matchId: 'match-2' });
+
+    await waitFor(() => expect(FakeWebSocket.instances.length).toBe(2));
+    const second = FakeWebSocket.instances[1];
+    act(() => second.simulateOpen());
+    await waitFor(() => expect(result.current.connectionStatus).toBe('open'));
+
+    // Simulate the stale first socket's real (always-async) onclose firing
+    // late, after the new generation has already taken over. It must not
+    // schedule a reconnect for the old match or touch the new socket.
+    act(() => first.onclose?.());
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(FakeWebSocket.instances.length).toBe(2);
+    expect(result.current.connectionStatus).toBe('open');
+
+    // A late message from the stale first socket must not corrupt the state
+    // the new match's UI is reading.
+    act(() =>
+      first.simulateMessage({
+        event_type: 'LIVE',
+        detail: {
+          viewers: 3,
+          current: { over: 0, ball: 0, inning: 1, runs: 999, wickets: 0, target: 0, crr: 0, balls_remaining: 120, required_runs: 0, rrr: 0, status: 'IN_PROGRESS', projected: 0 },
+          game: { this_over: [], current_players: { bowler: null, wicket_keeper: null, striker: null, non_striker: null } },
+        },
+      }),
+    );
+    expect(result.current.state.current.runs).not.toBe(999);
+  });
 });

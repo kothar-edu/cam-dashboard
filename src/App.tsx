@@ -34,6 +34,7 @@ import GameSettingsPage from '@/pages/GameSettingsPage';
 import PaymentSettingsPage from '@/pages/PaymentSettingsPage';
 import VotingListPage from '@/pages/VotingListPage';
 import VotingFormPage from '@/pages/VotingFormPage';
+import BroadcastOverlayPage from '@/pages/broadcast/BroadcastOverlayPage';
 
 export default function App() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
       <Toaster position="top-right" />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/broadcast/:matchId" element={<BroadcastOverlayPage />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route
           path="/dashboard"

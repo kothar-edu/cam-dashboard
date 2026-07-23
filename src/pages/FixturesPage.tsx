@@ -22,9 +22,6 @@ const STATUS_TABS = ["Live", "Upcoming", "Ended"] as const;
 type StatusTab = (typeof STATUS_TABS)[number];
 const ANY_TEAM_VALUE = "__any__";
 
-const LIVESCORE_ADMIN_URL =
-  import.meta.env.VITE_LIVESCORE_ADMIN_URL || "http://localhost:3000";
-
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString(undefined, {
     month: "short",
@@ -218,15 +215,15 @@ export default function FixturesPage() {
                       <Radio className="h-4 w-4" />
                       Score Live
                     </Link>
-                    <a
-                      href={`${LIVESCORE_ADMIN_URL}/livestream/${row.id}?tenant=${activeTenant?.schema_name}`}
+                    <Link
+                      to={`/broadcast/${row.id}?tenant=${activeTenant?.schema_name}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D] hover:bg-gray-50"
-                      title="OBS overlay (legacy)"
+                      title="OBS overlay"
                     >
                       <ExternalLink className="h-4 w-4" />
-                    </a>
+                    </Link>
                   </>
                 )}
                 <Link

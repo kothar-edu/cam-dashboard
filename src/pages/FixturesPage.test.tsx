@@ -140,4 +140,11 @@ describe('FixturesPage', () => {
     const scoreLiveLinks = screen.getAllByRole('link', { name: /score live/i });
     expect(scoreLiveLinks[0]).toHaveAttribute('href', expect.stringContaining('/score'));
   });
+
+  it('links the OBS overlay icon to the internal broadcast route, not the legacy livescore-admin app', () => {
+    renderPage();
+    const overlayLink = screen.getByTitle('OBS overlay');
+    expect(overlayLink).toHaveAttribute('href', expect.stringContaining('/broadcast/'));
+    expect(overlayLink).not.toHaveAttribute('href', expect.stringContaining('livestream'));
+  });
 });

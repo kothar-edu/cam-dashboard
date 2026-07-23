@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useLiveMatch } from './useLiveMatch';
+import { createInitialLiveMatchState } from '@/lib/liveMatchReducer';
 
 class FakeWebSocket {
   static instances: FakeWebSocket[] = [];
@@ -150,5 +151,53 @@ describe('useLiveMatch', () => {
       }),
     );
     expect(result.current.state.current.runs).not.toBe(999);
+  });
+
+  it('resets state and connectionStatus when matchId changes', async () => {
+    const { result, rerender } = renderHook(
+      ({ matchId }: { matchId: string }) => useLiveMatch(matchId, 'view'),
+      { initialProps: { matchId: 'match-1' } },
+    );
+
+    const first = FakeWebSocket.instances[0];
+    act(() => first.simulateOpen());
+    await waitFor(() => expect(result.current.connectionStatus).toBe('open'));
+
+    // Populate derived state (fallOfWickets, extras, lastEvent, etc.) via a
+    // WICKET message, the same shape used for SCORE/WICKET elsewhere in this
+    // file.
+    act(() =>
+      first.simulateMessage({
+        event_type: 'WICKET',
+        detail: {
+          current: { over: 1, ball: 3, inning: 1, runs: 12, wickets: 1, target: 0, crr: 6, balls_remaining: 114, required_runs: 0, rrr: 0, status: 'IN_PROGRESS', projected: 0 },
+          game: {
+            this_over: [
+              {
+                striker: 'player-1',
+                bowler: 'player-2',
+                value: 'BOWLED',
+                extras: 0,
+                runs: 0,
+                dismissed: 'player-1',
+                fielder: null,
+                is_bat_involved: true,
+                commentary: 'bowled',
+              },
+            ],
+            current_players: { bowler: null, wicket_keeper: null, striker: null, non_striker: null },
+          },
+        },
+      }),
+    );
+
+    expect(result.current.state.fallOfWickets.length).toBe(1);
+    expect(result.current.state.current.runs).toBe(12);
+
+    // Switch matches without unmounting.
+    rerender({ matchId: 'match-2' });
+
+    expect(result.current.state).toEqual(createInitialLiveMatchState());
+    expect(result.current.connectionStatus).toBe('connecting');
   });
 });

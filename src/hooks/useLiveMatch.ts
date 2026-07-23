@@ -17,6 +17,18 @@ export function useLiveMatch(matchId: string | undefined, mode: LiveMatchMode) {
   useEffect(() => {
     if (!matchId) return undefined;
 
+    // Reset derived state and connection status for the new matchId
+    // "generation". Without this, switching matchId on a mounted hook (e.g.
+    // client-side navigation between /broadcast/:matchId routes without a
+    // remount) would carry the previous match's extras, fallOfWickets,
+    // partnership, and firedMilestoneKeys into the new match's state until
+    // enough new SCORE/WICKET events overwrote them - and would keep
+    // reporting a stale 'open' connectionStatus for the new (not-yet-open)
+    // socket. Harmless on first mount too, since state is already the
+    // initial value then.
+    setState(createInitialLiveMatchState());
+    setConnectionStatus('connecting');
+
     // These are intentionally local to this effect invocation (not hook-level
     // refs) so each matchId "generation" gets its own isolated closure. If
     // this effect is cleaned up (matchId change or unmount) before the old
@@ -30,7 +42,13 @@ export function useLiveMatch(matchId: string | undefined, mode: LiveMatchMode) {
 
     function connect() {
       if (cancelled) return;
-      setConnectionStatus((prev) => (prev === 'open' ? prev : 'connecting'));
+      // No functional guard needed here: the effect-top reset above already
+      // handles the matchId-change case (connectionStatus starts at
+      // 'connecting' before this first connect() call), and for the
+      // recursive reconnect-after-drop call, onclose already set
+      // 'reconnecting' before scheduling the retry - so unconditionally
+      // setting 'connecting' here is always correct.
+      setConnectionStatus('connecting');
       const socket = new WebSocket(buildLiveScoreWsUrl(matchId as string));
       socketRef.current = socket;
 
@@ -41,11 +59,11 @@ export function useLiveMatch(matchId: string | undefined, mode: LiveMatchMode) {
       };
 
       // Guarded (unlike onopen/onclose/onerror, this one is *not* optional to
-      // skip): `state` is shared across matchId generations and is not reset
-      // when matchId changes, so a message that arrives from a superseded
-      // socket after cleanup (e.g. already in flight when close() was
-      // called) would otherwise silently merge stale/wrong-match data into
-      // the state the new matchId's UI is reading.
+      // skip): although `state` is reset to fresh initial state at the top
+      // of each effect run, a message that arrives from a superseded socket
+      // after cleanup (e.g. already in flight when close() was called) would
+      // otherwise still merge stale/wrong-match data into the state the new
+      // matchId's UI is reading.
       socket.onmessage = (event) => {
         if (cancelled) return;
         const message = JSON.parse(event.data) as IncomingLiveScoreMessage;

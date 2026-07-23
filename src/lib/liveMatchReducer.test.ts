@@ -82,6 +82,41 @@ describe('liveMatchReducer', () => {
 
     expect(JSON.stringify(state)).toBe(frozen);
   });
+
+  it('preserves currentPlayers on a LIVE viewer-count ping whose game object is empty', () => {
+    const striker = {
+      id: 's1',
+      full_name: 'Striker One',
+      picture: null,
+      reserve: false,
+      stats: {
+        runs_scored: 16, balls_faced: 9, fours: 2, sixes: 0, is_out: false, crr: 0, srr: 0,
+        runs_conceded: 0, overs_bowled: 0, wickets_taken: 0, wickets_lost: 0, maidens: 0, err: 0,
+      },
+    };
+    let state = createInitialLiveMatchState();
+    state = liveMatchReducer(state, {
+      event_type: 'SUMMARY',
+      detail: {
+        current: state.current,
+        score_history: [],
+        opponents: {},
+        game: { this_over: [], current_players: { bowler: null, wicket_keeper: null, striker, non_striker: null } },
+      },
+    });
+    expect(state.currentPlayers.striker).toEqual(striker);
+
+    // Real backend behavior (apps/livescore/utils/game_play.py's update_viewers,
+    // extra_summary=False): LIVE is a periodic viewer-count ping whose `game`
+    // is `{}` on the wire - no `current_players` key at all.
+    const next = liveMatchReducer(state, {
+      event_type: 'LIVE',
+      detail: { viewers: 3, current: state.current, game: {} },
+    });
+
+    expect(next.currentPlayers.striker).toEqual(striker);
+    expect(next.viewers).toBe(3);
+  });
 });
 
 describe('derived broadcast stats', () => {

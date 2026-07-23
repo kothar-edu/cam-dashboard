@@ -171,10 +171,16 @@ export function liveMatchReducer(state: LiveMatchState, message: IncomingLiveSco
       return state;
 
     case 'LIVE':
+      // The backend sends LIVE purely as a periodic viewer-count ping
+      // (apps/livescore/utils/game_play.py's update_viewers, extra_summary=False)
+      // - `game` is `{}` on the wire, with no `current_players` key at all.
+      // Falling back to the existing value here (instead of overwriting with
+      // undefined) prevents a LIVE ping from wiping out the real player
+      // assignments a prior SUMMARY/SCORE/WICKET message already established.
       return {
         ...state,
         current: message.detail.current,
-        currentPlayers: message.detail.game.current_players,
+        currentPlayers: message.detail.game.current_players ?? state.currentPlayers,
         viewers: message.detail.viewers,
       };
 

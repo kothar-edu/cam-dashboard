@@ -113,7 +113,15 @@ export type LiveBroadcastDetail = {
 
 export type IncomingLiveScoreMessage =
   | { event_type: 'ERROR'; detail: { message: string; code: string } }
-  | { event_type: 'LIVE'; detail: Pick<LiveBroadcastDetail, 'viewers' | 'current' | 'game'> }
+  | {
+      // Real backend behavior (apps/livescore/utils/game_play.py's
+      // update_viewers, extra_summary=False): LIVE is a periodic
+      // viewer-count ping whose `game` is `{}` on the wire - none of its
+      // fields (including current_players) are guaranteed present, unlike
+      // every other event type below.
+      event_type: 'LIVE';
+      detail: Pick<LiveBroadcastDetail, 'viewers' | 'current'> & { game: Partial<LiveBroadcastDetail['game']> };
+    }
   | { event_type: 'SCORE' | 'WICKET'; detail: Pick<LiveBroadcastDetail, 'current' | 'game'> }
   | {
       event_type: 'SUMMARY';

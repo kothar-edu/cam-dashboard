@@ -6,7 +6,7 @@ function BatterRow({ player, active }: { player: LiveMatchPlayer | null; active?
   if (!player) return null;
   return (
     <div className={`flex h-10 items-center gap-2 text-xl ${active ? 'text-blue-800' : 'text-slate-700'}`}>
-      {active && <BatIcon className="h-5 w-5 shrink-0" />}
+      {active && <BatIcon className="h-5 w-5 shrink-0 text-blue-800" />}
       <span className="uppercase">{player.full_name}</span>
       <span className="ml-auto flex items-end gap-1 text-3xl">
         <span>{player.stats.runs_scored}</span>

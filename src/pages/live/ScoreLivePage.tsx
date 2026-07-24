@@ -90,10 +90,10 @@ export default function ScoreLivePage() {
           </div>
         </div>
 
-        <div className="flex gap-2 border-t pt-4">
+        <div className="flex flex-wrap gap-2 border-t pt-4">
           <button
             type="button"
-            className="rounded-md border border-orange-300 bg-orange-50 px-3 py-1 text-sm text-orange-700 hover:bg-orange-100"
+            className="rounded-md border border-orange-300 bg-orange-50 px-3 py-2 text-sm text-orange-700 hover:bg-orange-100"
             onClick={() => {
               setForfeitedOpponentId('');
               setPointsToAward(2);
@@ -104,7 +104,7 @@ export default function ScoreLivePage() {
           </button>
           <button
             type="button"
-            className="rounded-md border border-yellow-300 bg-yellow-50 px-3 py-1 text-sm text-yellow-700 hover:bg-yellow-100"
+            className="rounded-md border border-yellow-300 bg-yellow-50 px-3 py-2 text-sm text-yellow-700 hover:bg-yellow-100"
             onClick={() => setAbandonOpen(true)}
           >
             Abandon

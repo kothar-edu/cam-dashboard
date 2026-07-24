@@ -87,7 +87,7 @@ function ChangePasswordForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-6">
+    <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
       <h2 className="text-lg font-semibold text-[#12233D]">Change password</h2>
       <Input label="Current password" type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} required />
       <Input label="New password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
@@ -156,7 +156,7 @@ function CreateAdminForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-6">
+    <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
       <h2 className="text-lg font-semibold text-[#12233D]">Create admin user</h2>
       <p className="text-sm text-muted-foreground">
         Creates a verified user with profile fields required by the backend registration API.

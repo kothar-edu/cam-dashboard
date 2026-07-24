@@ -106,7 +106,7 @@ function BulkFixtureRowFields({
           </Button>
         ) : null}
       </div>
-      <div className="grid gap-3 md:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {locked ? null : (
           <SearchableSelect
             label="Tournament"

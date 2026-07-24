@@ -76,7 +76,7 @@ export default function PaymentSettingsPage() {
             Unable to load payment settings.
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-6">
+          <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
             <Input
               label="Account name"
               value={bankAccountName}

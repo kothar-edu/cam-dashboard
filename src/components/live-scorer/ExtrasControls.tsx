@@ -40,19 +40,20 @@ export function ExtrasControls({ broadcastScore, disabled }: ExtrasControlsProps
   };
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
       {EXTRA_TYPES.map(({ value, label }) => (
         <div key={value} className="relative">
           <Button
             type="button"
             variant="secondary"
+            className="w-full"
             disabled={disabled}
             onClick={() => setExpanded(expanded === value ? null : value)}
           >
             {label}
           </Button>
           {expanded === value && (
-            <div className="absolute z-20 mt-1 w-56 rounded-md border border-gray-300 bg-white p-2 shadow-lg">
+            <div className="absolute left-0 z-20 mt-1 w-[min(14rem,calc(100vw-2rem))] rounded-md border border-gray-300 bg-white p-2 shadow-lg">
               {value === 'NO_BALL' && (
                 <div className="mb-2 flex gap-1">
                   {NO_BALL_SOURCES.map((source) => (

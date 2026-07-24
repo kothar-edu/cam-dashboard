@@ -9,8 +9,10 @@ export function TenantPicker() {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm text-muted-foreground">Organization</span>
+    <div className="flex min-w-0 flex-1 items-center gap-2 sm:flex-initial">
+      <span className="hidden shrink-0 text-sm text-muted-foreground sm:inline">
+        Organization
+      </span>
       <SearchableSelect
         value={activeTenantId ?? ''}
         onChange={setActiveTenantId}
@@ -18,10 +20,10 @@ export function TenantPicker() {
           value: tenant.schema_name,
           label: tenant.name,
         }))}
-        placeholder="Select organization"
+        placeholder="Organization"
         searchable
-        className="w-56 space-y-0"
-        triggerClassName="h-9"
+        className="min-w-0 flex-1 space-y-0 sm:w-56 sm:flex-initial"
+        triggerClassName="h-9 w-full"
       />
     </div>
   );

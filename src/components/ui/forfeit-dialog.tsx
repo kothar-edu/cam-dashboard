@@ -36,7 +36,7 @@ export function ForfeitDialog({
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="fixed inset-0 z-50 bg-black/40" />
-        <AlertDialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-6 shadow-xl">
+        <AlertDialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[min(90dvh,40rem)] w-[calc(100vw-1.5rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg bg-white p-4 shadow-xl sm:p-6">
           <AlertDialog.Title className="text-lg font-semibold text-[#12233D]">
             Forfeit / Withdraw Match
           </AlertDialog.Title>
@@ -100,9 +100,9 @@ export function ForfeitDialog({
             )}
           </div>
 
-          <div className="mt-6 flex justify-end gap-3">
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
             <AlertDialog.Cancel asChild>
-              <Button variant="outline" disabled={isLoading}>
+              <Button variant="outline" disabled={isLoading} className="w-full sm:w-auto">
                 Cancel
               </Button>
             </AlertDialog.Cancel>
@@ -111,6 +111,7 @@ export function ForfeitDialog({
               isLoading={isLoading}
               onClick={onConfirm}
               disabled={!canConfirm}
+              className="w-full sm:w-auto"
             >
               Forfeit match
             </Button>

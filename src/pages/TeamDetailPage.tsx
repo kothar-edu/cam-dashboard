@@ -125,7 +125,7 @@ export default function TeamDetailPage() {
           <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">Team not found.</div>
         ) : (
           <>
-            <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-6">
+            <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
               <p className="text-sm text-muted-foreground">
                 {teamQuery.data.total_players} registered player
                 {teamQuery.data.total_players === 1 ? '' : 's'}
@@ -147,7 +147,7 @@ export default function TeamDetailPage() {
               </Button>
             </form>
 
-            <form onSubmit={handleMaintainerSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-6">
+            <form onSubmit={handleMaintainerSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-[#12233D]">Team maintainer</h2>
               <p className="text-sm text-muted-foreground">
                 Assign a registered organization member as maintainer. They can manage roster join requests and edit
@@ -175,7 +175,7 @@ export default function TeamDetailPage() {
               </Button>
             </form>
 
-            <form onSubmit={handlePaymentSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-6">
+            <form onSubmit={handlePaymentSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-[#12233D]">Payment settings</h2>
               <p className="text-sm text-muted-foreground">
                 Team-level bank details and verification rules override tenant defaults when set.

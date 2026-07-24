@@ -75,7 +75,7 @@ export default function TenantsPage() {
 
       <form
         onSubmit={handleCreateTenant}
-        className="max-w-xl space-y-4 rounded-lg border bg-white p-6"
+        className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
       >
         <h2 className="text-lg font-semibold text-[#12233D]">Create tenant</h2>
         <Input
@@ -131,7 +131,7 @@ export default function TenantsPage() {
           <>
             <form
               onSubmit={handleAssignAdmin}
-              className="max-w-2xl space-y-4 rounded-lg border bg-white p-4"
+              className="max-w-2xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
             >
               <UserEmailLookupField
                 onResolved={(user) => {

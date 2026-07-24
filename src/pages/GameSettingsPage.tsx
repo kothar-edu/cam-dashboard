@@ -54,7 +54,7 @@ export default function GameSettingsPage() {
             Unable to load game configuration.
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-6">
+          <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
             <label className="flex items-center justify-between gap-4 rounded-md border p-4">
               <div>
                 <p className="text-sm font-medium text-[#12233D]">Registration open</p>

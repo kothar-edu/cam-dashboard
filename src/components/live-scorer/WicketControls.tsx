@@ -25,7 +25,7 @@ export function WicketControls({ broadcastWicket, currentPlayers, fieldingOppone
     <div className="flex flex-col gap-3">
       <div>
         <p className="mb-1 text-sm font-bold text-[#12233D]">Dismissal (striker, fielder = bowler or keeper)</p>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {SIMPLE_DISMISSALS.map(({ value, label }) => (
             <Button
               key={value}

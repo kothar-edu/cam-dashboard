@@ -231,7 +231,7 @@ export default function FixtureFormPage() {
         {isEdit && fixtureQuery.isLoading ? (
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         ) : (
-          <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-6">
+          <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
             {!isEdit ? (
               <>
                 <SearchableSelect

@@ -126,30 +126,31 @@ export default function FixturesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold tracking-tight text-[#12233D] sm:text-2xl">
             Fixtures
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="truncate text-sm text-muted-foreground">
             {activeTenant.name} · scheduled matches
           </p>
         </div>
         <Link
           to="/dashboard/fixtures/new"
-          className="inline-flex items-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white"
+          className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
         >
           New Fixture
         </Link>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="filter-chip-row">
         {STATUS_TABS.map((tab) => (
           <Button
             key={tab}
             type="button"
             variant={status === tab ? "primary" : "outline"}
             onClick={() => changeStatus(tab)}
+            className="flex-1 sm:flex-initial"
           >
             {tab}
           </Button>
@@ -204,31 +205,31 @@ export default function FixturesPage() {
             id: "actions",
             header: "Actions",
             cell: (row) => (
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-[12rem] flex-wrap items-center gap-1.5">
                 {(row.status === "Live" || row.status === "Upcoming") && (
                   <>
                     <Link
                       to={`/dashboard/fixtures/${row.id}/score`}
-                      className="inline-flex items-center gap-1 rounded-md border border-green-300 bg-green-50 px-3 py-1 text-sm text-green-700 hover:bg-green-100"
+                      className="inline-flex items-center gap-1 rounded-md border border-green-300 bg-green-50 px-2 py-1 text-xs text-green-700 hover:bg-green-100 sm:px-3 sm:text-sm"
                       title="Score Live"
                     >
-                      <Radio className="h-4 w-4" />
-                      Score Live
+                      <Radio className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      Score
                     </Link>
                     <Link
                       to={`/broadcast/${row.id}?tenant=${activeTenant?.schema_name}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D] hover:bg-gray-50"
+                      className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-2 py-1 text-xs text-[#12233D] hover:bg-gray-50 sm:px-3 sm:text-sm"
                       title="OBS overlay"
                     >
-                      <ExternalLink className="h-4 w-4" />
+                      <ExternalLink className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </Link>
                   </>
                 )}
                 <Link
                   to={`/dashboard/fixtures/${row.id}`}
-                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D] hover:bg-gray-50"
+                  className="inline-flex items-center rounded-md border border-gray-300 px-2 py-1 text-xs text-[#12233D] hover:bg-gray-50 sm:px-3 sm:text-sm"
                 >
                   Edit
                 </Link>
@@ -242,7 +243,7 @@ export default function FixturesPage() {
                         setPointsToAward(2);
                         setForfeitOpen(true);
                       }}
-                      className="inline-flex items-center rounded-md border border-orange-300 bg-orange-50 px-3 py-1 text-sm text-orange-700 hover:bg-orange-100"
+                      className="inline-flex items-center rounded-md border border-orange-300 bg-orange-50 px-2 py-1 text-xs text-orange-700 hover:bg-orange-100 sm:px-3 sm:text-sm"
                     >
                       Forfeit
                     </button>
@@ -252,7 +253,7 @@ export default function FixturesPage() {
                         setAbandonRow(row);
                         setAbandonOpen(true);
                       }}
-                      className="inline-flex items-center rounded-md border border-yellow-300 bg-yellow-50 px-3 py-1 text-sm text-yellow-700 hover:bg-yellow-100"
+                      className="inline-flex items-center rounded-md border border-yellow-300 bg-yellow-50 px-2 py-1 text-xs text-yellow-700 hover:bg-yellow-100 sm:px-3 sm:text-sm"
                     >
                       Abandon
                     </button>
@@ -262,7 +263,7 @@ export default function FixturesPage() {
                         setTargetRow(row);
                         setConfirmOpen(true);
                       }}
-                      className="inline-flex items-center rounded-md border border-red-300 bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100"
+                      className="inline-flex items-center rounded-md border border-red-300 bg-red-50 px-2 py-1 text-xs text-red-600 hover:bg-red-100 sm:px-3 sm:text-sm"
                     >
                       Cancel
                     </button>

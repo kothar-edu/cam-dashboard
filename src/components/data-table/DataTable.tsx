@@ -12,6 +12,8 @@ export type DataTableColumn<T> = {
   header: string;
   cell: (row: T) => React.ReactNode;
   className?: string;
+  /** Hide this column below the given Tailwind breakpoint (sm | md | lg). */
+  hideBelow?: 'sm' | 'md' | 'lg';
 };
 
 export type DataTablePagination = {
@@ -29,14 +31,25 @@ type DataTableProps<T extends { id: string | number }> = {
   emptyMessage?: string;
 };
 
-function LoadingRows({ columnCount }: { columnCount: number }) {
+const hideBelowClass: Record<NonNullable<DataTableColumn<unknown>['hideBelow']>, string> = {
+  sm: 'hidden sm:table-cell',
+  md: 'hidden md:table-cell',
+  lg: 'hidden lg:table-cell',
+};
+
+function LoadingRows({ columns }: { columns: DataTableColumn<unknown>[] }) {
   return (
     <>
       {Array.from({ length: 3 }).map((_, rowIndex) => (
         <TableRow key={`loading-${rowIndex}`} data-testid="data-table-loading">
-          {Array.from({ length: columnCount }).map((__, colIndex) => (
-            <TableCell key={`loading-cell-${colIndex}`}>
-              <div className="h-4 w-full animate-pulse rounded bg-muted" />
+          {columns.map((column) => (
+            <TableCell
+              key={`loading-cell-${column.id}`}
+              className={[column.className, column.hideBelow ? hideBelowClass[column.hideBelow] : '']
+                .filter(Boolean)
+                .join(' ')}
+            >
+              <div className="h-4 w-full min-w-[4rem] animate-pulse rounded bg-muted" />
             </TableCell>
           ))}
         </TableRow>
@@ -61,50 +74,72 @@ export function DataTable<T extends { id: string | number }>({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {columns.map((column) => (
-                <TableHead key={column.id} className={column.className}>
-                  {column.header}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <LoadingRows columnCount={columns.length} />
-            ) : data.length === 0 ? (
+      <div className="overflow-hidden rounded-md border bg-white">
+        <div className="w-full overflow-x-auto overscroll-x-contain">
+          <Table className="min-w-[640px]">
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                  {emptyMessage}
-                </TableCell>
+                {columns.map((column) => (
+                  <TableHead
+                    key={column.id}
+                    className={[
+                      'whitespace-nowrap',
+                      column.className,
+                      column.hideBelow ? hideBelowClass[column.hideBelow] : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    {column.header}
+                  </TableHead>
+                ))}
               </TableRow>
-            ) : (
-              data.map((row) => (
-                <TableRow key={row.id}>
-                  {columns.map((column) => (
-                    <TableCell key={column.id} className={column.className}>
-                      {column.cell(row)}
-                    </TableCell>
-                  ))}
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <LoadingRows columns={columns as DataTableColumn<unknown>[]} />
+              ) : data.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-muted-foreground"
+                  >
+                    {emptyMessage}
+                  </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                data.map((row) => (
+                  <TableRow key={row.id}>
+                    {columns.map((column) => (
+                      <TableCell
+                        key={column.id}
+                        className={[
+                          column.className,
+                          column.hideBelow ? hideBelowClass[column.hideBelow] : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                      >
+                        {column.cell(row)}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {pagination && onPaginationChange ? (
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>
+        <div className="flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <span className="min-w-0">
             Page {pagination.pageIndex + 1} of {pageCount} ({pagination.totalCount} total)
           </span>
           <div className="flex gap-2">
             <button
               type="button"
-              className="rounded border px-3 py-1 disabled:opacity-50"
+              className="flex-1 rounded border px-3 py-1.5 disabled:opacity-50 sm:flex-initial"
               disabled={!canPrevious}
               onClick={() =>
                 onPaginationChange({
@@ -117,7 +152,7 @@ export function DataTable<T extends { id: string | number }>({
             </button>
             <button
               type="button"
-              className="rounded border px-3 py-1 disabled:opacity-50"
+              className="flex-1 rounded border px-3 py-1.5 disabled:opacity-50 sm:flex-initial"
               disabled={!canNext}
               onClick={() =>
                 onPaginationChange({

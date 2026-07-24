@@ -30,7 +30,7 @@ export default function TeamFormPage() {
           description="Register a new team in the active organization."
           backTo="/dashboard/teams"
         />
-        <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-6">
+        <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
           <Input label="Team name" value={name} onChange={(e) => setName(e.target.value)} required />
           <Input
             label="Abbreviation"

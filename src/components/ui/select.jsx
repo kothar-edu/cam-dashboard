@@ -18,10 +18,18 @@ export function Select({ value, onValueChange, children, disabled }) {
   const updatePosition = useCallback(() => {
     if (!triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
+    const viewportPadding = 8;
+    const preferredWidth = Math.max(rect.width, 160);
+    const maxWidth = Math.min(preferredWidth, window.innerWidth - viewportPadding * 2);
+    let left = rect.left;
+    if (left + maxWidth > window.innerWidth - viewportPadding) {
+      left = Math.max(viewportPadding, window.innerWidth - viewportPadding - maxWidth);
+    }
+    if (left < viewportPadding) left = viewportPadding;
     setPosition({
       top: rect.bottom + 4,
-      left: rect.left,
-      width: rect.width,
+      left,
+      width: maxWidth,
     });
   }, []);
 
@@ -265,7 +273,9 @@ export const SelectContent = React.forwardRef(function SelectContent(
         top: position?.top ?? 0,
         left: position?.left ?? 0,
         width: position?.width ?? undefined,
-        minWidth: Math.max(position?.width ?? 0, 200),
+        minWidth: position?.width ?? undefined,
+        maxWidth: "calc(100vw - 1rem)",
+        maxHeight: "min(20rem, calc(100dvh - 1rem))",
         zIndex: DROPDOWN_Z_INDEX,
       }}
       onClick={(e) => e.stopPropagation()}

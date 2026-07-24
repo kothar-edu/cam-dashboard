@@ -69,7 +69,7 @@ export default function PostsPage() {
         </div>
         <Link
           to="/dashboard/posts/new"
-          className="inline-flex items-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white"
+          className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
         >
           New Post
         </Link>

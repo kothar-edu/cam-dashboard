@@ -39,9 +39,37 @@
   * {
     @apply border-border;
   }
+  html {
+    @apply h-full;
+    -webkit-text-size-adjust: 100%;
+  }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply min-h-full bg-background text-foreground antialiased;
     /* font-feature-settings: "rlig" 1, "calt" 1; */
+  }
+  #root {
+    @apply min-h-full;
+  }
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@layer components {
+  /* Shared surface for forms and settings panels */
+  .page-card {
+    @apply w-full max-w-full rounded-lg border bg-white p-4 sm:p-6;
+  }
+  .page-section {
+    @apply space-y-4 sm:space-y-6;
+  }
+  /* Horizontal chip/tab strips that wrap on narrow viewports */
+  .filter-chip-row {
+    @apply flex flex-wrap gap-2;
   }
 }
 /* Autocomplete Input */

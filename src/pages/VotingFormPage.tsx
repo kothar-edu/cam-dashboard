@@ -133,7 +133,7 @@ export default function VotingFormPage() {
             </Link>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="max-w-2xl space-y-4 rounded-lg border bg-white p-6">
+          <form onSubmit={handleSubmit} className="max-w-2xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
             <SearchableSelect
               label="Tournament"
               value={tournamentId}

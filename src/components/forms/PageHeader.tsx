@@ -11,17 +11,25 @@ type PageHeaderProps = {
 
 export function PageHeader({ title, description, backTo, backLabel, action }: PageHeaderProps) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4">
-      <div className="space-y-1">
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-4">
+      <div className="min-w-0 space-y-1">
         {backTo ? (
           <Link to={backTo} className="text-sm font-medium text-[#12233D] underline">
             {backLabel ?? 'Back'}
           </Link>
         ) : null}
-        <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">{title}</h1>
-        {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+        <h1 className="break-words text-xl font-bold tracking-tight text-[#12233D] sm:text-2xl">
+          {title}
+        </h1>
+        {description ? (
+          <p className="text-sm text-muted-foreground">{description}</p>
+        ) : null}
       </div>
-      {action}
+      {action ? (
+        <div className="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
+          {action}
+        </div>
+      ) : null}
     </div>
   );
 }

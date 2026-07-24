@@ -29,7 +29,7 @@ export function TossAndMatchControls({ broadcastGameEvent, teamA, teamB, disable
   const [tossRole, setTossRole] = useState('');
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
       <div>
         <Button type="button" disabled={disabled} onClick={() => setTossOpen(!tossOpen)}>
           Toss

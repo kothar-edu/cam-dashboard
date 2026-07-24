@@ -96,7 +96,7 @@ function StatusFilterTabs({
   onChange: (value: StatusFilter) => void;
 }) {
   return (
-    <div className="flex gap-1 rounded-lg border bg-gray-50 p-1 w-fit">
+    <div className="flex w-full flex-wrap gap-1 rounded-lg border bg-gray-50 p-1 sm:w-fit">
       {STATUS_TABS.map((option) => (
         <Button
           key={option.value}

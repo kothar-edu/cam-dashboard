@@ -59,7 +59,7 @@ export default function SponsorFormPage() {
         {isEdit && sponsorQuery.isLoading ? (
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         ) : (
-          <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-6">
+          <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
             <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} required />
             <Input label="Website URL" value={supportedUrl} onChange={(e) => setSupportedUrl(e.target.value)} />
             <FileField

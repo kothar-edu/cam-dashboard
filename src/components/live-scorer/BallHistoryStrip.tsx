@@ -16,7 +16,7 @@ type BallHistoryStripProps = {
 
 export function BallHistoryStrip({ scoreHistory }: BallHistoryStripProps) {
   return (
-    <div className="flex gap-2 overflow-x-auto rounded-md border border-gray-200 bg-white p-2">
+    <div className="flex gap-2 overflow-x-auto overscroll-x-contain rounded-md border border-gray-200 bg-white p-2">
       {scoreHistory.map((overBalls, index) => (
         <div key={index} data-testid="over-row" className="flex shrink-0 items-center gap-1">
           <span className="text-xs text-gray-500">{ordinal(index + 1)}</span>

@@ -3,6 +3,7 @@ import { DataTable } from '@/components/data-table/DataTable';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
+import { Modal } from '@/components/ui/modal';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { mediaUrl, type TeamJoinApplication, type TenantRegistration } from '@/api/verification';
 import { useTenant } from '@/contexts/TenantContext';
@@ -39,43 +40,48 @@ function StudentFeeBadge() {
 }
 
 function ReceiptPanel({
+  open,
   title,
   receipt,
   onClose,
 }: {
+  open: boolean;
   title: string;
   receipt: string | null;
   onClose: () => void;
 }) {
   const url = mediaUrl(receipt);
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-md rounded-lg border bg-white p-6 shadow-lg">
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <h3 className="text-lg font-semibold text-[#12233D]">{title}</h3>
-          <Button type="button" variant="outline" size="sm" onClick={onClose}>
-            Close
-          </Button>
+    <Modal
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
+      title={title}
+    >
+      {url ? (
+        <div className="space-y-3">
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-[#E8A93B] underline"
+          >
+            Open receipt
+          </a>
+          {url.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) ? (
+            <img src={url} alt={title} className="max-h-48 rounded border object-contain" />
+          ) : null}
         </div>
-        {url ? (
-          <div className="space-y-3">
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-[#E8A93B] underline"
-            >
-              Open receipt
-            </a>
-            {url.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) ? (
-              <img src={url} alt={title} className="max-h-48 rounded border object-contain" />
-            ) : null}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">No receipt uploaded.</p>
-        )}
+      ) : (
+        <p className="text-sm text-muted-foreground">No receipt uploaded.</p>
+      )}
+      <div className="mt-4 flex justify-end">
+        <Button type="button" variant="outline" size="sm" onClick={onClose}>
+          Close
+        </Button>
       </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -500,45 +506,51 @@ export default function VerificationPage() {
         />
       )}
 
-      {rejectTarget ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-lg border bg-white p-6 shadow-lg">
-            <h3 className="text-lg font-semibold text-[#12233D]">Reject registration</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Rejecting {rejectTarget.user_name}&apos;s request for {rejectTarget.tenant_name}.
-            </p>
-            <div className="mt-4 space-y-4">
-              <Input
-                label="Reason (optional)"
-                value={rejectReason}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  setRejectReason(event.target.value)
-                }
-              />
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setRejectTarget(null)}>
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  disabled={reviewRegistration.isPending}
-                  onClick={handleRejectRegistration}
-                >
-                  Reject
-                </Button>
-              </div>
-            </div>
+      <Modal
+        open={rejectTarget !== null}
+        onOpenChange={(next) => {
+          if (!next) setRejectTarget(null);
+        }}
+        title="Reject registration"
+      >
+        <p className="mt-2 text-sm text-muted-foreground">
+          Rejecting {rejectTarget?.user_name}&apos;s request for {rejectTarget?.tenant_name}.
+        </p>
+        <div className="mt-4 space-y-4">
+          <Input
+            label="Reason (optional)"
+            value={rejectReason}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              setRejectReason(event.target.value)
+            }
+          />
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setRejectTarget(null)}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={reviewRegistration.isPending}
+              onClick={handleRejectRegistration}
+              className="w-full sm:w-auto"
+            >
+              Reject
+            </Button>
           </div>
         </div>
-      ) : null}
+      </Modal>
 
-      {receiptTarget ? (
-        <ReceiptPanel
-          title={receiptTarget.title}
-          receipt={receiptTarget.receipt}
-          onClose={() => setReceiptTarget(null)}
-        />
-      ) : null}
+      <ReceiptPanel
+        open={receiptTarget !== null}
+        title={receiptTarget?.title ?? ''}
+        receipt={receiptTarget?.receipt ?? null}
+        onClose={() => setReceiptTarget(null)}
+      />
 
       <ConfirmDialog
         open={approveRegTarget !== null}
@@ -562,37 +574,44 @@ export default function VerificationPage() {
         }}
       />
 
-      {rejectJoinTarget ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-lg border bg-white p-6 shadow-lg">
-            <h3 className="text-lg font-semibold text-[#12233D]">Reject team join request</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Rejecting {rejectJoinTarget.user_name}&apos;s request to join {rejectJoinTarget.team_name}.
-            </p>
-            <div className="mt-4 space-y-4">
-              <Input
-                label="Reason (optional)"
-                value={rejectJoinReason}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  setRejectJoinReason(event.target.value)
-                }
-              />
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setRejectJoinTarget(null)}>
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  disabled={reviewTeamJoin.isPending}
-                  onClick={handleRejectTeamJoin}
-                >
-                  Reject
-                </Button>
-              </div>
-            </div>
+      <Modal
+        open={rejectJoinTarget !== null}
+        onOpenChange={(next) => {
+          if (!next) setRejectJoinTarget(null);
+        }}
+        title="Reject team join request"
+      >
+        <p className="mt-2 text-sm text-muted-foreground">
+          Rejecting {rejectJoinTarget?.user_name}&apos;s request to join {rejectJoinTarget?.team_name}.
+        </p>
+        <div className="mt-4 space-y-4">
+          <Input
+            label="Reason (optional)"
+            value={rejectJoinReason}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              setRejectJoinReason(event.target.value)
+            }
+          />
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setRejectJoinTarget(null)}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={reviewTeamJoin.isPending}
+              onClick={handleRejectTeamJoin}
+              className="w-full sm:w-auto"
+            >
+              Reject
+            </Button>
           </div>
         </div>
-      ) : null}
+      </Modal>
 
       <ConfirmDialog
         open={approveJoinTarget !== null}

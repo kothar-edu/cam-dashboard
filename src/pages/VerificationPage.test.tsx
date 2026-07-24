@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import VerificationPage from './VerificationPage';
@@ -57,5 +58,39 @@ describe('VerificationPage', () => {
     expect(screen.getByText('Test Player')).toBeInTheDocument();
     expect(screen.getByText('player@example.com')).toBeInTheDocument();
     expect(screen.getByText('Approve')).toBeInTheDocument();
+  });
+
+  it('opens the reject dialog with scroll-safe sizing so the Reject button stays reachable on short viewports', async () => {
+    const user = userEvent.setup();
+    const qc = new QueryClient();
+    render(
+      <QueryClientProvider client={qc}>
+        <VerificationPage />
+      </QueryClientProvider>
+    );
+
+    const [rowRejectButton] = screen.getAllByRole('button', { name: 'Reject' });
+    await user.click(rowRejectButton);
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.className).toContain('overflow-y-auto');
+    expect(dialog.className).toContain('max-h-[min(90dvh,40rem)]');
+    expect(within(dialog).getByRole('button', { name: 'Reject' })).toBeInTheDocument();
+  });
+
+  it('opens the receipt viewer with scroll-safe sizing', async () => {
+    const user = userEvent.setup();
+    const qc = new QueryClient();
+    render(
+      <QueryClientProvider client={qc}>
+        <VerificationPage />
+      </QueryClientProvider>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'View' }));
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.className).toContain('overflow-y-auto');
+    expect(screen.getByText('Open receipt')).toBeInTheDocument();
   });
 });

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { playerOptionLabel } from '@/lib/playerLabel';
 import { SectionCard } from './SectionCard';
 import type { CurrentPlayersState, LiveMatchPlayer, OpponentsState, PlayerRole } from '@/types/liveMatch';
 
@@ -47,10 +48,10 @@ export function PlayerAssignment({
   return (
     <SectionCard title="Players on Field">
       <div className="flex flex-col gap-3">
-        <RoleAssignmentRow role="striker" pool={battingPlayers} current={currentPlayers.striker} updatePlayer={updatePlayer} disabled={disabled} optionState={battingOptionState} />
-        <RoleAssignmentRow role="non_striker" pool={battingPlayers} current={currentPlayers.non_striker} updatePlayer={updatePlayer} disabled={disabled} optionState={battingOptionState} />
-        <RoleAssignmentRow role="bowler" pool={bowlingPlayers} current={currentPlayers.bowler} updatePlayer={updatePlayer} disabled={disabled} optionState={bowlerOptionState} />
-        <RoleAssignmentRow role="wicket_keeper" pool={bowlingPlayers} current={currentPlayers.wicket_keeper} updatePlayer={updatePlayer} disabled={disabled} />
+        <RoleAssignmentRow role="striker" pool={battingPlayers} current={currentPlayers.striker} currentPlayers={currentPlayers} updatePlayer={updatePlayer} disabled={disabled} optionState={battingOptionState} />
+        <RoleAssignmentRow role="non_striker" pool={battingPlayers} current={currentPlayers.non_striker} currentPlayers={currentPlayers} updatePlayer={updatePlayer} disabled={disabled} optionState={battingOptionState} />
+        <RoleAssignmentRow role="bowler" pool={bowlingPlayers} current={currentPlayers.bowler} currentPlayers={currentPlayers} updatePlayer={updatePlayer} disabled={disabled} optionState={bowlerOptionState} />
+        <RoleAssignmentRow role="wicket_keeper" pool={bowlingPlayers} current={currentPlayers.wicket_keeper} currentPlayers={currentPlayers} updatePlayer={updatePlayer} disabled={disabled} />
 
         {retiredHurtPlayers.length > 0 && (
           <div className="rounded-lg bg-orange-50 p-3">
@@ -79,11 +80,12 @@ export function PlayerAssignment({
 }
 
 function RoleAssignmentRow({
-  role, pool, current, updatePlayer, disabled, optionState,
+  role, pool, current, currentPlayers, updatePlayer, disabled, optionState,
 }: {
   role: PlayerRole;
   pool: LiveMatchPlayer[];
   current: LiveMatchPlayer | null;
+  currentPlayers: CurrentPlayersState;
   updatePlayer: (type: PlayerRole, id: string) => void;
   disabled: boolean;
   optionState?: (player: LiveMatchPlayer) => OptionState;
@@ -105,7 +107,7 @@ function RoleAssignmentRow({
             const state = optionState?.(player) ?? { disabled: false };
             return (
               <option key={player.id} value={player.id} disabled={state.disabled}>
-                {player.full_name}
+                {playerOptionLabel(player, currentPlayers)}
                 {state.reason ? ` — ${state.reason}` : ''}
               </option>
             );

@@ -47,4 +47,54 @@ describe('WicketControls', () => {
 
     expect(broadcastWicket).toHaveBeenCalledWith('RUN_OUT', 's2', 1, 'f1');
   });
+
+  it('Caught expands a fielder-only form instead of firing immediately', () => {
+    const broadcastWicket = vi.fn();
+    render(
+      <WicketControls broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={false} />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Caught' }));
+    expect(broadcastWicket).not.toHaveBeenCalled();
+
+    fireEvent.change(screen.getByLabelText('Fielder'), { target: { value: 'f1' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+
+    expect(broadcastWicket).toHaveBeenCalledWith('CAUGHT', 's1', 0, 'f1');
+  });
+
+  it('Hit Wicket broadcasts immediately with no runs picker, matching the app', () => {
+    const broadcastWicket = vi.fn();
+    render(
+      <WicketControls broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={false} />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hit Wicket' }));
+
+    expect(broadcastWicket).toHaveBeenCalledWith('HIT_WICKET', 's1', 0, wicketKeeper.id);
+    expect(screen.queryByLabelText(/runs/i)).not.toBeInTheDocument();
+  });
+
+  it('fielder options are tagged with the current wicket-keeper role', () => {
+    render(
+      <WicketControls broadcastWicket={vi.fn()} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={false} />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Caught' }));
+
+    expect(screen.getByRole('option', { name: 'Keeper [ wk ]' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Fielder One' })).toBeInTheDocument();
+  });
+
+  it('closes an open popover when clicking outside it', () => {
+    render(
+      <WicketControls broadcastWicket={vi.fn()} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={false} />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Run Out' }));
+    expect(screen.getByLabelText('Dismissed player')).toBeInTheDocument();
+
+    fireEvent.pointerDown(document.body);
+    expect(screen.queryByLabelText('Dismissed player')).not.toBeInTheDocument();
+  });
 });

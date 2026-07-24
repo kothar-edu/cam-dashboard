@@ -12,21 +12,29 @@ function resolveWsOrigin(): string {
   return `${wsProtocol}${httpOrigin.replace(/^https?/, '')}`;
 }
 
-export function buildLiveScoreWsUrl(matchId: string): string {
+/**
+ * `tenantOverride` lets a caller supply the tenant explicitly instead of
+ * relying on `getStoredTenantId()` - the broadcast overlay needs this for
+ * anonymous/logged-out viewers, who have no stored tenant but do have one
+ * in the page's own `?tenant=` URL param.
+ */
+export function buildLiveScoreWsUrl(matchId: string, tenantOverride?: string | null): string {
   const base = `${resolveWsOrigin()}/ws/livescore/v2/${matchId}/`;
 
   const params = new URLSearchParams();
   const token = getStoredAccessToken();
   if (token) params.set('token', token);
-  const tenantId = getStoredTenantId();
+  const tenantId = tenantOverride ?? getStoredTenantId();
   if (tenantId) params.set('tenant', tenantId);
 
   const query = params.toString();
   return query ? `${base}?${query}` : base;
 }
 
-export async function fetchLiveMatchInfo(matchId: string): Promise<LiveMatchInfo> {
-  const response = await apiClient.get(`/game/match/${matchId}/`);
+export async function fetchLiveMatchInfo(matchId: string, tenantOverride?: string | null): Promise<LiveMatchInfo> {
+  const response = await apiClient.get(`/game/match/${matchId}/`, {
+    headers: tenantOverride ? { 'X-Tenant-ID': tenantOverride } : undefined,
+  });
   const data = response.data;
   return {
     ground: data.ground ?? null,

@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useLiveMatch } from '@/hooks/useLiveMatch';
 import { useLiveMatchInfo } from '@/hooks/useLiveMatchInfo';
@@ -19,9 +19,15 @@ const CANVAS_HEIGHT = 1080;
 
 export default function BroadcastOverlayPage() {
   const { matchId } = useParams<{ matchId: string }>();
+  // Anonymous/logged-out viewers (the whole point of a public broadcast
+  // link) have no stored tenant - the link itself carries one via
+  // `?tenant=`, so that always takes priority over whatever's in
+  // localStorage (which, for a logged-out browser, is nothing at all).
+  const [searchParams] = useSearchParams();
+  const tenant = searchParams.get('tenant');
 
-  const { state } = useLiveMatch(matchId, 'view');
-  const { data: info, isLoading } = useLiveMatchInfo(matchId);
+  const { state } = useLiveMatch(matchId, 'view', tenant);
+  const { data: info, isLoading } = useLiveMatchInfo(matchId, tenant);
   const { scaleX, scaleY } = useCanvasScale(CANVAS_WIDTH, CANVAS_HEIGHT);
 
   useEffect(() => {
@@ -83,7 +89,10 @@ export default function BroadcastOverlayPage() {
         <div className="absolute bottom-14 flex w-full flex-col items-center gap-2">
           <div className="flex w-11/12 items-center justify-between gap-6 rounded-2xl bg-sky-200/80 px-6 py-3 shadow-lg">
             <BatterBowlerCards currentPlayers={state.currentPlayers} sponsors={info.sponsors} />
-            <div className="flex w-[420px] shrink-0 flex-col items-center gap-1">
+            {/* Wide enough that a full over (up to ~9-10 balls with extras)
+                fits on one row before OverHistoryStrip's own flex-wrap
+                kicks in - was 420px, cramped to ~10 badges. */}
+            <div className="flex w-[640px] shrink-0 flex-col items-center gap-1">
               <ScoreBug current={state.current} battingTeam={state.opponents.batting} bowlingTeam={state.opponents.bowling} />
               <OverHistoryStrip thisOver={state.scoreHistory[state.current.over] ?? []} />
             </div>

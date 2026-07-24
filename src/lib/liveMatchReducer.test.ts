@@ -206,6 +206,37 @@ describe('derived broadcast stats', () => {
     expect(state.partnership.ballsSinceWicket).toBe(0);
   });
 
+  it('ignores a replayed WICKET for a wicket number already recorded, instead of appending a duplicate fallOfWickets entry', () => {
+    const wicketMessage = {
+      event_type: 'WICKET' as const,
+      detail: {
+        current: { ...baseCurrent, runs: 23, wickets: 1, over: 4, ball: 2 },
+        game: {
+          this_over: [scoreEvent({ value: 'BOWLED', dismissed: 's1', runs: 0 })],
+          current_players: withPlayers({ striker: { id: 's3', full_name: 'New Batter', picture: null, reserve: false, stats: zeroStats() } }),
+        },
+      },
+    };
+
+    let state = createInitialLiveMatchState();
+    state = liveMatchReducer(state, wicketMessage);
+    // A couple more legal balls bowled before the (buggy) replay arrives.
+    state = liveMatchReducer(state, {
+      event_type: 'SCORE',
+      detail: {
+        current: { ...baseCurrent, runs: 25, wickets: 1, over: 4, ball: 3 },
+        game: { this_over: [scoreEvent({ value: 2, runs: 2 })], current_players: state.currentPlayers },
+      },
+    });
+    const stateBeforeReplay = state;
+
+    // The backend re-broadcasts the same WICKET message (e.g. reconnect resync).
+    state = liveMatchReducer(state, wicketMessage);
+
+    expect(state.fallOfWickets).toHaveLength(1);
+    expect(state.partnership).toEqual(stateBeforeReplay.partnership);
+  });
+
   it('marks the dismissed player is_out in opponents.batting.players immediately, without waiting for the next SUMMARY', () => {
     const s1 = { id: 's1', full_name: 'Striker', picture: null, reserve: false, stats: zeroStats() };
     const s2 = { id: 's2', full_name: 'Non-Striker', picture: null, reserve: false, stats: zeroStats() };

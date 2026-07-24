@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { setAuthTokens, clearAuthTokens, setStoredTenantId } from './client';
-import { buildLiveScoreWsUrl } from './livescore';
+import { apiClient, setAuthTokens, clearAuthTokens, setStoredTenantId } from './client';
+import { buildLiveScoreWsUrl, fetchLiveMatchInfo } from './livescore';
 
 describe('buildLiveScoreWsUrl', () => {
   beforeEach(() => {
@@ -54,5 +54,60 @@ describe('buildLiveScoreWsUrl', () => {
     const url = buildLiveScoreWsUrl('match-1');
 
     expect(url).toBe('ws://127.0.0.1:8000/ws/livescore/v2/match-1/?tenant=acme');
+  });
+
+  it('a tenantOverride wins over the stored tenant - the anonymous broadcast page has no stored tenant at all', () => {
+    vi.stubEnv('VITE_URL', 'http://127.0.0.1:8000');
+    clearAuthTokens();
+    setStoredTenantId('logged-in-admins-tenant');
+
+    const url = buildLiveScoreWsUrl('match-1', 'from-broadcast-link');
+
+    expect(url).toBe('ws://127.0.0.1:8000/ws/livescore/v2/match-1/?tenant=from-broadcast-link');
+  });
+
+  it('falls back to the stored tenant when no override is given', () => {
+    vi.stubEnv('VITE_URL', 'http://127.0.0.1:8000');
+    clearAuthTokens();
+    setStoredTenantId('acme');
+
+    const url = buildLiveScoreWsUrl('match-1', undefined);
+
+    expect(url).toBe('ws://127.0.0.1:8000/ws/livescore/v2/match-1/?tenant=acme');
+  });
+});
+
+describe('fetchLiveMatchInfo', () => {
+  const infoResponse = {
+    data: {
+      ground: null,
+      tournament: null,
+      powerplay_overs: 6,
+      livestream_overlay: null,
+      boundary_labels: null,
+      sponsors: [],
+    },
+  };
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('sends the tenantOverride as an explicit X-Tenant-ID header - needed for anonymous broadcast viewers with no stored tenant', async () => {
+    const getSpy = vi.spyOn(apiClient, 'get').mockResolvedValue(infoResponse);
+
+    await fetchLiveMatchInfo('match-1', 'from-broadcast-link');
+
+    expect(getSpy).toHaveBeenCalledWith('/game/match/match-1/', {
+      headers: { 'X-Tenant-ID': 'from-broadcast-link' },
+    });
+  });
+
+  it('sends no explicit header when no tenantOverride is given, leaving the stored-tenant interceptor in charge', async () => {
+    const getSpy = vi.spyOn(apiClient, 'get').mockResolvedValue(infoResponse);
+
+    await fetchLiveMatchInfo('match-1');
+
+    expect(getSpy).toHaveBeenCalledWith('/game/match/match-1/', { headers: undefined });
   });
 });

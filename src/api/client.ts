@@ -61,8 +61,13 @@ function attachAuthInterceptors(client: AxiosInstance) {
   client.interceptors.request.use((config) => {
     const token = getStoredAccessToken();
     if (token) config.headers.Authorization = `Bearer ${token}`;
-    const tenantId = getStoredTenantId();
-    if (tenantId) config.headers['X-Tenant-ID'] = tenantId;
+    // A caller-supplied X-Tenant-ID (e.g. the broadcast overlay, which reads
+    // its tenant from the page URL for anonymous/logged-out viewers) always
+    // wins over the logged-in user's stored tenant.
+    if (!config.headers['X-Tenant-ID']) {
+      const tenantId = getStoredTenantId();
+      if (tenantId) config.headers['X-Tenant-ID'] = tenantId;
+    }
     return config;
   });
 

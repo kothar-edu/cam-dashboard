@@ -226,33 +226,45 @@ export function liveMatchReducer(state: LiveMatchState, message: IncomingLiveSco
       );
 
       const isWicket = message.event_type === 'WICKET';
-      const fallOfWickets = isWicket
-        ? [
-            ...state.fallOfWickets,
-            {
-              wicketNumber: message.detail.current.wickets,
-              scoreAtWicket: message.detail.current.runs,
-              over: message.detail.current.over,
-              ball: message.detail.current.ball,
-              playerId: lastBall?.dismissed ?? null,
-              dismissalType: lastBall?.value ?? 'BOWLED',
-            },
-          ]
-        : state.fallOfWickets;
+      // The backend can re-broadcast the same WICKET message (e.g. on
+      // reconnect resync) - without this guard, every replay would append
+      // another identical fallOfWickets entry and reset the partnership
+      // again, which is where the "5 identical FOW entries" / negative
+      // partnership bugs came from. Treat a replay of an already-recorded
+      // wicket number as a no-op for both, instead of double-counting it.
+      const isDuplicateWicket =
+        isWicket && state.fallOfWickets.some((entry) => entry.wicketNumber === message.detail.current.wickets);
 
-      const partnership = isWicket
-        ? {
-            runsAtStart: message.detail.current.runs,
-            ballsSinceWicket: 0,
-            batterIds: [
-              message.detail.game.current_players.striker?.id ?? null,
-              message.detail.game.current_players.non_striker?.id ?? null,
-            ] as [string | null, string | null],
-          }
-        : {
-            ...state.partnership,
-            ballsSinceWicket: state.partnership.ballsSinceWicket + (lastBall && isLegalDelivery(lastBall.value) ? 1 : 0),
-          };
+      const fallOfWickets =
+        isWicket && !isDuplicateWicket
+          ? [
+              ...state.fallOfWickets,
+              {
+                wicketNumber: message.detail.current.wickets,
+                scoreAtWicket: message.detail.current.runs,
+                over: message.detail.current.over,
+                ball: message.detail.current.ball,
+                playerId: lastBall?.dismissed ?? null,
+                dismissalType: lastBall?.value ?? 'BOWLED',
+              },
+            ]
+          : state.fallOfWickets;
+
+      const partnership = isDuplicateWicket
+        ? state.partnership
+        : isWicket
+          ? {
+              runsAtStart: message.detail.current.runs,
+              ballsSinceWicket: 0,
+              batterIds: [
+                message.detail.game.current_players.striker?.id ?? null,
+                message.detail.game.current_players.non_striker?.id ?? null,
+              ] as [string | null, string | null],
+            }
+          : {
+              ...state.partnership,
+              ballsSinceWicket: state.partnership.ballsSinceWicket + (lastBall && isLegalDelivery(lastBall.value) ? 1 : 0),
+            };
 
       return {
         ...state,

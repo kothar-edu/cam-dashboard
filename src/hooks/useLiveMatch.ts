@@ -9,7 +9,7 @@ export type ConnectionStatus = 'connecting' | 'open' | 'reconnecting' | 'closed'
 const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY_MS = 1500;
 
-export function useLiveMatch(matchId: string | undefined, mode: LiveMatchMode) {
+export function useLiveMatch(matchId: string | undefined, mode: LiveMatchMode, tenant?: string | null) {
   const [state, setState] = useState<LiveMatchState>(createInitialLiveMatchState);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('connecting');
   const socketRef = useRef<WebSocket | null>(null);
@@ -49,7 +49,7 @@ export function useLiveMatch(matchId: string | undefined, mode: LiveMatchMode) {
       // 'reconnecting' before scheduling the retry - so unconditionally
       // setting 'connecting' here is always correct.
       setConnectionStatus('connecting');
-      const socket = new WebSocket(buildLiveScoreWsUrl(matchId as string));
+      const socket = new WebSocket(buildLiveScoreWsUrl(matchId as string, tenant));
       socketRef.current = socket;
 
       socket.onopen = () => {
@@ -95,7 +95,7 @@ export function useLiveMatch(matchId: string | undefined, mode: LiveMatchMode) {
       socketRef.current?.close();
       socketRef.current = null;
     };
-  }, [matchId]);
+  }, [matchId, tenant]);
 
   const sendEvent = useCallback(
     (message: OutgoingLiveScoreMessage) => {

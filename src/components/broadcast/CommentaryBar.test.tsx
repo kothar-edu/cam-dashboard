@@ -29,7 +29,29 @@ describe('CommentaryBar', () => {
     expect(screen.getByText('Central Oval')).toBeInTheDocument();
     expect(screen.getByText(/70 RUNS NEEDED IN 60/)).toBeInTheDocument();
     expect(screen.getByText(/RRR: 7/)).toBeInTheDocument();
-    expect(screen.getByText('Team A vs Team B')).toBeInTheDocument();
+    expect(screen.getByText('Team A')).toBeInTheDocument();
+    expect(screen.getByText('Team B')).toBeInTheDocument();
+    expect(screen.queryAllByRole('img')).toHaveLength(0);
+  });
+
+  it('shows each team logo next to its name when set', () => {
+    const withLogos = {
+      battingTeam: { ...battingTeam, logo: 'https://example.com/a.png' },
+      bowlingTeam: { ...bowlingTeam, logo: 'https://example.com/b.png' },
+    };
+    render(
+      <CommentaryBar
+        current={chasingCurrent}
+        battingTeam={withLogos.battingTeam}
+        bowlingTeam={withLogos.bowlingTeam}
+        ground="Central Oval"
+        sponsorText={null}
+      />,
+    );
+    const images = screen.getAllByRole('img');
+    expect(images).toHaveLength(2);
+    expect(images[0]).toHaveAttribute('src', 'https://example.com/a.png');
+    expect(images[1]).toHaveAttribute('src', 'https://example.com/b.png');
   });
 
   it('shows the projected score during the initial stats phase', () => {

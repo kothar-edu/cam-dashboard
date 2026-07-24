@@ -56,8 +56,28 @@ export function CommentaryBar({ current, battingTeam, bowlingTeam, ground, spons
           </div>
         )}
       </div>
-      <div className="flex h-full w-[420px] shrink-0 items-center bg-sky-200/80 px-3 text-xl capitalize text-slate-700">
-        {battingTeam?.name ?? '—'} vs {bowlingTeam?.name ?? '—'}
+      <div className="flex h-full w-[420px] shrink-0 items-center gap-1.5 overflow-hidden bg-sky-200/80 px-3 text-xl capitalize text-slate-700">
+        <span className="flex min-w-0 items-center gap-1.5 truncate">
+          {battingTeam?.logo && (
+            <img
+              src={battingTeam.logo}
+              alt={`${battingTeam.name} logo`}
+              className="h-6 w-6 shrink-0 rounded-full bg-white object-cover"
+            />
+          )}
+          <span className="truncate">{battingTeam?.name ?? '—'}</span>
+        </span>
+        <span className="shrink-0 lowercase text-slate-500">vs</span>
+        <span className="flex min-w-0 items-center gap-1.5 truncate">
+          {bowlingTeam?.logo && (
+            <img
+              src={bowlingTeam.logo}
+              alt={`${bowlingTeam.name} logo`}
+              className="h-6 w-6 shrink-0 rounded-full bg-white object-cover"
+            />
+          )}
+          <span className="truncate">{bowlingTeam?.name ?? '—'}</span>
+        </span>
       </div>
     </div>
   );

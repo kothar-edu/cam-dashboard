@@ -12,27 +12,34 @@ afterEach(() => {
 });
 
 describe('useCanvasScale', () => {
-  it('scales down to fit a viewport smaller than the canvas', () => {
-    setViewport(960, 540);
+  it('returns 1:1 scale when the viewport matches the canvas exactly (OBS Browser Source)', () => {
+    setViewport(1920, 1080);
     const { result } = renderHook(() => useCanvasScale(1920, 1080));
-    expect(result.current).toBe(0.5);
+    expect(result.current).toEqual({ scaleX: 1, scaleY: 1 });
   });
 
-  it('picks the smaller of the two axis ratios so the canvas never overflows', () => {
-    setViewport(1920, 400);
+  it('computes independent x/y scale factors so the canvas fills the viewport with no letterboxing', () => {
+    setViewport(960, 540);
     const { result } = renderHook(() => useCanvasScale(1920, 1080));
-    expect(result.current).toBeCloseTo(400 / 1080);
+    expect(result.current).toEqual({ scaleX: 0.5, scaleY: 0.5 });
+  });
+
+  it('stretches non-uniformly when the viewport aspect ratio differs from the canvas', () => {
+    setViewport(1920, 800);
+    const { result } = renderHook(() => useCanvasScale(1920, 1080));
+    expect(result.current.scaleX).toBe(1);
+    expect(result.current.scaleY).toBeCloseTo(800 / 1080);
   });
 
   it('recomputes on window resize', () => {
     setViewport(1920, 1080);
     const { result } = renderHook(() => useCanvasScale(1920, 1080));
-    expect(result.current).toBe(1);
+    expect(result.current).toEqual({ scaleX: 1, scaleY: 1 });
 
     act(() => {
       setViewport(960, 1080);
       window.dispatchEvent(new Event('resize'));
     });
-    expect(result.current).toBe(0.5);
+    expect(result.current).toEqual({ scaleX: 0.5, scaleY: 1 });
   });
 });

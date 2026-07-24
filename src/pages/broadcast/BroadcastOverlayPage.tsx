@@ -22,7 +22,7 @@ export default function BroadcastOverlayPage() {
 
   const { state } = useLiveMatch(matchId, 'view');
   const { data: info, isLoading } = useLiveMatchInfo(matchId);
-  const scale = useCanvasScale(CANVAS_WIDTH, CANVAS_HEIGHT);
+  const { scaleX, scaleY } = useCanvasScale(CANVAS_WIDTH, CANVAS_HEIGHT);
 
   useEffect(() => {
     document.title =
@@ -54,7 +54,7 @@ export default function BroadcastOverlayPage() {
       <div
         data-testid="broadcast-canvas"
         className="relative h-[1080px] w-[1920px] shrink-0 bg-transparent"
-        style={{ transform: `scale(${scale})` }}
+        style={{ transform: `scale(${scaleX}, ${scaleY})` }}
       >
         <CelebrationFlash lastEvent={state.lastEvent} boundaryLabels={info.boundaryLabels} />
         {latestMilestone && milestonePlayer && (

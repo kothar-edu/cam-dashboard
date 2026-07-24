@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { FileField } from '@/components/forms/FileField';
+import { PageHeader } from '@/components/forms/PageHeader';
 import { useChangePassword } from '@/hooks/useSettings';
 import { useCreateAdminUser } from '@/hooks/useCreateAdmin';
 import { useCountries } from '@/hooks/useCountries';
@@ -15,10 +16,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Settings</h1>
-        <p className="text-sm text-muted-foreground">Manage your account and admin users</p>
-      </div>
+      <PageHeader title="Settings" description="Manage your account and admin users" />
 
       <div className="flex gap-2 border-b">
         <TabButton active={tab === 'password'} onClick={() => setTab('password')}>

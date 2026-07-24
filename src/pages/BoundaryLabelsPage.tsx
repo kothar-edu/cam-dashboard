@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useTenant } from '@/contexts/TenantContext';
+import { PageHeader } from '@/components/forms/PageHeader';
 import { useGameConfig, useUpdateGameConfig } from '@/hooks/useGameConfig';
 
 export default function BoundaryLabelsPage() {
@@ -56,12 +57,10 @@ export default function BoundaryLabelsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Boundary Labels</h1>
-        <p className="text-sm text-muted-foreground">
-          {activeTenant.name} · custom four and six commentary text for live scoring
-        </p>
-      </div>
+      <PageHeader
+        title="Boundary Labels"
+        description={`${activeTenant.name} · custom four and six commentary text for live scoring`}
+      />
 
       <form
         onSubmit={handleSubmit}

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { TenantRequired } from '@/components/forms/TenantRequired';
+import { PageHeader } from '@/components/forms/PageHeader';
 import { useTenant } from '@/contexts/TenantContext';
 import { useTenantPaymentSettings, useUpdateTenantPaymentSettings } from '@/hooks/usePaymentSettings';
 
@@ -60,12 +61,10 @@ export default function PaymentSettingsPage() {
   return (
     <TenantRequired message="Choose a tenant from the header to manage payment settings.">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Payment settings</h1>
-          <p className="text-sm text-muted-foreground">
-            {activeTenant?.name} · bank details and verification fee configuration
-          </p>
-        </div>
+        <PageHeader
+          title="Payment settings"
+          description={`${activeTenant?.name} · bank details and verification fee configuration`}
+        />
 
         {isLoading && !data ? (
           <div className="flex min-h-[30vh] items-center justify-center">

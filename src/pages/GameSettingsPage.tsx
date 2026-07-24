@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { TenantRequired } from '@/components/forms/TenantRequired';
+import { PageHeader } from '@/components/forms/PageHeader';
 import { useTenant } from '@/contexts/TenantContext';
 import { useGameConfig, useUpdateGameConfig } from '@/hooks/useGameConfig';
 
@@ -38,12 +39,10 @@ export default function GameSettingsPage() {
   return (
     <TenantRequired message="Choose a tenant from the header to manage game settings.">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Game settings</h1>
-          <p className="text-sm text-muted-foreground">
-            {activeTenant?.name} · registration and voting feature toggles
-          </p>
-        </div>
+        <PageHeader
+          title="Game settings"
+          description={`${activeTenant?.name} · registration and voting feature toggles`}
+        />
 
         {isLoading && !data ? (
           <div className="flex min-h-[30vh] items-center justify-center">

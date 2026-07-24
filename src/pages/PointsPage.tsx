@@ -3,6 +3,7 @@ import { DataTable } from '@/components/data-table/DataTable';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { useTenant } from '@/contexts/TenantContext';
+import { PageHeader } from '@/components/forms/PageHeader';
 import { useTournaments } from '@/hooks/useTournaments';
 import { usePointsTable } from '@/hooks/usePointsTable';
 
@@ -52,28 +53,25 @@ export default function PointsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Points Table</h1>
-          <p className="text-sm text-muted-foreground">
-            {activeTenant.name} · tournament standings
-          </p>
-        </div>
-
-        {tournaments.length > 0 ? (
-          <SearchableSelect
-            value={selectedTournamentId ?? ''}
-            onChange={setSelectedTournamentId}
-            options={tournaments.map((tournament) => ({
-              value: tournament.id,
-              label: tournament.name,
-            }))}
-            placeholder="Select tournament"
-            searchable
-            className="w-full md:w-72 space-y-0"
-          />
-        ) : null}
-      </div>
+      <PageHeader
+        title="Points Table"
+        description={`${activeTenant.name} · tournament standings`}
+        action={
+          tournaments.length > 0 ? (
+            <SearchableSelect
+              value={selectedTournamentId ?? ''}
+              onChange={setSelectedTournamentId}
+              options={tournaments.map((tournament) => ({
+                value: tournament.id,
+                label: tournament.name,
+              }))}
+              placeholder="Select tournament"
+              searchable
+              className="w-full sm:w-72 space-y-0"
+            />
+          ) : undefined
+        }
+      />
 
       {tournaments.length === 0 ? (
         <div className="rounded-lg border bg-white p-8 text-center text-muted-foreground">

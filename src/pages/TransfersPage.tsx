@@ -3,6 +3,7 @@ import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { DataTable } from '@/components/data-table/DataTable';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
+import { PageHeader } from '@/components/forms/PageHeader';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import type { Player } from '@/api/players';
 import type { Team } from '@/api/teams';
@@ -74,18 +75,19 @@ export default function TransfersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Player Transfers</h1>
-          <p className="text-sm text-muted-foreground">
-            {activeTenant.name} · move players between teams
-          </p>
-        </div>
-
-        <Button type="button" onClick={() => setDialogOpen(true)}>
-          Transfer player
-        </Button>
-      </div>
+      <PageHeader
+        title="Player Transfers"
+        description={`${activeTenant.name} · move players between teams`}
+        action={
+          <Button
+            type="button"
+            onClick={() => setDialogOpen(true)}
+            className="w-full sm:w-auto"
+          >
+            Transfer player
+          </Button>
+        }
+      />
 
       <DataTable<Player>
         columns={[

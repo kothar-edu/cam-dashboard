@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { ForfeitDialog } from "@/components/ui/forfeit-dialog";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { PageHeader } from "@/components/forms/PageHeader";
 import { useTenant } from "@/contexts/TenantContext";
 import {
   useFixtures,
@@ -126,22 +127,18 @@ export default function FixturesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-xl font-bold tracking-tight text-[#12233D] sm:text-2xl">
-            Fixtures
-          </h1>
-          <p className="truncate text-sm text-muted-foreground">
-            {activeTenant.name} · scheduled matches
-          </p>
-        </div>
-        <Link
-          to="/dashboard/fixtures/new"
-          className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
-        >
-          New Fixture
-        </Link>
-      </div>
+      <PageHeader
+        title="Fixtures"
+        description={`${activeTenant.name} · scheduled matches`}
+        action={
+          <Link
+            to="/dashboard/fixtures/new"
+            className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
+          >
+            New Fixture
+          </Link>
+        }
+      />
 
       <div className="filter-chip-row">
         {STATUS_TABS.map((tab) => (

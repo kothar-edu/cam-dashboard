@@ -32,20 +32,24 @@ export function SponsorShowcase({ sponsors }: SponsorShowcaseProps) {
 
   return (
     <div className="flex h-full w-full items-center justify-center overflow-hidden">
-      <div key={sponsor.id} className="flex max-w-full flex-col items-center gap-1 animate-in fade-in zoom-in-90 duration-500">
+      <div key={sponsor.id} className="flex max-w-full items-center gap-4 animate-in fade-in zoom-in-90 duration-500">
         {sponsor.imageUrl && (
-          <img src={sponsor.imageUrl} alt={sponsor.name} className="h-9 max-w-[200px] object-contain" />
+          <img src={sponsor.imageUrl} alt={sponsor.name} className="h-16 max-w-[220px] shrink-0 object-contain" />
         )}
-        <div ref={containerRef} className="max-w-[200px] overflow-hidden">
-          <div
-            ref={contentRef}
-            className="flex w-max items-center gap-1.5 whitespace-nowrap"
-            style={{ transform: `scale(${scale})`, transformOrigin: 'center' }}
+        <div className="flex min-w-0 flex-col items-start gap-1.5">
+          <span
+            className={`w-fit shrink-0 rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wide ${LEVEL_CLASS[sponsor.level]}`}
           >
-            <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${LEVEL_CLASS[sponsor.level]}`}>
-              {sponsor.level}
-            </span>
-            <span className="text-sm font-semibold text-[#12233D]">{sponsor.name}</span>
+            {sponsor.level} Sponsor
+          </span>
+          <div ref={containerRef} className="max-w-[460px] overflow-hidden">
+            <div
+              ref={contentRef}
+              className="w-max whitespace-nowrap text-2xl font-extrabold leading-none text-[#12233D]"
+              style={{ transform: `scale(${scale})`, transformOrigin: 'left center' }}
+            >
+              {sponsor.name}
+            </div>
           </div>
         </div>
       </div>

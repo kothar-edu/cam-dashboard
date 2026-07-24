@@ -4,8 +4,8 @@ import { SponsorShowcase } from './SponsorShowcase';
 import type { BroadcastSponsor } from '@/types/liveMatch';
 
 const sponsors: BroadcastSponsor[] = [
-  { id: 's1', name: 'Title Sponsor Co', imageUrl: 'https://example.com/title.png', level: 'Title' },
-  { id: 's2', name: 'Gold Sponsor Co', imageUrl: null, level: 'Gold' },
+  { id: 's1', name: 'Acme Corp', imageUrl: 'https://example.com/title.png', level: 'Title' },
+  { id: 's2', name: 'Widget Inc', imageUrl: null, level: 'Gold' },
 ];
 
 afterEach(() => {
@@ -20,27 +20,27 @@ describe('SponsorShowcase', () => {
 
   it('shows the first sponsor with its logo and level badge', () => {
     render(<SponsorShowcase sponsors={sponsors} />);
-    expect(screen.getByText('Title Sponsor Co')).toBeInTheDocument();
-    expect(screen.getByText('Title')).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: 'Title Sponsor Co' })).toHaveAttribute('src', 'https://example.com/title.png');
+    expect(screen.getByText('Acme Corp')).toBeInTheDocument();
+    expect(screen.getByText(/Title Sponsor/)).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Acme Corp' })).toHaveAttribute('src', 'https://example.com/title.png');
   });
 
   it('falls back to name-only when a sponsor has no logo', () => {
     render(<SponsorShowcase sponsors={[sponsors[1]]} />);
-    expect(screen.getByText('Gold Sponsor Co')).toBeInTheDocument();
+    expect(screen.getByText('Widget Inc')).toBeInTheDocument();
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 
   it('rotates to the next sponsor on a timer', () => {
     vi.useFakeTimers();
     render(<SponsorShowcase sponsors={sponsors} />);
-    expect(screen.getByText('Title Sponsor Co')).toBeInTheDocument();
+    expect(screen.getByText('Acme Corp')).toBeInTheDocument();
 
     act(() => {
       vi.advanceTimersByTime(4501);
     });
-    expect(screen.getByText('Gold Sponsor Co')).toBeInTheDocument();
-    expect(screen.queryByText('Title Sponsor Co')).not.toBeInTheDocument();
+    expect(screen.getByText('Widget Inc')).toBeInTheDocument();
+    expect(screen.queryByText('Acme Corp')).not.toBeInTheDocument();
   });
 
   it('does not rotate with only one sponsor', () => {
@@ -49,6 +49,6 @@ describe('SponsorShowcase', () => {
     act(() => {
       vi.advanceTimersByTime(10000);
     });
-    expect(screen.getByText('Title Sponsor Co')).toBeInTheDocument();
+    expect(screen.getByText('Acme Corp')).toBeInTheDocument();
   });
 });

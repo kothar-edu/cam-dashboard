@@ -24,7 +24,7 @@ export function ScoreBug({ current, battingTeam, bowlingTeam }: ScoreBugProps) {
       </div>
       <div className="flex h-1/2 items-center justify-between px-6 text-base font-bold">
         <span className="text-blue-200/80">CRR: {current.crr}</span>
-        <span>Balls: {current.balls_remaining}</span>
+        <span>Balls Left: {current.balls_remaining}</span>
         <span>{current.target ? `Target: ${current.target}` : `Inning ${current.inning}`}</span>
       </div>
     </div>

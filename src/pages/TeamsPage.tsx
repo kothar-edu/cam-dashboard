@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DataTable } from '@/components/data-table/DataTable';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { PageHeader } from '@/components/forms/PageHeader';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useTenant } from '@/contexts/TenantContext';
 import { useTeams, useSetTeamActive } from '@/hooks/useTeams';
@@ -45,18 +46,18 @@ export default function TeamsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Teams</h1>
-          <p className="text-sm text-muted-foreground">{activeTenant.name} · registered teams</p>
-        </div>
-        <Link
-          to="/dashboard/teams/new"
-          className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
-        >
-          New Team
-        </Link>
-      </div>
+      <PageHeader
+        title="Teams"
+        description={`${activeTenant.name} · registered teams`}
+        action={
+          <Link
+            to="/dashboard/teams/new"
+            className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
+          >
+            New Team
+          </Link>
+        }
+      />
 
       <DataTable
         columns={[

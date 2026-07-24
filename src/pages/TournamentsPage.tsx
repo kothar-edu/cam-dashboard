@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DataTable } from '@/components/data-table/DataTable';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { PageHeader } from '@/components/forms/PageHeader';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useTenant } from '@/contexts/TenantContext';
 import { useTournaments, useUpdateTournament } from '@/hooks/useTournaments';
@@ -59,20 +60,18 @@ export default function TournamentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Tournaments</h1>
-          <p className="text-sm text-muted-foreground">
-            {activeTenant.name} · league tournaments
-          </p>
-        </div>
-        <Link
-          to="/dashboard/tournaments/new"
-          className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
-        >
-          New Tournament
-        </Link>
-      </div>
+      <PageHeader
+        title="Tournaments"
+        description={`${activeTenant.name} · league tournaments`}
+        action={
+          <Link
+            to="/dashboard/tournaments/new"
+            className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
+          >
+            New Tournament
+          </Link>
+        }
+      />
 
       <DataTable
         columns={[

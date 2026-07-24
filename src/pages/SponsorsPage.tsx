@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { DataTable } from '@/components/data-table/DataTable';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { PageHeader } from '@/components/forms/PageHeader';
 import { useTenant } from '@/contexts/TenantContext';
 import { useDeleteSponsor, useSponsors } from '@/hooks/useSponsors';
 import type { Sponsor } from '@/api/sponsors';
@@ -51,20 +52,18 @@ export default function SponsorsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Sponsors</h1>
-          <p className="text-sm text-muted-foreground">
-            {activeTenant.name} · league sponsors
-          </p>
-        </div>
-        <Link
-          to="/dashboard/sponsors/new"
-          className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
-        >
-          New Sponsor
-        </Link>
-      </div>
+      <PageHeader
+        title="Sponsors"
+        description={`${activeTenant.name} · league sponsors`}
+        action={
+          <Link
+            to="/dashboard/sponsors/new"
+            className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
+          >
+            New Sponsor
+          </Link>
+        }
+      />
 
       <DataTable
         columns={[

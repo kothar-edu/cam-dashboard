@@ -2,6 +2,16 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import { CommentaryBar } from './CommentaryBar';
 
+// MarqueeBox always renders an extra invisible measurement copy of its children
+// alongside the visible one, so text/images inside it match twice by design.
+function expectVisible(matcher: string | RegExp) {
+  expect(screen.getAllByText(matcher).length).toBeGreaterThan(0);
+}
+
+function expectAbsent(matcher: string | RegExp) {
+  expect(screen.queryAllByText(matcher)).toHaveLength(0);
+}
+
 function zeroStats() {
   return { runs_scored: 0, balls_faced: 0, fours: 0, sixes: 0, is_out: false, crr: 0, srr: 0, runs_conceded: 0, overs_bowled: 0, wickets_taken: 0, wickets_lost: 0, maidens: 0, err: 0 };
 }
@@ -26,11 +36,11 @@ afterEach(() => {
 describe('CommentaryBar', () => {
   it('shows ground, chase requirement, and team names while chasing', () => {
     render(<CommentaryBar current={chasingCurrent} battingTeam={battingTeam} bowlingTeam={bowlingTeam} ground="Central Oval" sponsorText={null} />);
-    expect(screen.getByText('Central Oval')).toBeInTheDocument();
-    expect(screen.getByText(/70 RUNS NEEDED IN 60/)).toBeInTheDocument();
-    expect(screen.getByText(/RRR: 7/)).toBeInTheDocument();
-    expect(screen.getByText('Team A')).toBeInTheDocument();
-    expect(screen.getByText('Team B')).toBeInTheDocument();
+    expectVisible('Central Oval');
+    expectVisible(/70 RUNS NEEDED IN 60/);
+    expectVisible(/RRR: 7/);
+    expectVisible('Team A');
+    expectVisible('Team B');
     expect(screen.queryAllByRole('img')).toHaveLength(0);
   });
 
@@ -48,34 +58,33 @@ describe('CommentaryBar', () => {
         sponsorText={null}
       />,
     );
-    const images = screen.getAllByRole('img');
-    expect(images).toHaveLength(2);
-    expect(images[0]).toHaveAttribute('src', 'https://example.com/a.png');
-    expect(images[1]).toHaveAttribute('src', 'https://example.com/b.png');
+    const srcs = screen.getAllByRole('img').map((img) => img.getAttribute('src'));
+    expect(srcs).toContain('https://example.com/a.png');
+    expect(srcs).toContain('https://example.com/b.png');
   });
 
   it('shows the projected score during the initial stats phase', () => {
     render(<CommentaryBar current={firstInningsCurrent} battingTeam={battingTeam} bowlingTeam={bowlingTeam} ground="Central Oval" sponsorText="Powered by Acme" />);
-    expect(screen.getByText(/Projected: 187/)).toBeInTheDocument();
-    expect(screen.queryByText('Powered by Acme')).not.toBeInTheDocument();
+    expectVisible(/Projected: 187/);
+    expectAbsent('Powered by Acme');
   });
 
   it('slides over to the sponsor text after the stats phase elapses, then back to stats', () => {
     vi.useFakeTimers();
     render(<CommentaryBar current={firstInningsCurrent} battingTeam={battingTeam} bowlingTeam={bowlingTeam} ground="Central Oval" sponsorText="Powered by Acme" />);
-    expect(screen.getByText(/Projected: 187/)).toBeInTheDocument();
+    expectVisible(/Projected: 187/);
 
     act(() => {
       vi.advanceTimersByTime(20001);
     });
-    expect(screen.getByText('Powered by Acme')).toBeInTheDocument();
-    expect(screen.queryByText(/Projected: 187/)).not.toBeInTheDocument();
+    expectVisible('Powered by Acme');
+    expectAbsent(/Projected: 187/);
 
     act(() => {
       vi.advanceTimersByTime(5001);
     });
-    expect(screen.getByText(/Projected: 187/)).toBeInTheDocument();
-    expect(screen.queryByText('Powered by Acme')).not.toBeInTheDocument();
+    expectVisible(/Projected: 187/);
+    expectAbsent('Powered by Acme');
   });
 
   it('always shows sponsor text once the match has ended, regardless of phase', () => {
@@ -88,6 +97,6 @@ describe('CommentaryBar', () => {
         sponsorText="Powered by Acme"
       />,
     );
-    expect(screen.getByText('Powered by Acme')).toBeInTheDocument();
+    expectVisible('Powered by Acme');
   });
 });

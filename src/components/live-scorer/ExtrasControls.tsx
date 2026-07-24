@@ -40,11 +40,12 @@ export function ExtrasControls({ broadcastScore, disabled }: ExtrasControlsProps
   };
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
+    <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-5">
       {EXTRA_TYPES.map(({ value, label }) => (
         <div key={value} className="relative">
           <Button
             type="button"
+            size="sm"
             variant="secondary"
             className="w-full"
             disabled={disabled}
@@ -75,7 +76,7 @@ export function ExtrasControls({ broadcastScore, disabled }: ExtrasControlsProps
                   <button
                     key={extraRuns}
                     type="button"
-                    className="h-8 w-8 rounded bg-[#12233D] text-sm font-bold text-white"
+                    className="h-7 w-7 rounded bg-[#12233D] text-xs font-bold text-white"
                     onClick={() => submit(value, extraRuns)}
                   >
                     {extraRuns}

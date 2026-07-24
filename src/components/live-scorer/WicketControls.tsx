@@ -3,7 +3,10 @@ import { Button } from '@/components/ui/button';
 import type { CurrentPlayersState, LiveOpponent, WicketType } from '@/types/liveMatch';
 
 const SELECT_CLASS =
-  'mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-[#12233D] focus:border-[#12233D] focus:outline-none focus:ring-1 focus:ring-[#12233D]';
+  'mt-1 w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs text-[#12233D] focus:border-[#12233D] focus:outline-none focus:ring-1 focus:ring-[#12233D]';
+
+const POPOVER_CLASS =
+  'absolute left-0 z-20 mt-1 w-[min(16rem,calc(100vw-2rem))] rounded-md border border-gray-300 bg-white p-2.5 shadow-lg';
 
 const SIMPLE_DISMISSALS: Array<{ value: WicketType; label: string }> = [
   { value: 'BOWLED', label: 'Bowled' },
@@ -22,33 +25,32 @@ type WicketControlsProps = {
 
 export function WicketControls({ broadcastWicket, currentPlayers, fieldingOpponent, disabled }: WicketControlsProps) {
   return (
-    <div className="flex flex-col gap-3">
-      <div>
-        <p className="mb-1 text-sm font-bold text-[#12233D]">Dismissal (striker, fielder = bowler or keeper)</p>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {SIMPLE_DISMISSALS.map(({ value, label }) => (
-            <Button
-              key={value}
-              type="button"
-              variant="danger"
-              disabled={disabled || !currentPlayers.striker}
-              onClick={() => {
-                const credited = currentPlayers.wicket_keeper?.id ?? currentPlayers.bowler?.id ?? null;
-                broadcastWicket(value, currentPlayers.striker?.id, 0, credited ?? null);
-              }}
-            >
-              {label}
-            </Button>
-          ))}
-        </div>
+    <div>
+      <p className="mb-2 text-xs text-gray-500">Striker, fielder = bowler or keeper</p>
+      <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
+        {SIMPLE_DISMISSALS.map(({ value, label }) => (
+          <Button
+            key={value}
+            type="button"
+            size="sm"
+            variant="danger"
+            disabled={disabled || !currentPlayers.striker}
+            onClick={() => {
+              const credited = currentPlayers.wicket_keeper?.id ?? currentPlayers.bowler?.id ?? null;
+              broadcastWicket(value, currentPlayers.striker?.id, 0, credited ?? null);
+            }}
+          >
+            {label}
+          </Button>
+        ))}
+        <RunOutForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={disabled} label="Run Out" wicketValue="RUN_OUT" />
+        <HitWicketForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} disabled={disabled} />
+        <RetiredForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} disabled={disabled} label="Retired Hurt" wicketValue="RETIRED_HURT" />
+        <RetiredForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} disabled={disabled} label="Retired Out" wicketValue="RETIRED_OUT" />
+        <RunOutForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={disabled} label="Wide + Run Out" wicketValue="WIDE_RUN_OUT" />
+        <RunOutForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={disabled} label="No Ball + Run Out" wicketValue="NO_BALL_RUN_OUT" />
+        <WideStumpedForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={disabled} />
       </div>
-      <RunOutForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={disabled} label="Run Out" wicketValue="RUN_OUT" />
-      <HitWicketForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} disabled={disabled} />
-      <RetiredForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} disabled={disabled} label="Retired Hurt" wicketValue="RETIRED_HURT" />
-      <RetiredForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} disabled={disabled} label="Retired Out" wicketValue="RETIRED_OUT" />
-      <RunOutForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={disabled} label="Wide + Run Out" wicketValue="WIDE_RUN_OUT" />
-      <RunOutForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={disabled} label="No Ball + Run Out" wicketValue="NO_BALL_RUN_OUT" />
-      <WideStumpedForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={disabled} />
     </div>
   );
 }
@@ -73,12 +75,12 @@ function RunOutForm({
   const [fielder, setFielder] = useState('');
 
   return (
-    <div>
-      <Button type="button" variant="danger" disabled={disabled} onClick={() => setOpen(!open)}>
+    <div className="relative">
+      <Button type="button" size="sm" variant="danger" className="w-full" disabled={disabled} onClick={() => setOpen(!open)}>
         {label}
       </Button>
       {open && (
-        <div className="mt-2 flex flex-col gap-2 rounded-md border border-gray-300 p-3">
+        <div className={POPOVER_CLASS}>
           <label className="text-xs font-medium text-[#12233D]">
             Dismissed player
             <select aria-label="Dismissed player" className={SELECT_CLASS} value={player} onChange={(e) => setPlayer(e.target.value)}>
@@ -88,7 +90,7 @@ function RunOutForm({
               ))}
             </select>
           </label>
-          <label className="text-xs font-medium text-[#12233D]">
+          <label className="mt-2 block text-xs font-medium text-[#12233D]">
             Runs completed
             <select aria-label="Runs completed" className={SELECT_CLASS} value={runs} onChange={(e) => setRuns(Number(e.target.value))}>
               {[0, 1, 2, 3].map((r) => (
@@ -96,7 +98,7 @@ function RunOutForm({
               ))}
             </select>
           </label>
-          <label className="text-xs font-medium text-[#12233D]">
+          <label className="mt-2 block text-xs font-medium text-[#12233D]">
             Fielder
             <select aria-label="Fielder" className={SELECT_CLASS} value={fielder} onChange={(e) => setFielder(e.target.value)}>
               <option value="">Select fielder</option>
@@ -107,6 +109,8 @@ function RunOutForm({
           </label>
           <Button
             type="button"
+            size="sm"
+            className="mt-2 w-full"
             disabled={!player || !fielder}
             onClick={() => {
               broadcastWicket(wicketValue, player, runs, fielder);
@@ -135,12 +139,12 @@ function HitWicketForm({
   const [runs, setRuns] = useState(0);
 
   return (
-    <div>
-      <Button type="button" variant="danger" disabled={disabled} onClick={() => setOpen(!open)}>
+    <div className="relative">
+      <Button type="button" size="sm" variant="danger" className="w-full" disabled={disabled} onClick={() => setOpen(!open)}>
         Hit Wicket
       </Button>
       {open && (
-        <div className="mt-2 flex flex-col gap-2 rounded-md border border-gray-300 p-3">
+        <div className={POPOVER_CLASS}>
           <label className="text-xs font-medium text-[#12233D]">
             Runs before hit wicket
             <select aria-label="Runs before hit wicket" className={SELECT_CLASS} value={runs} onChange={(e) => setRuns(Number(e.target.value))}>
@@ -151,6 +155,8 @@ function HitWicketForm({
           </label>
           <Button
             type="button"
+            size="sm"
+            className="mt-2 w-full"
             disabled={!currentPlayers.striker}
             onClick={() => {
               if (!currentPlayers.striker) return;
@@ -180,12 +186,12 @@ function RetiredForm({
   const [player, setPlayer] = useState('');
 
   return (
-    <div>
-      <Button type="button" variant="secondary" disabled={disabled} onClick={() => setOpen(!open)}>
+    <div className="relative">
+      <Button type="button" size="sm" variant="secondary" className="w-full" disabled={disabled} onClick={() => setOpen(!open)}>
         {label}
       </Button>
       {open && (
-        <div className="mt-2 flex flex-col gap-2 rounded-md border border-gray-300 p-3">
+        <div className={POPOVER_CLASS}>
           <label className="text-xs font-medium text-[#12233D]">
             Player
             <select aria-label={`${label} player`} className={SELECT_CLASS} value={player} onChange={(e) => setPlayer(e.target.value)}>
@@ -197,6 +203,8 @@ function RetiredForm({
           </label>
           <Button
             type="button"
+            size="sm"
+            className="mt-2 w-full"
             disabled={!player}
             onClick={() => {
               broadcastWicket(wicketValue, player, 0);
@@ -224,13 +232,13 @@ function WideStumpedForm({
   const [fielder, setFielder] = useState('');
 
   return (
-    <div>
-      <Button type="button" variant="danger" disabled={disabled} onClick={() => setOpen(!open)}>
+    <div className="relative">
+      <Button type="button" size="sm" variant="danger" className="w-full" disabled={disabled} onClick={() => setOpen(!open)}>
         Wide + Stumped
       </Button>
       {open && (
-        <div className="mt-2 flex flex-col gap-2 rounded-md border border-gray-300 p-3">
-          <p className="text-xs text-gray-500">Striker only, no bye runs, not a legal ball.</p>
+        <div className={POPOVER_CLASS}>
+          <p className="mb-1.5 text-[11px] text-gray-500">Striker only, no bye runs, not a legal ball.</p>
           <label className="text-xs font-medium text-[#12233D]">
             Wicket-keeper (stumping)
             <select aria-label="Wicket-keeper" className={SELECT_CLASS} value={fielder} onChange={(e) => setFielder(e.target.value)}>
@@ -242,6 +250,8 @@ function WideStumpedForm({
           </label>
           <Button
             type="button"
+            size="sm"
+            className="mt-2 w-full"
             disabled={!fielder || !currentPlayers.striker}
             onClick={() => {
               if (!currentPlayers.striker) return;

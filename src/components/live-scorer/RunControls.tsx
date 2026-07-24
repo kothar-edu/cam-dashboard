@@ -11,11 +11,12 @@ type RunControlsProps = {
 
 export function RunControls({ broadcastScore, disabled }: RunControlsProps) {
   return (
-    <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
+    <div className="grid grid-cols-7 gap-1.5">
       {RUN_VALUES.map((value) => (
         <Button
           key={value}
           type="button"
+          size="sm"
           variant={value === 4 || value === 6 ? 'success' : 'primary'}
           disabled={disabled}
           onClick={() => broadcastScore(value)}

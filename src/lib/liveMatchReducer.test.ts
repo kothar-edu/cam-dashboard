@@ -206,6 +206,39 @@ describe('derived broadcast stats', () => {
     expect(state.partnership.ballsSinceWicket).toBe(0);
   });
 
+  it('marks the dismissed player is_out in opponents.batting.players immediately, without waiting for the next SUMMARY', () => {
+    const s1 = { id: 's1', full_name: 'Striker', picture: null, reserve: false, stats: zeroStats() };
+    const s2 = { id: 's2', full_name: 'Non-Striker', picture: null, reserve: false, stats: zeroStats() };
+
+    let state = createInitialLiveMatchState();
+    state = liveMatchReducer(state, {
+      event_type: 'SUMMARY',
+      detail: {
+        current: baseCurrent,
+        score_history: [],
+        opponents: {
+          batting: { id: 'opp-a', name: 'Team A', code: 'A', logo: null, players: [s1, s2], stats: zeroStats() },
+          bowling: { id: 'opp-b', name: 'Team B', code: 'B', logo: null, players: [], stats: zeroStats() },
+        },
+        game: { this_over: [], current_players: withPlayers() },
+      },
+    });
+
+    state = liveMatchReducer(state, {
+      event_type: 'WICKET',
+      detail: {
+        current: { ...baseCurrent, wickets: 1 },
+        game: {
+          this_over: [scoreEvent({ value: 'BOWLED', dismissed: 's1', runs: 0 })],
+          current_players: withPlayers({ striker: { id: 's3', full_name: 'New Batter', picture: null, reserve: false, stats: zeroStats() } }),
+        },
+      },
+    });
+
+    expect(state.opponents.batting?.players.find((p) => p.id === 's1')?.stats.is_out).toBe(true);
+    expect(state.opponents.batting?.players.find((p) => p.id === 's2')?.stats.is_out).toBe(false);
+  });
+
   it('fires a 50-run milestone exactly once when a batter crosses the threshold', () => {
     let state = createInitialLiveMatchState();
     const strikerAt49 = { id: 's1', full_name: 'Striker', picture: null, reserve: false, stats: { ...zeroStats(), runs_scored: 49 } };

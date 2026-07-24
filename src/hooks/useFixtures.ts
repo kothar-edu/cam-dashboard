@@ -7,10 +7,12 @@ import {
   updateFixture,
   forfeitFixture,
   abandonFixture,
+  startMatch,
   type BulkFixtureRowPayload,
   type CreateFixturePayload,
   type UpdateFixturePayload,
   type ForfeitFixturePayload,
+  type StartMatchPayload,
 } from "@/api/fixtures";
 import type { ListParams } from "@/api/pagination";
 import { useTenant } from "@/contexts/TenantContext";
@@ -103,6 +105,19 @@ export function useAbandonFixture() {
     onSuccess: (_data, id) => {
       qc.invalidateQueries({ queryKey: ["fixtures", activeTenantId] });
       qc.invalidateQueries({ queryKey: ["fixture", activeTenantId, id] });
+    },
+  });
+}
+
+export function useStartMatch() {
+  const qc = useQueryClient();
+  const { activeTenantId } = useTenant();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: StartMatchPayload }) =>
+      startMatch(id, payload),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ["fixtures", activeTenantId] });
+      qc.invalidateQueries({ queryKey: ["fixture", activeTenantId, variables.id] });
     },
   });
 }

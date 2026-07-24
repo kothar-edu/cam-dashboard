@@ -24,7 +24,7 @@ describe('ScoreBug', () => {
     expect(screen.getByText('38-2')).toBeInTheDocument();
     expect(screen.getByText('4.2')).toBeInTheDocument();
     expect(screen.getByText(/CRR: 8.6/)).toBeInTheDocument();
-    expect(screen.getByText(/Balls: 96/)).toBeInTheDocument();
+    expect(screen.getByText(/Balls Left: 96/)).toBeInTheDocument();
   });
 
   it('shows Target when chasing instead of the inning label', () => {

@@ -131,6 +131,19 @@ function withExtrasApplied(extras: ExtrasBreakdown, lastBall: ScoreEvent | undef
   return { ...extras, [key]: extras[key] + (lastBall.extras ?? 0) };
 }
 
+// Dismissal-driven UI (e.g. disabling an out batter in the striker/non-striker
+// pickers) needs opponents.batting.players[].stats.is_out to be current, but
+// the backend only resends the full opponents roster on SUMMARY/EVENT
+// messages, not on every WICKET - so we patch the dismissed player's is_out
+// locally to avoid a stale "still selectable" batter between those refreshes.
+function withPlayerMarkedOut(opponents: OpponentsState, playerId: string | null | undefined): OpponentsState {
+  if (!playerId || !opponents.batting) return opponents;
+  const players = opponents.batting.players.map((player) =>
+    player.id === playerId ? { ...player, stats: { ...player.stats, is_out: true } } : player,
+  );
+  return { ...opponents, batting: { ...opponents.batting, players } };
+}
+
 function withMilestonesChecked(
   milestones: MilestoneEvent[],
   firedKeys: string[],
@@ -245,6 +258,7 @@ export function liveMatchReducer(state: LiveMatchState, message: IncomingLiveSco
         ...state,
         current: message.detail.current,
         scoreHistory: withOverAppended(state.scoreHistory, message.detail.current.over, message.detail.game.this_over),
+        opponents: isWicket ? withPlayerMarkedOut(state.opponents, lastBall?.dismissed) : state.opponents,
         currentPlayers: message.detail.game.current_players,
         lastEvent: { kind: message.event_type, value: lastBall?.value ?? null },
         extras: withExtrasApplied(state.extras, lastBall),

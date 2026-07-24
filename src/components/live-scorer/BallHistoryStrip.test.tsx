@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { BallHistoryStrip } from './BallHistoryStrip';
 import type { ScoreEvent } from '@/types/liveMatch';
 
@@ -11,14 +11,27 @@ function ball(value: number | string): ScoreEvent {
 }
 
 describe('BallHistoryStrip', () => {
-  it('renders one badge per ball, grouped by over', () => {
+  it('shows only the current (latest) over by default, folded', () => {
     render(<BallHistoryStrip scoreHistory={[[ball(1), ball(4)], [ball('WICKET' as any)]]} />);
+    expect(screen.getByText('2nd')).toBeInTheDocument();
+    expect(screen.queryByText('1st')).not.toBeInTheDocument();
+  });
+
+  it('shows every over once expanded, and folds back on toggle', () => {
+    render(<BallHistoryStrip scoreHistory={[[ball(1), ball(4)], [ball('WICKET' as any)]]} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /show all overs/i }));
     expect(screen.getByText('1st')).toBeInTheDocument();
+    expect(screen.getByText('2nd')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /show current over/i }));
+    expect(screen.queryByText('1st')).not.toBeInTheDocument();
     expect(screen.getByText('2nd')).toBeInTheDocument();
   });
 
-  it('renders nothing but the container when there is no history yet', () => {
+  it('renders nothing but the empty state when there is no history yet', () => {
     const { container } = render(<BallHistoryStrip scoreHistory={[]} />);
     expect(container.querySelectorAll('[data-testid="over-row"]').length).toBe(0);
+    expect(screen.getByText('No balls bowled yet.')).toBeInTheDocument();
   });
 });

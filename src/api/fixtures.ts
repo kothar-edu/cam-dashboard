@@ -18,6 +18,8 @@ export type Fixture = {
   round: string | null;
   is_public?: boolean;
   live_stream_url?: string | null;
+  over_limit?: number;
+  bowling_limit?: number;
 };
 
 export async function listFixtures(
@@ -220,6 +222,27 @@ export async function abandonFixture(id: string): Promise<{ detail: string }> {
   const { data } = await apiClient.post<{ detail: string }>(
     `/game/match/${id}/abandon/`,
     {},
+  );
+  return data;
+}
+
+export type StartMatchTeamSelection = {
+  players: string[];
+  reserves: string[];
+};
+
+export type StartMatchPayload = {
+  opponent_a: StartMatchTeamSelection;
+  opponent_b: StartMatchTeamSelection;
+};
+
+export async function startMatch(
+  id: string,
+  payload: StartMatchPayload,
+): Promise<{ detail: string }> {
+  const { data } = await apiClient.post<{ detail: string }>(
+    `/game/match/${id}/start/`,
+    payload,
   );
   return data;
 }

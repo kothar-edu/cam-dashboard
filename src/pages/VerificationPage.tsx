@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
+import { PageHeader } from '@/components/forms/PageHeader';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { mediaUrl, type TeamJoinApplication, type TenantRegistration } from '@/api/verification';
 import { useTenant } from '@/contexts/TenantContext';
@@ -190,13 +191,12 @@ export default function VerificationPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Verification</h1>
-        <p className="text-sm text-muted-foreground">
-          Review tenant registrations and team join requests
-          {activeTenant ? ` · ${activeTenant.name}` : ''}
-        </p>
-      </div>
+      <PageHeader
+        title="Verification"
+        description={`Review tenant registrations and team join requests${
+          activeTenant ? ` · ${activeTenant.name}` : ''
+        }`}
+      />
 
       <div className="flex gap-2">
         <Button

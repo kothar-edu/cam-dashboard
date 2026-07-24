@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { DataTable } from '@/components/data-table/DataTable';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { PageHeader } from '@/components/forms/PageHeader';
 import { useTenant } from '@/contexts/TenantContext';
 import { useScorecards } from '@/hooks/useScorecards';
 
@@ -57,12 +58,7 @@ export default function ScorecardsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Scorecards</h1>
-        <p className="text-sm text-muted-foreground">
-          {activeTenant.name} · completed matches
-        </p>
-      </div>
+      <PageHeader title="Scorecards" description={`${activeTenant.name} · completed matches`} />
 
       <DataTable
         columns={[

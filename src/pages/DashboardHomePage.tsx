@@ -1,6 +1,7 @@
 import { BarChart2, Calendar, Trophy, Users } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useTenant } from '@/contexts/TenantContext';
+import { PageHeader } from '@/components/forms/PageHeader';
 import {
   Card,
   CardContent,
@@ -74,14 +75,7 @@ export default function DashboardHomePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">
-            {activeTenant.name} · tenant-scoped cricket overview
-          </p>
-        </div>
-      </div>
+      <PageHeader title="Dashboard" description={`${activeTenant.name} · tenant-scoped cricket overview`} />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         {stats.map((stat) => {

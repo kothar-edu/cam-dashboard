@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
+import { PageHeader } from '@/components/forms/PageHeader';
 import {
   useAssignTenantAdmin,
   useCreateTenant,
@@ -66,12 +67,7 @@ export default function TenantsPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Tenants</h1>
-        <p className="text-sm text-muted-foreground">
-          Create organizations and assign tenant administrators
-        </p>
-      </div>
+      <PageHeader title="Tenants" description="Create organizations and assign tenant administrators" />
 
       <form
         onSubmit={handleCreateTenant}

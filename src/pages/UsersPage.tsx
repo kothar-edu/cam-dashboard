@@ -5,6 +5,7 @@ import { DataTable } from '@/components/data-table/DataTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { PageHeader } from '@/components/forms/PageHeader';
 import { useUpdateUserPayment } from '@/hooks/useUpdateUserPayment';
 import { useUsers } from '@/hooks/useUsers';
 import type { DashboardUser } from '@/api/users';
@@ -112,12 +113,10 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#12233D]">Users</h1>
-        <p className="text-sm text-muted-foreground">
-          Global user directory. Tenant admins only see users in the tenants they administer.
-        </p>
-      </div>
+      <PageHeader
+        title="Users"
+        description="Global user directory. Tenant admins only see users in the tenants they administer."
+      />
 
       <Input
         placeholder="Search by name, email, or phone…"

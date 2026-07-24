@@ -21,6 +21,7 @@ describe('useLiveMatchInfo', () => {
       powerplayOvers: 6,
       livestreamOverlay: { sponsorText: 'Sponsor', topLeftImage: null, topRightImage: null },
       boundaryLabels: { four: null, six: null },
+      sponsors: [],
     };
     vi.spyOn(livescoreApi, 'fetchLiveMatchInfo').mockResolvedValue(info);
 

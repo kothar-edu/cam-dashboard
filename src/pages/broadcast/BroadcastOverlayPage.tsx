@@ -82,7 +82,7 @@ export default function BroadcastOverlayPage() {
 
         <div className="absolute bottom-14 flex w-full flex-col items-center gap-2">
           <div className="flex w-11/12 items-center justify-between gap-6 rounded-2xl bg-sky-200/80 px-6 py-3 shadow-lg">
-            <BatterBowlerCards currentPlayers={state.currentPlayers} />
+            <BatterBowlerCards currentPlayers={state.currentPlayers} sponsors={info.sponsors} />
             <div className="flex w-[420px] shrink-0 flex-col items-center gap-1">
               <ScoreBug current={state.current} battingTeam={state.opponents.batting} bowlingTeam={state.opponents.bowling} />
               <OverHistoryStrip thisOver={state.scoreHistory[state.current.over] ?? []} />

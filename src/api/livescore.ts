@@ -41,5 +41,11 @@ export async function fetchLiveMatchInfo(matchId: string): Promise<LiveMatchInfo
       four: data.boundary_labels?.four ?? null,
       six: data.boundary_labels?.six ?? null,
     },
+    sponsors: (data.sponsors ?? []).map((sponsor: Record<string, unknown>) => ({
+      id: String(sponsor.id),
+      name: String(sponsor.name),
+      imageUrl: (sponsor.image as string | null) ?? null,
+      level: sponsor.sponsor_type as LiveMatchInfo['sponsors'][number]['level'],
+    })),
   };
 }

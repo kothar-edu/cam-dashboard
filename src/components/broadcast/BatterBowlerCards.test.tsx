@@ -21,4 +21,14 @@ describe('BatterBowlerCards', () => {
     expect(screen.getByText('34')).toBeInTheDocument();
     expect(screen.getByText('2-28')).toBeInTheDocument();
   });
+
+  it('shows the tournament sponsor in the space between batters and bowler', () => {
+    render(
+      <BatterBowlerCards
+        currentPlayers={{ striker: player({ full_name: 'Striker' }), non_striker: null, bowler: player({ full_name: 'Bowler' }), wicket_keeper: null }}
+        sponsors={[{ id: 's1', name: 'Acme Corp', imageUrl: null, level: 'Title' }]}
+      />,
+    );
+    expect(screen.getByText('Acme Corp')).toBeInTheDocument();
+  });
 });

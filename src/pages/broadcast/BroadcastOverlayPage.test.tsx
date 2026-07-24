@@ -37,6 +37,7 @@ describe('BroadcastOverlayPage', () => {
         powerplayOvers: 6,
         livestreamOverlay: { sponsorText: null, topLeftImage: null, topRightImage: null },
         boundaryLabels: { four: null, six: null },
+        sponsors: [],
       },
       isLoading: false,
     } as any);

@@ -1,5 +1,6 @@
-import type { CurrentPlayersState, LiveMatchPlayer } from '@/types/liveMatch';
+import type { BroadcastSponsor, CurrentPlayersState, LiveMatchPlayer } from '@/types/liveMatch';
 import { BallIcon, BatIcon } from '@/components/broadcast/CricketIcons';
+import { SponsorShowcase } from '@/components/broadcast/SponsorShowcase';
 
 function BatterRow({ player, active }: { player: LiveMatchPlayer | null; active?: boolean }) {
   if (!player) return null;
@@ -31,16 +32,22 @@ function BowlerRow({ player }: { player: LiveMatchPlayer | null }) {
 
 type BatterBowlerCardsProps = {
   currentPlayers: CurrentPlayersState;
+  sponsors?: BroadcastSponsor[];
 };
 
-export function BatterBowlerCards({ currentPlayers }: BatterBowlerCardsProps) {
+export function BatterBowlerCards({ currentPlayers, sponsors = [] }: BatterBowlerCardsProps) {
   return (
-    <div className="flex w-full justify-between px-6">
-      <div className="flex flex-col gap-1">
+    <div className="flex w-full items-center px-6">
+      <div className="flex shrink-0 flex-col gap-1">
         <BatterRow player={currentPlayers.striker} active />
         <BatterRow player={currentPlayers.non_striker} />
       </div>
-      <BowlerRow player={currentPlayers.bowler} />
+      <div className="mx-4 min-w-0 flex-1">
+        <SponsorShowcase sponsors={sponsors} />
+      </div>
+      <div className="shrink-0">
+        <BowlerRow player={currentPlayers.bowler} />
+      </div>
     </div>
   );
 }

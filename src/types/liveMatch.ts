@@ -161,6 +161,15 @@ export type OutgoingLiveScoreMessage =
   | { event_type: 'EVENT'; detail: { value: string; [key: string]: unknown } }
   | { event_type: 'UPDATE_RETIRED_HURT'; detail: { player_id: string; can_return: boolean } };
 
+export type SponsorLevel = 'Title' | 'Gold' | 'Silver' | 'Bronze' | 'General';
+
+export type BroadcastSponsor = {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  level: SponsorLevel;
+};
+
 export type LiveMatchInfo = {
   ground: string | null;
   tournamentName: string | null;
@@ -174,4 +183,5 @@ export type LiveMatchInfo = {
     four: string | null;
     six: string | null;
   };
+  sponsors: BroadcastSponsor[];
 };

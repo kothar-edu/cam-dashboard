@@ -4,7 +4,7 @@ import { useLiveMatch } from '@/hooks/useLiveMatch';
 import { useLiveMatchInfo } from '@/hooks/useLiveMatchInfo';
 import { useCanvasScale } from '@/hooks/useCanvasScale';
 import { ScoreBug } from '@/components/broadcast/ScoreBug';
-import { BatterBowlerCards } from '@/components/broadcast/BatterBowlerCards';
+import { BatterBowlerCards, BowlerRow } from '@/components/broadcast/BatterBowlerCards';
 import { OverHistoryStrip } from '@/components/broadcast/OverHistoryStrip';
 import { CommentaryBar } from '@/components/broadcast/CommentaryBar';
 import { SponsorCorners, SPONSOR_LOGO_CLASS } from '@/components/broadcast/SponsorCorners';
@@ -87,14 +87,27 @@ export default function BroadcastOverlayPage() {
         </div>
 
         <div className="absolute bottom-14 flex w-full flex-col items-center gap-2">
-          <div className="flex w-11/12 items-center justify-between gap-6 rounded-2xl bg-sky-200/80 px-6 py-3 shadow-lg">
+          {/* items-start (not items-center): BatterBowlerCards and the
+              bowler+score group must both anchor at this row's own top
+              edge so the bowler row lands level with the striker's row -
+              centering them as blocks would offset each by half of its
+              own height difference from the tallest sibling (ScoreBug, a
+              fixed 96px pill), throwing the alignment off again. */}
+          <div className="flex w-11/12 items-start justify-between gap-6 rounded-2xl bg-sky-200/80 px-6 py-3 shadow-lg">
             <BatterBowlerCards currentPlayers={state.currentPlayers} sponsors={info.sponsors} />
-            {/* Wide enough that a full over (up to ~9-10 balls with extras)
-                fits on one row before OverHistoryStrip's own flex-wrap
-                kicks in - was 420px, cramped to ~10 badges. */}
-            <div className="flex w-[640px] shrink-0 flex-col items-center gap-1">
-              <ScoreBug current={state.current} battingTeam={state.opponents.batting} bowlingTeam={state.opponents.bowling} />
-              <OverHistoryStrip thisOver={state.scoreHistory[state.current.over] ?? []} />
+            {/* Bowler grouped directly against the score box (small fixed
+                gap) instead of living inside BatterBowlerCards, where it
+                was pinned to wherever the flex-1 sponsor slot happened to
+                end - often nowhere near the score box. */}
+            <div className="flex shrink-0 items-start gap-3">
+              <BowlerRow player={state.currentPlayers.bowler} />
+              {/* Wide enough that a full over (up to ~9-10 balls with
+                  extras) fits on one row before OverHistoryStrip's own
+                  flex-wrap kicks in - was 420px, cramped to ~10 badges. */}
+              <div className="flex w-[640px] shrink-0 flex-col items-center gap-1">
+                <ScoreBug current={state.current} battingTeam={state.opponents.batting} bowlingTeam={state.opponents.bowling} />
+                <OverHistoryStrip thisOver={state.scoreHistory[state.current.over] ?? []} />
+              </div>
             </div>
           </div>
         </div>

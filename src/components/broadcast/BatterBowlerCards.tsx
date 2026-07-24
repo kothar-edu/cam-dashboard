@@ -16,7 +16,14 @@ function BatterRow({ player, active }: { player: LiveMatchPlayer | null; active?
   );
 }
 
-function BowlerRow({ player }: { player: LiveMatchPlayer | null }) {
+/**
+ * Exported (rather than kept private like BatterRow) because
+ * BroadcastOverlayPage renders it outside this component, directly
+ * alongside ScoreBug - grouping it there keeps it snug against the score
+ * box instead of pinned to wherever BatterBowlerCards' own flex-1 sponsor
+ * slot happens to end.
+ */
+export function BowlerRow({ player }: { player: LiveMatchPlayer | null }) {
   if (!player) return null;
   return (
     <div className="flex h-10 items-center gap-2 text-xl text-slate-700">
@@ -44,9 +51,6 @@ export function BatterBowlerCards({ currentPlayers, sponsors = [] }: BatterBowle
       </div>
       <div className="mx-4 min-w-0 flex-1">
         <SponsorShowcase sponsors={sponsors} />
-      </div>
-      <div className="shrink-0">
-        <BowlerRow player={currentPlayers.bowler} />
       </div>
     </div>
   );

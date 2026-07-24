@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { BatterBowlerCards } from './BatterBowlerCards';
+import { BatterBowlerCards, BowlerRow } from './BatterBowlerCards';
 
 function player(overrides = {}) {
   return {
@@ -11,24 +11,39 @@ function player(overrides = {}) {
 }
 
 describe('BatterBowlerCards', () => {
-  it('shows striker runs/balls and bowler wickets-runs/overs', () => {
+  // Bowler is rendered separately (BowlerRow, grouped next to the score box
+  // in BroadcastOverlayPage) - not part of this component, so it's not
+  // asserted here even though `currentPlayers.bowler` is still accepted.
+  it('shows striker runs/balls', () => {
     render(
       <BatterBowlerCards
-        currentPlayers={{ striker: player({ full_name: 'Striker' }), non_striker: null, bowler: player({ full_name: 'Bowler' }), wicket_keeper: null }}
+        currentPlayers={{ striker: player({ full_name: 'Striker' }), non_striker: null, bowler: null, wicket_keeper: null }}
       />,
     );
     expect(screen.getByText('Striker')).toBeInTheDocument();
     expect(screen.getByText('34')).toBeInTheDocument();
-    expect(screen.getByText('2-28')).toBeInTheDocument();
   });
 
-  it('shows the tournament sponsor in the space between batters and bowler', () => {
+  it('shows the tournament sponsor in the space next to the batters', () => {
     render(
       <BatterBowlerCards
-        currentPlayers={{ striker: player({ full_name: 'Striker' }), non_striker: null, bowler: player({ full_name: 'Bowler' }), wicket_keeper: null }}
+        currentPlayers={{ striker: player({ full_name: 'Striker' }), non_striker: null, bowler: null, wicket_keeper: null }}
         sponsors={[{ id: 's1', name: 'Acme Corp', imageUrl: null, level: 'Title' }]}
       />,
     );
     expect(screen.getByText('Acme Corp')).toBeInTheDocument();
+  });
+});
+
+describe('BowlerRow', () => {
+  it('shows bowler wickets-runs/overs', () => {
+    render(<BowlerRow player={player({ full_name: 'Bowler' })} />);
+    expect(screen.getByText('Bowler')).toBeInTheDocument();
+    expect(screen.getByText('2-28')).toBeInTheDocument();
+  });
+
+  it('renders nothing when there is no bowler yet', () => {
+    const { container } = render(<BowlerRow player={null} />);
+    expect(container.firstChild).toBeNull();
   });
 });

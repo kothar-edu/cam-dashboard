@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { DataTable } from '@/components/data-table/DataTable';
 import { Button } from '@/components/ui/button';
+import { Modal } from '@/components/ui/modal';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import type { Player } from '@/api/players';
 import type { Team } from '@/api/teams';
@@ -108,60 +109,61 @@ export default function TransfersPage() {
         onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
       />
 
-      {dialogOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-lg border bg-white p-6 shadow-lg">
-            <h3 className="text-lg font-semibold text-[#12233D]">Transfer player</h3>
-            <div className="mt-4 space-y-4">
-              <SearchableSelect
-                id="transfer-player"
-                label="Player"
-                value={selectedPlayerId}
-                onChange={setSelectedPlayerId}
-                options={players.map((player) => ({
-                  value: player.id,
-                  label: `${player.full_name} (${player.team_name ?? 'No team'})`,
-                }))}
-                placeholder="Select player"
-                searchable
-              />
+      <Modal open={dialogOpen} onOpenChange={setDialogOpen} title="Transfer player">
+        <div className="mt-4 space-y-4">
+          <SearchableSelect
+            id="transfer-player"
+            label="Player"
+            value={selectedPlayerId}
+            onChange={setSelectedPlayerId}
+            options={players.map((player) => ({
+              value: player.id,
+              label: `${player.full_name} (${player.team_name ?? 'No team'})`,
+            }))}
+            placeholder="Select player"
+            searchable
+          />
 
-              {selectedPlayer ? (
-                <SearchableSelect
-                  id="transfer-team"
-                  label="New team"
-                  value={selectedTeamId}
-                  onChange={setSelectedTeamId}
-                  options={teams
-                    .filter((team: Team) => team.id !== selectedPlayer.current_team)
-                    .map((team) => ({ value: team.id, label: team.name }))}
-                  placeholder="Select team"
-                  searchable
-                />
-              ) : null}
+          {selectedPlayer ? (
+            <SearchableSelect
+              id="transfer-team"
+              label="New team"
+              value={selectedTeamId}
+              onChange={setSelectedTeamId}
+              options={teams
+                .filter((team: Team) => team.id !== selectedPlayer.current_team)
+                .map((team) => ({ value: team.id, label: team.name }))}
+              placeholder="Select team"
+              searchable
+            />
+          ) : null}
 
-              {transferMutation.isError ? (
-                <p className="text-sm text-red-600">
-                  Transfer failed. Check permissions and try again.
-                </p>
-              ) : null}
+          {transferMutation.isError ? (
+            <p className="text-sm text-red-600">
+              Transfer failed. Check permissions and try again.
+            </p>
+          ) : null}
 
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  disabled={!selectedPlayerId || !selectedTeamId || transferMutation.isPending}
-                  onClick={handleTransfer}
-                >
-                  {transferMutation.isPending ? 'Transferring…' : 'Transfer'}
-                </Button>
-              </div>
-            </div>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDialogOpen(false)}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={!selectedPlayerId || !selectedTeamId || transferMutation.isPending}
+              onClick={handleTransfer}
+              className="w-full sm:w-auto"
+            >
+              {transferMutation.isPending ? 'Transferring…' : 'Transfer'}
+            </Button>
           </div>
         </div>
-      ) : null}
+      </Modal>
     </div>
   );
 }

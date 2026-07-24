@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import TransfersPage from './TransfersPage';
@@ -60,5 +61,21 @@ describe('TransfersPage', () => {
     expect(screen.getByText('Virat Kohli')).toBeInTheDocument();
     expect(screen.getByText('Royal Challengers')).toBeInTheDocument();
     expect(screen.getByText('Transfer player')).toBeInTheDocument();
+  });
+
+  it('opens the transfer dialog with scroll-safe sizing so the Transfer button stays reachable on short viewports', async () => {
+    const user = userEvent.setup();
+    const qc = new QueryClient();
+    render(
+      <QueryClientProvider client={qc}>
+        <TransfersPage />
+      </QueryClientProvider>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Transfer player' }));
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.className).toContain('overflow-y-auto');
+    expect(dialog.className).toContain('max-h-[min(90dvh,40rem)]');
   });
 });

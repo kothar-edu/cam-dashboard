@@ -31,7 +31,13 @@ describe('BroadcastOverlayPage', () => {
       sendEvent: vi.fn(),
     });
     vi.mocked(useLiveMatchInfoModule.useLiveMatchInfo).mockReturnValue({
-      data: { ground: 'Main Ground', tournamentName: 'Cup', powerplayOvers: 6, livestreamOverlay: { sponsorText: null, topLeftImage: null, topRightImage: null } },
+      data: {
+        ground: 'Main Ground',
+        tournamentName: 'Cup',
+        powerplayOvers: 6,
+        livestreamOverlay: { sponsorText: null, topLeftImage: null, topRightImage: null },
+        boundaryLabels: { four: null, six: null },
+      },
       isLoading: false,
     } as any);
   });

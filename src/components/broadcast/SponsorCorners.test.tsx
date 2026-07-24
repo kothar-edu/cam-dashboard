@@ -3,8 +3,13 @@ import { render, screen } from '@testing-library/react';
 import { SponsorCorners } from './SponsorCorners';
 
 describe('SponsorCorners', () => {
-  it('renders only the images that are provided', () => {
-    render(<SponsorCorners topLeftImage="https://example.com/left.png" topRightImage={null} />);
+  it('renders the top-right logo when provided', () => {
+    render(<SponsorCorners topRightImage="https://example.com/right.png" />);
     expect(screen.getAllByRole('img')).toHaveLength(1);
+  });
+
+  it('renders nothing when no logo is provided', () => {
+    const { container } = render(<SponsorCorners topRightImage={null} />);
+    expect(container.querySelectorAll('img')).toHaveLength(0);
   });
 });

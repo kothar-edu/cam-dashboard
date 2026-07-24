@@ -170,4 +170,8 @@ export type LiveMatchInfo = {
     topLeftImage: string | null;
     topRightImage: string | null;
   };
+  boundaryLabels: {
+    four: string | null;
+    six: string | null;
+  };
 };

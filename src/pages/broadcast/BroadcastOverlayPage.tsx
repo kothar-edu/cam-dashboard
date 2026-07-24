@@ -2,22 +2,27 @@ import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useLiveMatch } from '@/hooks/useLiveMatch';
 import { useLiveMatchInfo } from '@/hooks/useLiveMatchInfo';
+import { useCanvasScale } from '@/hooks/useCanvasScale';
 import { ScoreBug } from '@/components/broadcast/ScoreBug';
 import { BatterBowlerCards } from '@/components/broadcast/BatterBowlerCards';
 import { OverHistoryStrip } from '@/components/broadcast/OverHistoryStrip';
 import { CommentaryBar } from '@/components/broadcast/CommentaryBar';
-import { SponsorCorners } from '@/components/broadcast/SponsorCorners';
+import { SponsorCorners, SPONSOR_LOGO_CLASS } from '@/components/broadcast/SponsorCorners';
 import { CelebrationFlash, MilestoneFlash } from '@/components/broadcast/CelebrationFlash';
 import { PartnershipStrip } from '@/components/broadcast/PartnershipStrip';
 import { FallOfWicketsTicker } from '@/components/broadcast/FallOfWicketsTicker';
 import { ExtrasBreakdownChip } from '@/components/broadcast/ExtrasBreakdownChip';
 import { PowerplayBadge } from '@/components/broadcast/PowerplayBadge';
 
+const CANVAS_WIDTH = 1920;
+const CANVAS_HEIGHT = 1080;
+
 export default function BroadcastOverlayPage() {
   const { matchId } = useParams<{ matchId: string }>();
 
   const { state } = useLiveMatch(matchId, 'view');
   const { data: info, isLoading } = useLiveMatchInfo(matchId);
+  const scale = useCanvasScale(CANVAS_WIDTH, CANVAS_HEIGHT);
 
   useEffect(() => {
     document.title =
@@ -46,34 +51,42 @@ export default function BroadcastOverlayPage() {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center overflow-hidden bg-transparent">
-      <div data-testid="broadcast-canvas" className="relative h-[1080px] w-[1920px] bg-transparent">
-        <SponsorCorners
-          topLeftImage={info.livestreamOverlay.topLeftImage}
-          topRightImage={info.livestreamOverlay.topRightImage}
-        />
-
-        <CelebrationFlash lastEvent={state.lastEvent} />
+      <div
+        data-testid="broadcast-canvas"
+        className="relative h-[1080px] w-[1920px] shrink-0 bg-transparent"
+        style={{ transform: `scale(${scale})` }}
+      >
+        <CelebrationFlash lastEvent={state.lastEvent} boundaryLabels={info.boundaryLabels} />
         {latestMilestone && milestonePlayer && (
           <MilestoneFlash milestone={latestMilestone} playerName={milestonePlayer.full_name} />
         )}
 
-        <div className="absolute left-16 top-10 flex flex-col gap-2">
-          <PowerplayBadge current={state.current} powerplayOvers={info.powerplayOvers} />
-          <PartnershipStrip
-            partnership={state.partnership}
-            current={state.current}
-            striker={state.currentPlayers.striker}
-            nonStriker={state.currentPlayers.non_striker}
-          />
-          <ExtrasBreakdownChip extras={state.extras} />
-          <FallOfWicketsTicker entries={state.fallOfWickets} playerNameById={playerNameById} />
+        <SponsorCorners topRightImage={info.livestreamOverlay.topRightImage} />
+
+        <div className="absolute left-16 top-10 flex flex-col items-start gap-3">
+          {info.livestreamOverlay.topLeftImage && (
+            <img src={info.livestreamOverlay.topLeftImage} alt="Sponsor logo" className={SPONSOR_LOGO_CLASS} />
+          )}
+          <div className="flex flex-col gap-2">
+            <PowerplayBadge current={state.current} powerplayOvers={info.powerplayOvers} />
+            <PartnershipStrip
+              partnership={state.partnership}
+              current={state.current}
+              striker={state.currentPlayers.striker}
+              nonStriker={state.currentPlayers.non_striker}
+            />
+            <ExtrasBreakdownChip extras={state.extras} />
+            <FallOfWicketsTicker entries={state.fallOfWickets} playerNameById={playerNameById} />
+          </div>
         </div>
 
         <div className="absolute bottom-14 flex w-full flex-col items-center gap-2">
-          <div className="flex w-11/12 items-center justify-center gap-6 rounded-2xl bg-sky-200/80 px-6 py-3 shadow-lg">
+          <div className="flex w-11/12 items-center justify-between gap-6 rounded-2xl bg-sky-200/80 px-6 py-3 shadow-lg">
             <BatterBowlerCards currentPlayers={state.currentPlayers} />
-            <ScoreBug current={state.current} battingTeam={state.opponents.batting} bowlingTeam={state.opponents.bowling} />
-            <OverHistoryStrip thisOver={state.scoreHistory[state.current.over] ?? []} />
+            <div className="flex w-[420px] shrink-0 flex-col items-center gap-1">
+              <ScoreBug current={state.current} battingTeam={state.opponents.batting} bowlingTeam={state.opponents.bowling} />
+              <OverHistoryStrip thisOver={state.scoreHistory[state.current.over] ?? []} />
+            </div>
           </div>
         </div>
 

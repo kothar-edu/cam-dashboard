@@ -26,7 +26,7 @@ type OverHistoryStripProps = {
 
 export function OverHistoryStrip({ thisOver }: OverHistoryStripProps) {
   return (
-    <div className="flex gap-1 px-4">
+    <div className="flex flex-wrap items-center justify-center gap-1 px-4">
       {thisOver.map((event, index) => (
         <div
           key={index}

@@ -21,6 +21,21 @@ describe('CelebrationFlash', () => {
     rerender(<CelebrationFlash lastEvent={{ kind: 'SCORE', value: 6 }} />);
     expect(screen.queryByText('SIX')).not.toBeInTheDocument();
   });
+
+  it('uses the configured boundary label instead of FOUR/SIX when set', () => {
+    render(
+      <CelebrationFlash
+        lastEvent={{ kind: 'SCORE', value: 4 }}
+        boundaryLabels={{ four: 'Kothar FOUR', six: null }}
+      />,
+    );
+    expect(screen.getByText('Kothar FOUR')).toBeInTheDocument();
+  });
+
+  it('falls back to FOUR/SIX when no boundary label is configured', () => {
+    render(<CelebrationFlash lastEvent={{ kind: 'SCORE', value: 4 }} boundaryLabels={{ four: null, six: null }} />);
+    expect(screen.getByText('FOUR')).toBeInTheDocument();
+  });
 });
 
 describe('MilestoneFlash', () => {

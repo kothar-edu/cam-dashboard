@@ -10,7 +10,9 @@ const VALUE_LABEL: Partial<Record<AllScoreValue, string>> = {
   6: 'SIX',
 };
 
-function labelFor(value: AllScoreValue): string {
+function labelFor(value: AllScoreValue, boundaryLabels?: BoundaryLabels): string {
+  if (value === 4) return boundaryLabels?.four || VALUE_LABEL[4]!;
+  if (value === 6) return boundaryLabels?.six || VALUE_LABEL[6]!;
   return VALUE_LABEL[value] ?? 'WICKET';
 }
 
@@ -19,12 +21,14 @@ function styleFor(kind: 'SCORE' | 'WICKET' | null): string {
 }
 
 type LastEvent = { kind: 'SCORE' | 'WICKET' | null; value: AllScoreValue | null };
+type BoundaryLabels = { four: string | null; six: string | null };
 
 type CelebrationFlashProps = {
   lastEvent: LastEvent;
+  boundaryLabels?: BoundaryLabels;
 };
 
-export function CelebrationFlash({ lastEvent }: CelebrationFlashProps) {
+export function CelebrationFlash({ lastEvent, boundaryLabels }: CelebrationFlashProps) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -41,7 +45,7 @@ export function CelebrationFlash({ lastEvent }: CelebrationFlashProps) {
 
   return (
     <div className={`absolute inset-0 flex items-center justify-center text-8xl font-bold text-yellow-400 ${styleFor(lastEvent.kind)}`}>
-      <span className="animate-pulse">{labelFor(lastEvent.value)}</span>
+      <span className="animate-pulse">{labelFor(lastEvent.value, boundaryLabels)}</span>
     </div>
   );
 }

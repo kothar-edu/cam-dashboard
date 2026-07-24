@@ -20,6 +20,7 @@ describe('useLiveMatchInfo', () => {
       tournamentName: 'Cup',
       powerplayOvers: 6,
       livestreamOverlay: { sponsorText: 'Sponsor', topLeftImage: null, topRightImage: null },
+      boundaryLabels: { four: null, six: null },
     };
     vi.spyOn(livescoreApi, 'fetchLiveMatchInfo').mockResolvedValue(info);
 

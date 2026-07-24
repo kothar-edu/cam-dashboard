@@ -37,5 +37,9 @@ export async function fetchLiveMatchInfo(matchId: string): Promise<LiveMatchInfo
       topLeftImage: data.livestream_overlay?.top_left_image ?? null,
       topRightImage: data.livestream_overlay?.top_right_image ?? null,
     },
+    boundaryLabels: {
+      four: data.boundary_labels?.four ?? null,
+      six: data.boundary_labels?.six ?? null,
+    },
   };
 }

@@ -53,6 +53,11 @@ export function ScoringConsole({ fixture }: ScoringConsoleProps) {
       <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5">
         <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${CONNECTION_DOT[connectionStatus]}`} />
         <span className="text-sm font-medium text-[#12233D]">{CONNECTION_LABEL[connectionStatus]}</span>
+        {connected && (
+          <span className="text-sm text-gray-500">
+            · {state.viewers} watching
+          </span>
+        )}
         {connectionStatus === 'closed' && (
           <span className="text-sm text-gray-500"> — refresh the page to try reconnecting.</span>
         )}

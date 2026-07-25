@@ -160,16 +160,26 @@ describe('FixturesPage', () => {
     expect(lastCall).not.toHaveProperty('opponent_team');
   });
 
-  it('shows a Score Live link to the new console for Live and Upcoming fixtures', () => {
+  it('shows a Score Live link to the new console for Live and Upcoming fixtures', async () => {
+    const user = userEvent.setup();
     renderPage();
-    const scoreLiveLinks = screen.getAllByRole('link', { name: /score live/i });
-    expect(scoreLiveLinks[0]).toHaveAttribute('href', expect.stringContaining('/score'));
+
+    await user.click(screen.getByRole('button', { name: /actions for/i }));
+
+    const scoreLiveLink = screen.getByRole('menuitem', { name: /score live/i });
+    expect(scoreLiveLink).toHaveAttribute('href', expect.stringContaining('/score'));
   });
 
-  it('links the OBS overlay icon to the internal broadcast route, not the legacy livescore-admin app', () => {
+  it('offers both the new broadcast overlay and the legacy livescore-admin overlay', async () => {
+    const user = userEvent.setup();
     renderPage();
-    const overlayLink = screen.getByTitle('OBS overlay');
-    expect(overlayLink).toHaveAttribute('href', expect.stringContaining('/broadcast/'));
-    expect(overlayLink).not.toHaveAttribute('href', expect.stringContaining('livestream'));
+
+    await user.click(screen.getByRole('button', { name: /actions for/i }));
+
+    const newOverlayLink = screen.getByRole('menuitem', { name: /^OBS overlay$/i });
+    expect(newOverlayLink).toHaveAttribute('href', expect.stringContaining('/broadcast/'));
+
+    const legacyOverlayLink = screen.getByRole('menuitem', { name: /OBS overlay \(legacy\)/i });
+    expect(legacyOverlayLink).toHaveAttribute('href', expect.stringContaining('/livestream/'));
   });
 });

@@ -1,10 +1,25 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, Radio } from 'lucide-react';
+import {
+  AlertTriangle,
+  ExternalLink,
+  Flag,
+  MoreVertical,
+  Pencil,
+  Radio,
+  XCircle,
+} from 'lucide-react';
 import { DataTable } from '@/components/data-table/DataTable';
 import { SearchableSelect } from '@/components/forms/SearchableSelect';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { ForfeitDialog } from '@/components/ui/forfeit-dialog';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
@@ -22,6 +37,11 @@ const PAGE_SIZE = 20;
 const STATUS_TABS = ['Live', 'Upcoming', 'Ended'] as const;
 type StatusTab = (typeof STATUS_TABS)[number];
 const ANY_TEAM_VALUE = '__any__';
+
+// The legacy standalone livescore-admin app's overlay is being kept around
+// temporarily alongside the new in-dashboard broadcast route while the two
+// are compared - see cam-dashboard/.env's VITE_LIVESCORE_ADMIN_URL.
+const LIVESCORE_ADMIN_URL = import.meta.env.VITE_LIVESCORE_ADMIN_URL || 'http://localhost:3000';
 
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString(undefined, {
@@ -193,73 +213,100 @@ export default function FixturesPage() {
           {
             id: 'actions',
             header: 'Actions',
-            cell: (row) => (
-              <div className="flex min-w-[12rem] flex-wrap items-center gap-1.5">
-                {(row.status === 'Live' || row.status === 'Upcoming') && (
-                  <>
-                    <Link
-                      to={`/dashboard/fixtures/${row.id}/score`}
-                      className="inline-flex items-center gap-1 rounded-md border border-green-300 bg-green-50 px-2 py-1 text-xs text-green-700 hover:bg-green-100 sm:px-3 sm:text-sm"
-                      title="Score Live"
-                    >
-                      <Radio className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      Score
-                    </Link>
-                    <Link
-                      to={`/broadcast/${row.id}?tenant=${activeTenant?.schema_name}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-2 py-1 text-xs text-[#12233D] hover:bg-gray-50 sm:px-3 sm:text-sm"
-                      title="OBS overlay"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    </Link>
-                  </>
-                )}
-                <Link
-                  to={`/dashboard/fixtures/${row.id}`}
-                  className="inline-flex items-center rounded-md border border-gray-300 px-2 py-1 text-xs text-[#12233D] hover:bg-gray-50 sm:px-3 sm:text-sm"
-                >
-                  Edit
-                </Link>
-                {(row.status === 'Upcoming' || row.status === 'Live') && (
-                  <>
+            cell: (row) => {
+              const isLiveOrUpcoming = row.status === 'Live' || row.status === 'Upcoming';
+              return (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      onClick={() => {
-                        setForfeitRow(row);
-                        setForfeitedOpponentId('');
-                        setPointsToAward(2);
-                        setForfeitOpen(true);
-                      }}
-                      className="inline-flex items-center rounded-md border border-orange-300 bg-orange-50 px-2 py-1 text-xs text-orange-700 hover:bg-orange-100 sm:px-3 sm:text-sm"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 text-[#12233D] hover:bg-gray-50"
+                      aria-label={`Actions for ${matchLabel(row)}`}
                     >
-                      Forfeit
+                      <MoreVertical className="h-4 w-4" />
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAbandonRow(row);
-                        setAbandonOpen(true);
-                      }}
-                      className="inline-flex items-center rounded-md border border-yellow-300 bg-yellow-50 px-2 py-1 text-xs text-yellow-700 hover:bg-yellow-100 sm:px-3 sm:text-sm"
-                    >
-                      Abandon
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTargetRow(row);
-                        setConfirmOpen(true);
-                      }}
-                      className="inline-flex items-center rounded-md border border-red-300 bg-red-50 px-2 py-1 text-xs text-red-600 hover:bg-red-100 sm:px-3 sm:text-sm"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                )}
-              </div>
-            ),
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {isLiveOrUpcoming && (
+                      <DropdownMenuItem asChild>
+                        <Link to={`/dashboard/fixtures/${row.id}/score`} className="text-green-700">
+                          <Radio className="h-4 w-4" />
+                          Score Live
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    {isLiveOrUpcoming && (
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to={`/broadcast/${row.id}?tenant=${activeTenant?.schema_name}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          OBS overlay
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    {isLiveOrUpcoming && (
+                      <DropdownMenuItem asChild>
+                        <a
+                          href={`${LIVESCORE_ADMIN_URL}/livestream/${row.id}?tenant=${activeTenant?.schema_name}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-500"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          OBS overlay (legacy)
+                        </a>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem asChild>
+                      <Link to={`/dashboard/fixtures/${row.id}`}>
+                        <Pencil className="h-4 w-4" />
+                        Edit
+                      </Link>
+                    </DropdownMenuItem>
+                    {isLiveOrUpcoming && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-orange-700"
+                          onSelect={() => {
+                            setForfeitRow(row);
+                            setForfeitedOpponentId('');
+                            setPointsToAward(2);
+                            setForfeitOpen(true);
+                          }}
+                        >
+                          <Flag className="h-4 w-4" />
+                          Forfeit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-yellow-700"
+                          onSelect={() => {
+                            setAbandonRow(row);
+                            setAbandonOpen(true);
+                          }}
+                        >
+                          <AlertTriangle className="h-4 w-4" />
+                          Abandon
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onSelect={() => {
+                            setTargetRow(row);
+                            setConfirmOpen(true);
+                          }}
+                        >
+                          <XCircle className="h-4 w-4" />
+                          Cancel
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              );
+            },
           },
         ]}
         data={fixtures}

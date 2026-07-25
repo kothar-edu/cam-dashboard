@@ -179,6 +179,29 @@ export type BroadcastSponsor = {
   level: SponsorLevel;
 };
 
+export type OpponentFinalScore = {
+  runsScored: number;
+  oversBowled: number;
+  wicketsLost: number;
+  wicketsTaken: number;
+};
+
+/** Final result once a match has ended - null fields mean "not applicable",
+ * not "still loading" (e.g. `score` is null for forfeited/abandoned matches
+ * that never produced innings totals). */
+export type MatchOutcome = {
+  winner: { id: string; team: string } | null;
+  abandoned: boolean;
+  tied: boolean;
+  dls: boolean;
+  forfeit: boolean;
+  forfeitedBy: string | null;
+  score: {
+    opponentA: OpponentFinalScore | null;
+    opponentB: OpponentFinalScore | null;
+  } | null;
+};
+
 export type LiveMatchInfo = {
   ground: string | null;
   tournamentName: string | null;
@@ -193,4 +216,5 @@ export type LiveMatchInfo = {
     six: string | null;
   };
   sponsors: BroadcastSponsor[];
+  outcome: MatchOutcome;
 };

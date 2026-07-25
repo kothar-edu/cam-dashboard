@@ -22,6 +22,15 @@ describe('useLiveMatchInfo', () => {
       livestreamOverlay: { sponsorText: 'Sponsor', topLeftImage: null, topRightImage: null },
       boundaryLabels: { four: null, six: null },
       sponsors: [],
+      outcome: {
+        winner: null,
+        abandoned: false,
+        tied: false,
+        dls: false,
+        forfeit: false,
+        forfeitedBy: null,
+        score: null,
+      },
     };
     vi.spyOn(livescoreApi, 'fetchLiveMatchInfo').mockResolvedValue(info);
 

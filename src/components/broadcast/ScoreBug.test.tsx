@@ -72,4 +72,112 @@ describe('ScoreBug', () => {
     );
     expect(screen.getByText(/Target: 150/)).toBeInTheDocument();
   });
+
+  const endedCurrent = { ...current, status: 'END_OF_MATCH' };
+  const teamA = { id: 'a', name: 'Team A', code: 'TMA', logo: null };
+  const teamB = { id: 'b', name: 'Team B', code: 'TMB', logo: null };
+
+  it('falls back to a plain "Match Ended" label when no outcome is available yet', () => {
+    render(<ScoreBug current={endedCurrent} battingTeam={battingTeam} bowlingTeam={bowlingTeam} />);
+    expect(screen.getByText('Match Ended')).toBeInTheDocument();
+  });
+
+  it('shows both final scores and the winner for a normal completed match', () => {
+    render(
+      <ScoreBug
+        current={endedCurrent}
+        battingTeam={battingTeam}
+        bowlingTeam={bowlingTeam}
+        teamA={teamA}
+        teamB={teamB}
+        outcome={{
+          winner: { id: 'a', team: 'Team A' },
+          abandoned: false,
+          tied: false,
+          dls: false,
+          forfeit: false,
+          forfeitedBy: null,
+          score: {
+            opponentA: { runsScored: 180, oversBowled: 20, wicketsLost: 6, wicketsTaken: 0 },
+            opponentB: { runsScored: 175, oversBowled: 20, wicketsLost: 8, wicketsTaken: 0 },
+          },
+        }}
+      />
+    );
+    expect(screen.getByText('TMA')).toBeInTheDocument();
+    expect(screen.getByText('180-6 (20)')).toBeInTheDocument();
+    expect(screen.getByText('TMB')).toBeInTheDocument();
+    expect(screen.getByText('175-8 (20)')).toBeInTheDocument();
+    expect(screen.getByText('Team A won')).toBeInTheDocument();
+  });
+
+  it('shows Match Tied without a winner line', () => {
+    render(
+      <ScoreBug
+        current={endedCurrent}
+        battingTeam={battingTeam}
+        bowlingTeam={bowlingTeam}
+        teamA={teamA}
+        teamB={teamB}
+        outcome={{
+          winner: null,
+          abandoned: false,
+          tied: true,
+          dls: false,
+          forfeit: false,
+          forfeitedBy: null,
+          score: {
+            opponentA: { runsScored: 150, oversBowled: 20, wicketsLost: 10, wicketsTaken: 0 },
+            opponentB: { runsScored: 150, oversBowled: 20, wicketsLost: 9, wicketsTaken: 0 },
+          },
+        }}
+      />
+    );
+    expect(screen.getByText('Match tied')).toBeInTheDocument();
+  });
+
+  it('shows Match abandoned with no score row', () => {
+    render(
+      <ScoreBug
+        current={endedCurrent}
+        battingTeam={battingTeam}
+        bowlingTeam={bowlingTeam}
+        teamA={teamA}
+        teamB={teamB}
+        outcome={{
+          winner: null,
+          abandoned: true,
+          tied: false,
+          dls: false,
+          forfeit: false,
+          forfeitedBy: null,
+          score: null,
+        }}
+      />
+    );
+    expect(screen.getByText('Match abandoned')).toBeInTheDocument();
+    expect(screen.queryByText('TMA')).not.toBeInTheDocument();
+  });
+
+  it('shows the forfeiting team and the winner', () => {
+    render(
+      <ScoreBug
+        current={endedCurrent}
+        battingTeam={battingTeam}
+        bowlingTeam={bowlingTeam}
+        teamA={teamA}
+        teamB={teamB}
+        outcome={{
+          winner: { id: 'b', team: 'Team B' },
+          abandoned: false,
+          tied: false,
+          dls: false,
+          forfeit: true,
+          forfeitedBy: 'Team A',
+          score: null,
+        }}
+      />
+    );
+    expect(screen.getByText('Team A forfeited — Team B win')).toBeInTheDocument();
+  });
 });

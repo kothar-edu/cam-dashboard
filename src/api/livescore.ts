@@ -1,5 +1,5 @@
 import { apiClient, getStoredAccessToken, getStoredTenantId } from './client';
-import type { LiveMatchInfo } from '@/types/liveMatch';
+import type { LiveMatchInfo, OpponentFinalScore } from '@/types/liveMatch';
 
 function resolveWsOrigin(): string {
   const viteBase = (import.meta.env.VITE_URL ?? '/').replace(/\/+$/, '');
@@ -21,6 +21,16 @@ export function buildLiveScoreWsUrl(matchId: string, tenantOverride?: string | n
   return query ? `${base}?${query}` : base;
 }
 
+function mapOpponentFinalScore(raw: Record<string, unknown> | undefined): OpponentFinalScore | null {
+  if (!raw) return null;
+  return {
+    runsScored: Number(raw.runs_scored ?? 0),
+    oversBowled: Number(raw.overs_bowled ?? 0),
+    wicketsLost: Number(raw.wickets_lost ?? 0),
+    wicketsTaken: Number(raw.wickets_taken ?? 0),
+  };
+}
+
 export async function fetchLiveMatchInfo(
   matchId: string,
   tenantOverride?: string | null
@@ -29,6 +39,7 @@ export async function fetchLiveMatchInfo(
     headers: tenantOverride ? { 'X-Tenant-ID': tenantOverride } : undefined,
   });
   const data = response.data;
+  const resultSummary = data.result_summary as Record<string, unknown> | null | undefined;
   return {
     ground: data.ground ?? null,
     tournamentName: data.tournament?.name ?? null,
@@ -48,5 +59,23 @@ export async function fetchLiveMatchInfo(
       imageUrl: (sponsor.image as string | null) ?? null,
       level: sponsor.sponsor_type as LiveMatchInfo['sponsors'][number]['level'],
     })),
+    outcome: {
+      winner: data.winner ? { id: String(data.winner.id), team: String(data.winner.team) } : null,
+      abandoned: Boolean(data.abandoned),
+      tied: Boolean(data.tied),
+      dls: Boolean(data.dls),
+      forfeit: Boolean(data.result?.forfeit),
+      forfeitedBy: data.result?.forfeited_by ?? null,
+      score: resultSummary
+        ? {
+            opponentA: mapOpponentFinalScore(
+              resultSummary.opponent_a as Record<string, unknown> | undefined
+            ),
+            opponentB: mapOpponentFinalScore(
+              resultSummary.opponent_b as Record<string, unknown> | undefined
+            ),
+          }
+        : null,
+    },
   };
 }

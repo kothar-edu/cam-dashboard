@@ -98,6 +98,9 @@ export default function BroadcastOverlayPage() {
                   current={state.current}
                   battingTeam={state.opponents.batting}
                   bowlingTeam={state.opponents.bowling}
+                  teamA={state.opponents.team_a}
+                  teamB={state.opponents.team_b}
+                  outcome={info.outcome}
                 />
                 <OverHistoryStrip thisOver={state.scoreHistory[state.current.over] ?? []} />
               </div>

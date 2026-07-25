@@ -20,18 +20,18 @@ Open [http://localhost:5173](http://localhost:5173).
 
 ### Environment
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
+| Variable   | Default                  | Purpose             |
+| ---------- | ------------------------ | ------------------- |
 | `VITE_URL` | `http://127.0.0.1:8000/` | Django API base URL |
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Vite dev server (port 5173) |
-| `npm run build` | TypeScript check + production build |
-| `npm run test` | Vitest unit tests |
-| `npm run preview` | Preview production build |
+| Command           | Description                         |
+| ----------------- | ----------------------------------- |
+| `npm run dev`     | Vite dev server (port 5173)         |
+| `npm run build`   | TypeScript check + production build |
+| `npm run test`    | Vitest unit tests                   |
+| `npm run preview` | Preview production build            |
 
 ## Auth & tenancy
 

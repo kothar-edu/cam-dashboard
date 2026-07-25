@@ -5,8 +5,15 @@ import type { ScoreEvent } from '@/types/liveMatch';
 
 function ball(value: number | string): ScoreEvent {
   return {
-    striker: 's1', bowler: 'b1', value: value as ScoreEvent['value'], extras: 0, runs: typeof value === 'number' ? value : 0,
-    dismissed: null, fielder: null, is_bat_involved: true, commentary: '',
+    striker: 's1',
+    bowler: 'b1',
+    value: value as ScoreEvent['value'],
+    extras: 0,
+    runs: typeof value === 'number' ? value : 0,
+    dismissed: null,
+    fielder: null,
+    is_bat_involved: true,
+    commentary: '',
   };
 }
 

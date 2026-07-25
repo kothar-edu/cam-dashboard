@@ -1,8 +1,7 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 
 type MarqueeBoxProps = {
   children: React.ReactNode;
-  /** Changes whenever the underlying content changes, forcing a remeasure. */
   measureKey: string | number;
   speedPxPerSec?: number;
   gapPx?: number;
@@ -11,8 +10,12 @@ type MarqueeBoxProps = {
 const DEFAULT_SPEED_PX_PER_SEC = 55;
 const DEFAULT_GAP_PX = 56;
 
-/** Renders children statically, or as a seamless looping marquee if they overflow the container. */
-export function MarqueeBox({ children, measureKey, speedPxPerSec = DEFAULT_SPEED_PX_PER_SEC, gapPx = DEFAULT_GAP_PX }: MarqueeBoxProps) {
+export function MarqueeBox({
+  children,
+  measureKey,
+  speedPxPerSec = DEFAULT_SPEED_PX_PER_SEC,
+  gapPx = DEFAULT_GAP_PX,
+}: MarqueeBoxProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
   const [marquee, setMarquee] = useState({ active: false, durationSeconds: 0 });
@@ -27,7 +30,11 @@ export function MarqueeBox({ children, measureKey, speedPxPerSec = DEFAULT_SPEED
   }, [measureKey, speedPxPerSec, gapPx]);
 
   return (
-    <div ref={containerRef} data-testid="marquee-container" className="relative w-full min-w-0 overflow-hidden">
+    <div
+      ref={containerRef}
+      data-testid="marquee-container"
+      className="relative w-full min-w-0 overflow-hidden"
+    >
       <div
         ref={measureRef}
         data-testid="marquee-measure"

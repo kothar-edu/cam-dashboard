@@ -61,7 +61,9 @@ export default function VotingFormPage() {
 
   const togglePlayer = (playerId: string) => {
     setSelectedPlayers((current) =>
-      current.includes(playerId) ? current.filter((pid) => pid !== playerId) : [...current, playerId]
+      current.includes(playerId)
+        ? current.filter((pid) => pid !== playerId)
+        : [...current, playerId]
     );
   };
 
@@ -122,7 +124,10 @@ export default function VotingFormPage() {
   return (
     <TenantRequired>
       <div className="space-y-6">
-        <PageHeader title={isEdit ? 'Edit voting nomination' : 'Create voting nomination'} backTo="/dashboard/voting" />
+        <PageHeader
+          title={isEdit ? 'Edit voting nomination' : 'Create voting nomination'}
+          backTo="/dashboard/voting"
+        />
         {isLoadingEdit ? (
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         ) : loadFailed ? (
@@ -133,7 +138,10 @@ export default function VotingFormPage() {
             </Link>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="max-w-2xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
+          <form
+            onSubmit={handleSubmit}
+            className="max-w-2xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
+          >
             <SearchableSelect
               label="Tournament"
               value={tournamentId}
@@ -162,7 +170,8 @@ export default function VotingFormPage() {
               <div>
                 <p className="text-sm font-medium text-[#12233D]">Poll voting open</p>
                 <p className="text-xs text-muted-foreground">
-                  When enabled, this poll appears on the mobile Vote screen (if organization voting is also open).
+                  When enabled, this poll appears on the mobile Vote screen (if organization voting
+                  is also open).
                 </p>
               </div>
               <input
@@ -193,7 +202,12 @@ export default function VotingFormPage() {
               <Button type="submit" disabled={pending || !selectedPlayers.length}>
                 {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create nomination'}
               </Button>
-              <Button type="button" variant="outline" disabled={pending} onClick={() => navigate('/dashboard/voting')}>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={pending}
+                onClick={() => navigate('/dashboard/voting')}
+              >
                 Cancel
               </Button>
             </div>

@@ -103,9 +103,7 @@ export default function PlayersPage() {
         data={players}
         loading={isLoading}
         emptyMessage="No players found."
-        pagination={
-          data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined
-        }
+        pagination={data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined}
         onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
       />
 
@@ -123,7 +121,10 @@ export default function PlayersPage() {
         onConfirm={() => {
           if (!targetRow) return;
           updatePlayerMutation.mutate(
-            { id: targetRow.id, payload: { is_active: !targetRow.is_active } as UpdatePlayerPayload },
+            {
+              id: targetRow.id,
+              payload: { is_active: !targetRow.is_active } as UpdatePlayerPayload,
+            },
             { onSuccess: () => setConfirmOpen(false) }
           );
         }}

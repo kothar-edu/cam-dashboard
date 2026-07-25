@@ -2,7 +2,17 @@ import { useEffect, useState } from 'react';
 import type { AllScoreValue } from '@/types/liveMatch';
 import type { MilestoneEvent } from '@/lib/liveMatchReducer';
 
-const CELEBRATE_VALUES = new Set<AllScoreValue>([4, 6, 'BOWLED', 'LBW', 'STUMPED', 'CAUGHT', 'RUN_OUT', 'HANDLED', 'WIDE_STUMPED']);
+const CELEBRATE_VALUES = new Set<AllScoreValue>([
+  4,
+  6,
+  'BOWLED',
+  'LBW',
+  'STUMPED',
+  'CAUGHT',
+  'RUN_OUT',
+  'HANDLED',
+  'WIDE_STUMPED',
+]);
 const FLASH_DURATION_MS = 5000;
 
 const VALUE_LABEL: Partial<Record<AllScoreValue, string>> = {
@@ -44,7 +54,9 @@ export function CelebrationFlash({ lastEvent, boundaryLabels }: CelebrationFlash
   if (!visible || !lastEvent.kind || lastEvent.value == null) return null;
 
   return (
-    <div className={`absolute inset-0 flex items-center justify-center text-8xl font-bold text-yellow-400 ${styleFor(lastEvent.kind)}`}>
+    <div
+      className={`absolute inset-0 flex items-center justify-center text-8xl font-bold text-yellow-400 ${styleFor(lastEvent.kind)}`}
+    >
       <span className="animate-pulse">{labelFor(lastEvent.value, boundaryLabels)}</span>
     </div>
   );

@@ -1,5 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createPost, deletePost, getPost, listPosts, updatePost, type PostPayload } from '@/api/posts';
+import {
+  createPost,
+  deletePost,
+  getPost,
+  listPosts,
+  updatePost,
+  type PostPayload,
+} from '@/api/posts';
 import type { ListParams } from '@/api/pagination';
 import { useTenant } from '@/contexts/TenantContext';
 

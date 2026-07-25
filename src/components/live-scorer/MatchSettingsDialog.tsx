@@ -29,7 +29,9 @@ export function MatchSettingsDialog({ open, onOpenChange, onSubmit }: MatchSetti
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[min(90dvh,40rem)] w-[calc(100vw-1.5rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg bg-white p-4 shadow-xl sm:p-6">
-          <Dialog.Title className="text-lg font-semibold text-[#12233D]">DLS / Inning Settings</Dialog.Title>
+          <Dialog.Title className="text-lg font-semibold text-[#12233D]">
+            DLS / Inning Settings
+          </Dialog.Title>
           <div className="mt-4 flex flex-col gap-3">
             <label className="text-sm font-medium text-[#12233D]">
               New target
@@ -41,7 +43,9 @@ export function MatchSettingsDialog({ open, onOpenChange, onSubmit }: MatchSetti
                 value={target}
                 onChange={(e) => setTarget(parseInt(e.target.value, 10) || 0)}
               />
-              <span className="text-xs italic text-gray-500">New target will be 0 for the first inning.</span>
+              <span className="text-xs italic text-gray-500">
+                New target will be 0 for the first inning.
+              </span>
             </label>
             <label className="text-sm font-medium text-[#12233D]">
               New over limit
@@ -68,13 +72,20 @@ export function MatchSettingsDialog({ open, onOpenChange, onSubmit }: MatchSetti
               />
             </label>
             <label className="flex items-center gap-2 text-sm font-medium text-[#12233D]">
-              <input aria-label="DLS" type="checkbox" checked={dls} onChange={(e) => setDls(e.target.checked)} />
+              <input
+                aria-label="DLS"
+                type="checkbox"
+                checked={dls}
+                onChange={(e) => setDls(e.target.checked)}
+              />
               DLS
             </label>
           </div>
           <div className="mt-6 flex justify-end gap-3">
             <Dialog.Close asChild>
-              <Button type="button" variant="outline">Cancel</Button>
+              <Button type="button" variant="outline">
+                Cancel
+              </Button>
             </Dialog.Close>
             <Button
               type="button"

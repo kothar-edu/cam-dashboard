@@ -5,7 +5,15 @@ import { ReservePicker } from './ReservePicker';
 import * as playersApi from '@/api/players';
 
 function player(id: string, name: string) {
-  return { id, full_name: name, jersey_no: null, current_team: 'team-1', is_active: true, team_name: 'Team A', user: null };
+  return {
+    id,
+    full_name: name,
+    jersey_no: null,
+    current_team: 'team-1',
+    is_active: true,
+    team_name: 'Team A',
+    user: null,
+  };
 }
 
 const ROSTER = [player('p1', 'Player 1'), player('p2', 'Player 2'), player('p3', 'Player 3')];
@@ -24,7 +32,7 @@ function renderPicker(props: Partial<React.ComponentProps<typeof ReservePicker>>
         onBack={vi.fn()}
         {...props}
       />
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
 }
 
@@ -34,7 +42,10 @@ afterEach(() => {
 
 describe('ReservePicker', () => {
   it('excludes already-selected starting XI players from the pool', async () => {
-    vi.spyOn(playersApi, 'listPlayers').mockResolvedValue({ count: ROSTER.length, results: ROSTER });
+    vi.spyOn(playersApi, 'listPlayers').mockResolvedValue({
+      count: ROSTER.length,
+      results: ROSTER,
+    });
     renderPicker();
 
     expect(await screen.findByText('Player 2')).toBeInTheDocument();
@@ -42,7 +53,10 @@ describe('ReservePicker', () => {
   });
 
   it('allows confirming with zero reserves selected', async () => {
-    vi.spyOn(playersApi, 'listPlayers').mockResolvedValue({ count: ROSTER.length, results: ROSTER });
+    vi.spyOn(playersApi, 'listPlayers').mockResolvedValue({
+      count: ROSTER.length,
+      results: ROSTER,
+    });
     const onConfirm = vi.fn();
     renderPicker({ onConfirm });
 
@@ -52,7 +66,10 @@ describe('ReservePicker', () => {
   });
 
   it('allows selecting exactly one reserve, and toggling it off deselects it', async () => {
-    vi.spyOn(playersApi, 'listPlayers').mockResolvedValue({ count: ROSTER.length, results: ROSTER });
+    vi.spyOn(playersApi, 'listPlayers').mockResolvedValue({
+      count: ROSTER.length,
+      results: ROSTER,
+    });
     const onConfirm = vi.fn();
     renderPicker({ onConfirm });
 

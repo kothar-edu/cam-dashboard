@@ -42,16 +42,6 @@ export type MilestoneEvent = {
   atBall: number;
 };
 
-// Known limitation: fallOfWickets, extras, and milestones are derived live,
-// ball-by-ball, from SCORE/WICKET messages received while connected. They do
-// NOT backfill on a fresh page load mid-innings — the SUMMARY/LIVE messages
-// sent on (re)connect carry only the current aggregate state, not a per-ball
-// history with point-in-time score snapshots, so "the score when wicket #2
-// fell" cannot be reconstructed from a cold connect without a backend change
-// (out of scope; see design spec's Non-goals). `partnership` is the exception:
-// it recovers correctly on reconnect since it's derived from the
-// always-current current.runs/currentPlayers, just reset relative to
-// whatever current.wickets count is present at connect time.
 export type LiveMatchState = {
   current: CurrentData;
   scoreHistory: ScoreEvent[][];
@@ -104,7 +94,11 @@ export function createInitialLiveMatchState(): LiveMatchState {
   };
 }
 
-function withOverAppended(scoreHistory: ScoreEvent[][], over: number, thisOver: ScoreEvent[]): ScoreEvent[][] {
+function withOverAppended(
+  scoreHistory: ScoreEvent[][],
+  over: number,
+  thisOver: ScoreEvent[]
+): ScoreEvent[][] {
   const next = [...scoreHistory];
   next[over] = thisOver;
   return next;
@@ -124,22 +118,23 @@ function isLegalDelivery(value: ScoreEvent['value']): boolean {
   return !NON_LEGAL_DELIVERY_VALUES.has(value);
 }
 
-function withExtrasApplied(extras: ExtrasBreakdown, lastBall: ScoreEvent | undefined): ExtrasBreakdown {
+function withExtrasApplied(
+  extras: ExtrasBreakdown,
+  lastBall: ScoreEvent | undefined
+): ExtrasBreakdown {
   if (!lastBall) return extras;
   const key = EXTRA_KEY_BY_VALUE[lastBall.value];
   if (!key) return extras;
   return { ...extras, [key]: extras[key] + (lastBall.extras ?? 0) };
 }
 
-// Dismissal-driven UI (e.g. disabling an out batter in the striker/non-striker
-// pickers) needs opponents.batting.players[].stats.is_out to be current, but
-// the backend only resends the full opponents roster on SUMMARY/EVENT
-// messages, not on every WICKET - so we patch the dismissed player's is_out
-// locally to avoid a stale "still selectable" batter between those refreshes.
-function withPlayerMarkedOut(opponents: OpponentsState, playerId: string | null | undefined): OpponentsState {
+function withPlayerMarkedOut(
+  opponents: OpponentsState,
+  playerId: string | null | undefined
+): OpponentsState {
   if (!playerId || !opponents.batting) return opponents;
   const players = opponents.batting.players.map((player) =>
-    player.id === playerId ? { ...player, stats: { ...player.stats, is_out: true } } : player,
+    player.id === playerId ? { ...player, stats: { ...player.stats, is_out: true } } : player
   );
   return { ...opponents, batting: { ...opponents.batting, players } };
 }
@@ -148,19 +143,49 @@ function withMilestonesChecked(
   milestones: MilestoneEvent[],
   firedKeys: string[],
   current: CurrentData,
-  currentPlayers: CurrentPlayersState,
+  currentPlayers: CurrentPlayersState
 ): { milestones: MilestoneEvent[]; firedMilestoneKeys: string[] } {
-  const candidates: Array<{ player: CurrentPlayersState['striker']; kind: MilestoneEvent['kind']; threshold: number; metric: number }> = [];
+  const candidates: Array<{
+    player: CurrentPlayersState['striker'];
+    kind: MilestoneEvent['kind'];
+    threshold: number;
+    metric: number;
+  }> = [];
   if (currentPlayers.striker) {
-    candidates.push({ player: currentPlayers.striker, kind: '50', threshold: 50, metric: currentPlayers.striker.stats.runs_scored });
-    candidates.push({ player: currentPlayers.striker, kind: '100', threshold: 100, metric: currentPlayers.striker.stats.runs_scored });
+    candidates.push({
+      player: currentPlayers.striker,
+      kind: '50',
+      threshold: 50,
+      metric: currentPlayers.striker.stats.runs_scored,
+    });
+    candidates.push({
+      player: currentPlayers.striker,
+      kind: '100',
+      threshold: 100,
+      metric: currentPlayers.striker.stats.runs_scored,
+    });
   }
   if (currentPlayers.non_striker) {
-    candidates.push({ player: currentPlayers.non_striker, kind: '50', threshold: 50, metric: currentPlayers.non_striker.stats.runs_scored });
-    candidates.push({ player: currentPlayers.non_striker, kind: '100', threshold: 100, metric: currentPlayers.non_striker.stats.runs_scored });
+    candidates.push({
+      player: currentPlayers.non_striker,
+      kind: '50',
+      threshold: 50,
+      metric: currentPlayers.non_striker.stats.runs_scored,
+    });
+    candidates.push({
+      player: currentPlayers.non_striker,
+      kind: '100',
+      threshold: 100,
+      metric: currentPlayers.non_striker.stats.runs_scored,
+    });
   }
   if (currentPlayers.bowler) {
-    candidates.push({ player: currentPlayers.bowler, kind: '5WICKETS', threshold: 5, metric: currentPlayers.bowler.stats.wickets_taken });
+    candidates.push({
+      player: currentPlayers.bowler,
+      kind: '5WICKETS',
+      threshold: 5,
+      metric: currentPlayers.bowler.stats.wickets_taken,
+    });
   }
 
   let nextMilestones = milestones;
@@ -172,24 +197,27 @@ function withMilestonesChecked(
     nextFiredKeys = [...nextFiredKeys, key];
     nextMilestones = [
       ...nextMilestones,
-      { key, playerId: candidate.player.id, kind: candidate.kind, atOver: current.over, atBall: current.ball },
+      {
+        key,
+        playerId: candidate.player.id,
+        kind: candidate.kind,
+        atOver: current.over,
+        atBall: current.ball,
+      },
     ];
   }
   return { milestones: nextMilestones, firedMilestoneKeys: nextFiredKeys };
 }
 
-export function liveMatchReducer(state: LiveMatchState, message: IncomingLiveScoreMessage): LiveMatchState {
+export function liveMatchReducer(
+  state: LiveMatchState,
+  message: IncomingLiveScoreMessage
+): LiveMatchState {
   switch (message.event_type) {
     case 'ERROR':
       return state;
 
     case 'LIVE':
-      // The backend sends LIVE purely as a periodic viewer-count ping
-      // (apps/livescore/utils/game_play.py's update_viewers, extra_summary=False)
-      // - `game` is `{}` on the wire, with no `current_players` key at all.
-      // Falling back to the existing value here (instead of overwriting with
-      // undefined) prevents a LIVE ping from wiping out the real player
-      // assignments a prior SUMMARY/SCORE/WICKET message already established.
       return {
         ...state,
         current: message.detail.current,
@@ -222,18 +250,13 @@ export function liveMatchReducer(state: LiveMatchState, message: IncomingLiveSco
         state.milestones,
         state.firedMilestoneKeys,
         message.detail.current,
-        message.detail.game.current_players,
+        message.detail.game.current_players
       );
 
       const isWicket = message.event_type === 'WICKET';
-      // The backend can re-broadcast the same WICKET message (e.g. on
-      // reconnect resync) - without this guard, every replay would append
-      // another identical fallOfWickets entry and reset the partnership
-      // again, which is where the "5 identical FOW entries" / negative
-      // partnership bugs came from. Treat a replay of an already-recorded
-      // wicket number as a no-op for both, instead of double-counting it.
       const isDuplicateWicket =
-        isWicket && state.fallOfWickets.some((entry) => entry.wicketNumber === message.detail.current.wickets);
+        isWicket &&
+        state.fallOfWickets.some((entry) => entry.wicketNumber === message.detail.current.wickets);
 
       const fallOfWickets =
         isWicket && !isDuplicateWicket
@@ -263,14 +286,22 @@ export function liveMatchReducer(state: LiveMatchState, message: IncomingLiveSco
             }
           : {
               ...state.partnership,
-              ballsSinceWicket: state.partnership.ballsSinceWicket + (lastBall && isLegalDelivery(lastBall.value) ? 1 : 0),
+              ballsSinceWicket:
+                state.partnership.ballsSinceWicket +
+                (lastBall && isLegalDelivery(lastBall.value) ? 1 : 0),
             };
 
       return {
         ...state,
         current: message.detail.current,
-        scoreHistory: withOverAppended(state.scoreHistory, message.detail.current.over, message.detail.game.this_over),
-        opponents: isWicket ? withPlayerMarkedOut(state.opponents, lastBall?.dismissed) : state.opponents,
+        scoreHistory: withOverAppended(
+          state.scoreHistory,
+          message.detail.current.over,
+          message.detail.game.this_over
+        ),
+        opponents: isWicket
+          ? withPlayerMarkedOut(state.opponents, lastBall?.dismissed)
+          : state.opponents,
         currentPlayers: message.detail.game.current_players,
         lastEvent: { kind: message.event_type, value: lastBall?.value ?? null },
         extras: withExtrasApplied(state.extras, lastBall),

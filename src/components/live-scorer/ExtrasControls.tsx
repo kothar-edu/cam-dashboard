@@ -5,7 +5,11 @@ import type { BatAdvantage } from '@/types/liveMatch';
 const EXTRA_RUN_OPTIONS = [0, 1, 2, 3, 4] as const;
 const NO_BALL_SOURCES = ['BAT', 'BYE', 'LEG_BYE'] as const;
 type NoBallSource = (typeof NO_BALL_SOURCES)[number];
-const NO_BALL_SOURCE_LABEL: Record<NoBallSource, string> = { BAT: 'Bat', BYE: 'Byes', LEG_BYE: 'Leg Byes' };
+const NO_BALL_SOURCE_LABEL: Record<NoBallSource, string> = {
+  BAT: 'Bat',
+  BYE: 'Byes',
+  LEG_BYE: 'Leg Byes',
+};
 
 const EXTRA_TYPES: Array<{ value: BatAdvantage; label: string }> = [
   { value: 'WIDE_BALL', label: 'Wide' },
@@ -20,7 +24,7 @@ type ExtrasControlsProps = {
     value: BatAdvantage,
     extras?: number,
     is_bat_involved?: boolean,
-    bye_type?: 'BYE' | 'LEG_BYE',
+    bye_type?: 'BYE' | 'LEG_BYE'
   ) => void;
   disabled: boolean;
 };
@@ -31,7 +35,12 @@ export function ExtrasControls({ broadcastScore, disabled }: ExtrasControlsProps
 
   const submit = (value: BatAdvantage, extraRuns: number) => {
     if (value === 'NO_BALL') {
-      broadcastScore(value, extraRuns, noBallSource === 'BAT', noBallSource === 'BAT' ? undefined : noBallSource);
+      broadcastScore(
+        value,
+        extraRuns,
+        noBallSource === 'BAT',
+        noBallSource === 'BAT' ? undefined : noBallSource
+      );
     } else {
       broadcastScore(value, extraRuns);
     }
@@ -62,7 +71,9 @@ export function ExtrasControls({ broadcastScore, disabled }: ExtrasControlsProps
                       key={source}
                       type="button"
                       className={`rounded px-2 py-1 text-xs font-bold ${
-                        noBallSource === source ? 'bg-[#12233D] text-white' : 'bg-gray-100 text-[#12233D]'
+                        noBallSource === source
+                          ? 'bg-[#12233D] text-white'
+                          : 'bg-gray-100 text-[#12233D]'
                       }`}
                       onClick={() => setNoBallSource(source)}
                     >

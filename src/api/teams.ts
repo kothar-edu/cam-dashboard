@@ -59,7 +59,10 @@ export async function createTeam(payload: CreateTeamPayload): Promise<Team> {
     });
     return data;
   }
-  const { data } = await apiClient.post<Team>('/game/teams/', { name: payload.name, code: payload.code });
+  const { data } = await apiClient.post<Team>('/game/teams/', {
+    name: payload.name,
+    code: payload.code,
+  });
   return data;
 }
 

@@ -80,7 +80,12 @@ export default function PostFormPage() {
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         ) : (
           <form onSubmit={handleSubmit} className="w-full space-y-4 rounded-lg border bg-white p-6">
-            <Input label="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+            <Input
+              label="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
             <div className="space-y-2" data-color-mode="light">
               <label className="text-sm font-medium text-[#12233D]">Description</label>
               <MDEditor
@@ -91,13 +96,11 @@ export default function PostFormPage() {
                 textareaProps={{ required: true }}
               />
               <p className="text-xs text-gray-500">
-                Supports Markdown (headings, bold, lists, links) - the mobile app renders it formatted.
+                Supports Markdown (headings, bold, lists, links) - the mobile app renders it
+                formatted.
               </p>
             </div>
             <FileField label="Cover image" onChange={setCoverImage} currentUrl={currentCoverUrl} />
-            {/* Short-value fields stay reading-width even though the card
-                itself is full-width - a date picker stretched across a wide
-                monitor is its own kind of broken. */}
             <div className="max-w-2xl space-y-2">
               <div className="grid gap-4 sm:grid-cols-2">
                 <Input
@@ -141,7 +144,11 @@ export default function PostFormPage() {
             </div>
             {isEdit ? (
               <label className="flex items-center gap-2 text-sm text-[#12233D]">
-                <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  checked={isPublic}
+                  onChange={(e) => setIsPublic(e.target.checked)}
+                />
                 Public post (visible to guests and non-members)
               </label>
             ) : null}

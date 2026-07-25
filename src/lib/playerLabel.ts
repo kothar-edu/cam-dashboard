@@ -8,7 +8,7 @@ import type { CurrentPlayersState, LiveMatchPlayer } from '@/types/liveMatch';
  */
 export function playerRoleTags(
   player: LiveMatchPlayer,
-  currentPlayers: CurrentPlayersState,
+  currentPlayers: CurrentPlayersState
 ): string[] {
   const tags: string[] = [];
   if (currentPlayers.bowler?.id === player.id) tags.push('b');
@@ -19,7 +19,7 @@ export function playerRoleTags(
 
 export function playerOptionLabel(
   player: LiveMatchPlayer,
-  currentPlayers: CurrentPlayersState,
+  currentPlayers: CurrentPlayersState
 ): string {
   const tags = playerRoleTags(player, currentPlayers);
   return tags.length

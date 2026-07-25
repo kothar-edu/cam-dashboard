@@ -22,7 +22,10 @@ describe('SponsorShowcase', () => {
     render(<SponsorShowcase sponsors={sponsors} />);
     expect(screen.getByText('Acme Corp')).toBeInTheDocument();
     expect(screen.getByText(/Title Sponsor/)).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: 'Acme Corp' })).toHaveAttribute('src', 'https://example.com/title.png');
+    expect(screen.getByRole('img', { name: 'Acme Corp' })).toHaveAttribute(
+      'src',
+      'https://example.com/title.png'
+    );
   });
 
   it('falls back to name-only when a sponsor has no logo', () => {

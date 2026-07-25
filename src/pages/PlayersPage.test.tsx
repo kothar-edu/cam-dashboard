@@ -31,7 +31,12 @@ vi.mock('@/hooks/usePlayers', () => ({
 
 vi.mock('@/contexts/TenantContext', () => ({
   useTenant: () => ({
-    activeTenant: { id: 1, name: 'CAM Youth', schema_name: 'cam_youth_association', is_active: true },
+    activeTenant: {
+      id: 1,
+      name: 'CAM Youth',
+      schema_name: 'cam_youth_association',
+      is_active: true,
+    },
     activeTenantId: 'cam_youth_association',
   }),
 }));

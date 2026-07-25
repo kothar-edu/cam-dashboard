@@ -97,7 +97,10 @@ export default function PostsPage() {
                 </Link>
                 <button
                   type="button"
-                  onClick={() => { setTargetRow(row); setConfirmOpen(true); }}
+                  onClick={() => {
+                    setTargetRow(row);
+                    setConfirmOpen(true);
+                  }}
                   className="ml-2 inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-red-600"
                 >
                   Delete
@@ -109,9 +112,7 @@ export default function PostsPage() {
         data={posts}
         loading={isLoading}
         emptyMessage="No posts found."
-        pagination={
-          data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined
-        }
+        pagination={data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined}
         onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
       />
 

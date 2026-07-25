@@ -21,9 +21,7 @@ export function PageHeader({ title, description, backTo, backLabel, action }: Pa
         <h1 className="break-words text-xl font-bold tracking-tight text-[#12233D] sm:text-2xl">
           {title}
         </h1>
-        {description ? (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        ) : null}
+        {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
       </div>
       {action ? (
         <div className="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto sm:justify-end">

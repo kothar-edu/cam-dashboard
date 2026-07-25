@@ -15,12 +15,23 @@ type ReservePickerProps = {
   onBack: () => void;
 };
 
-export function ReservePicker({ teamId, teamName, stepLabel, excludeIds, initialSelectedId, onConfirm, onBack }: ReservePickerProps) {
+export function ReservePicker({
+  teamId,
+  teamName,
+  stepLabel,
+  excludeIds,
+  initialSelectedId,
+  onConfirm,
+  onBack,
+}: ReservePickerProps) {
   const { data: roster, isLoading } = useTeamRoster(teamId);
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId);
 
-  const eligible = useMemo(() => (roster ?? []).filter((player) => !excludeIds.includes(player.id)), [roster, excludeIds]);
+  const eligible = useMemo(
+    () => (roster ?? []).filter((player) => !excludeIds.includes(player.id)),
+    [roster, excludeIds]
+  );
   const filtered = useMemo(() => {
     if (!search.trim()) return eligible;
     const query = search.trim().toLowerCase();
@@ -74,7 +85,9 @@ export function ReservePicker({ teamId, teamName, stepLabel, excludeIds, initial
                     >
                       {checked && <Check className="h-3.5 w-3.5 text-white" />}
                     </span>
-                    <span className="flex-1 text-sm font-medium text-[#12233D]">{player.full_name}</span>
+                    <span className="flex-1 text-sm font-medium text-[#12233D]">
+                      {player.full_name}
+                    </span>
                     {player.jersey_no != null && (
                       <span className="shrink-0 text-xs text-gray-400">#{player.jersey_no}</span>
                     )}

@@ -23,7 +23,13 @@ describe('useScoreActions', () => {
 
     expect(sendEvent).toHaveBeenCalledWith({
       event_type: 'WICKET',
-      detail: { value: 'RUN_OUT', dismissed: 'player-1', successful_runs: 1, fielder: 'fielder-1', extras: 0 },
+      detail: {
+        value: 'RUN_OUT',
+        dismissed: 'player-1',
+        successful_runs: 1,
+        fielder: 'fielder-1',
+        extras: 0,
+      },
     });
   });
 
@@ -32,7 +38,10 @@ describe('useScoreActions', () => {
     const { result } = renderHook(() => useScoreActions(sendEvent));
 
     result.current.broadcastCommentary('  hello  ');
-    expect(sendEvent).toHaveBeenCalledWith({ event_type: 'COMMENTARY', detail: { message: 'hello' } });
+    expect(sendEvent).toHaveBeenCalledWith({
+      event_type: 'COMMENTARY',
+      detail: { message: 'hello' },
+    });
 
     sendEvent.mockClear();
     result.current.broadcastCommentary('   ');
@@ -44,7 +53,10 @@ describe('useScoreActions', () => {
     const { result } = renderHook(() => useScoreActions(sendEvent));
 
     result.current.updatePlayer('bowler', 'player-9');
-    expect(sendEvent).toHaveBeenCalledWith({ event_type: 'UPDATE_PLAYER', detail: { type: 'bowler', id: 'player-9' } });
+    expect(sendEvent).toHaveBeenCalledWith({
+      event_type: 'UPDATE_PLAYER',
+      detail: { type: 'bowler', id: 'player-9' },
+    });
 
     result.current.updateRetiredHurtStatus('player-2', true);
     expect(sendEvent).toHaveBeenCalledWith({
@@ -57,7 +69,12 @@ describe('useScoreActions', () => {
     const sendEvent = vi.fn();
     const { result } = renderHook(() => useScoreActions(sendEvent));
 
-    result.current.broadcastGameEvent('SETTING', { target: 150, max_overs: 20, bowling_limit: 4, DLS: false });
+    result.current.broadcastGameEvent('SETTING', {
+      target: 150,
+      max_overs: 20,
+      bowling_limit: 4,
+      DLS: false,
+    });
 
     expect(sendEvent).toHaveBeenCalledWith({
       event_type: 'EVENT',

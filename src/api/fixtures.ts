@@ -1,6 +1,6 @@
-import { apiClient } from "./client";
-import { ListParams, Paginated, parsePaginated } from "./pagination";
-import type { Tournament } from "./tournaments";
+import { apiClient } from './client';
+import { ListParams, Paginated, parsePaginated } from './pagination';
+import type { Tournament } from './tournaments';
 
 export type FixtureOpponent = {
   id: string;
@@ -22,10 +22,8 @@ export type Fixture = {
   bowling_limit?: number;
 };
 
-export async function listFixtures(
-  params?: ListParams,
-): Promise<Paginated<Fixture>> {
-  const response = await apiClient.get<Paginated<Fixture>>("/game/match/", {
+export async function listFixtures(params?: ListParams): Promise<Paginated<Fixture>> {
+  const response = await apiClient.get<Paginated<Fixture>>('/game/match/', {
     params,
   });
   return parsePaginated(response.data);
@@ -82,7 +80,7 @@ export type FixtureDetail = Omit<Fixture, 'opponent_a' | 'opponent_b'> & {
     sponsor_text: string | null;
     top_left_image: string | null;
     top_right_image: string | null;
-    source: "match" | "tournament";
+    source: 'match' | 'tournament';
   };
   tournament?: Tournament & {
     livestream_sponsor_text?: string;
@@ -138,22 +136,16 @@ export type LineupFieldingUpdatePayload = {
   stumps: number;
 };
 
-export async function updateLineupBatting(
-  payload: LineupBattingUpdatePayload[],
-): Promise<void> {
-  await apiClient.put("/game/lineup/batting-update/", payload);
+export async function updateLineupBatting(payload: LineupBattingUpdatePayload[]): Promise<void> {
+  await apiClient.put('/game/lineup/batting-update/', payload);
 }
 
-export async function updateLineupBowling(
-  payload: LineupBowlingUpdatePayload[],
-): Promise<void> {
-  await apiClient.put("/game/lineup/bowling-update/", payload);
+export async function updateLineupBowling(payload: LineupBowlingUpdatePayload[]): Promise<void> {
+  await apiClient.put('/game/lineup/bowling-update/', payload);
 }
 
-export async function updateLineupFielding(
-  payload: LineupFieldingUpdatePayload[],
-): Promise<void> {
-  await apiClient.put("/game/lineup/fielding-update/", payload);
+export async function updateLineupFielding(payload: LineupFieldingUpdatePayload[]): Promise<void> {
+  await apiClient.put('/game/lineup/fielding-update/', payload);
 }
 
 export type UpdateFixturePayload = {
@@ -174,31 +166,21 @@ export async function getFixture(id: string): Promise<FixtureDetail> {
   return data;
 }
 
-export async function createFixture(
-  payload: CreateFixturePayload,
-): Promise<Fixture> {
-  const { data } = await apiClient.post<Fixture>("/game/match/", payload);
+export async function createFixture(payload: CreateFixturePayload): Promise<Fixture> {
+  const { data } = await apiClient.post<Fixture>('/game/match/', payload);
   return data;
 }
 
-export async function createFixturesBulk(
-  payload: BulkFixtureRowPayload[],
-): Promise<Fixture[]> {
-  const { data } = await apiClient.post<Fixture[]>(
-    "/game/match/create-multiple-match/",
-    payload,
-  );
+export async function createFixturesBulk(payload: BulkFixtureRowPayload[]): Promise<Fixture[]> {
+  const { data } = await apiClient.post<Fixture[]>('/game/match/create-multiple-match/', payload);
   return data;
 }
 
 export async function updateFixture(
   id: string,
-  payload: UpdateFixturePayload,
+  payload: UpdateFixturePayload
 ): Promise<FixtureDetail> {
-  const { data } = await apiClient.patch<FixtureDetail>(
-    `/game/match/${id}/`,
-    payload,
-  );
+  const { data } = await apiClient.patch<FixtureDetail>(`/game/match/${id}/`, payload);
   return data;
 }
 
@@ -209,20 +191,14 @@ export type ForfeitFixturePayload = {
 
 export async function forfeitFixture(
   id: string,
-  payload: ForfeitFixturePayload,
+  payload: ForfeitFixturePayload
 ): Promise<{ detail: string }> {
-  const { data } = await apiClient.post<{ detail: string }>(
-    `/game/match/${id}/forfeit/`,
-    payload,
-  );
+  const { data } = await apiClient.post<{ detail: string }>(`/game/match/${id}/forfeit/`, payload);
   return data;
 }
 
 export async function abandonFixture(id: string): Promise<{ detail: string }> {
-  const { data } = await apiClient.post<{ detail: string }>(
-    `/game/match/${id}/abandon/`,
-    {},
-  );
+  const { data } = await apiClient.post<{ detail: string }>(`/game/match/${id}/abandon/`, {});
   return data;
 }
 
@@ -238,11 +214,8 @@ export type StartMatchPayload = {
 
 export async function startMatch(
   id: string,
-  payload: StartMatchPayload,
+  payload: StartMatchPayload
 ): Promise<{ detail: string }> {
-  const { data } = await apiClient.post<{ detail: string }>(
-    `/game/match/${id}/start/`,
-    payload,
-  );
+  const { data } = await apiClient.post<{ detail: string }>(`/game/match/${id}/start/`, payload);
   return data;
 }

@@ -31,7 +31,9 @@ function OverRow({ index, overBalls }: { index: number; overBalls: ScoreEvent[] 
             className={`flex min-h-7 min-w-7 shrink-0 flex-col items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-bold uppercase leading-tight ${badgeTone(event)}`}
           >
             <span>{wordLabel(event)}</span>
-            {detail ? <span className="text-[9px] font-semibold normal-case opacity-80">{detail}</span> : null}
+            {detail ? (
+              <span className="text-[9px] font-semibold normal-case opacity-80">{detail}</span>
+            ) : null}
           </span>
         );
       })}
@@ -66,7 +68,9 @@ export function BallHistoryStrip({ scoreHistory }: BallHistoryStripProps) {
             className="flex items-center gap-1 text-xs font-semibold text-[#12233D] hover:underline"
           >
             {expanded ? 'Show current over' : 'Show all overs'}
-            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`}
+            />
           </button>
         ) : undefined
       }
@@ -76,7 +80,7 @@ export function BallHistoryStrip({ scoreHistory }: BallHistoryStripProps) {
       ) : expanded ? (
         <div ref={scrollRef} className="flex max-h-40 flex-col gap-2 overflow-y-auto">
           {scoreHistory.map((overBalls, index) =>
-            overBalls ? <OverRow key={index} index={index} overBalls={overBalls} /> : null,
+            overBalls ? <OverRow key={index} index={index} overBalls={overBalls} /> : null
           )}
         </div>
       ) : (

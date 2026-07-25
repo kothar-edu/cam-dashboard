@@ -5,7 +5,11 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { Button } from '@/components/ui/button';
-import { useNomineeVotingPlayers, useUpdateNomineeVotingPlayer, useVotingPolls } from '@/hooks/useVoting';
+import {
+  useNomineeVotingPlayers,
+  useUpdateNomineeVotingPlayer,
+  useVotingPolls,
+} from '@/hooks/useVoting';
 import { getApiErrorMessage } from '@/lib/api-errors';
 import type { NomineeVotingPlayer } from '@/api/voting';
 import type { VotingPoll } from '@/api/voting';
@@ -51,14 +55,17 @@ export default function VotingListPage() {
           }
         />
         <p className="text-sm text-muted-foreground">
-          Use <span className="font-medium">Open voting</span> / <span className="font-medium">Close voting</span> on
-          each row to control what appears on the mobile Vote screen. Game settings → Voting open is the organization-wide
-          master switch and banner toggle.
+          Use <span className="font-medium">Open voting</span> /{' '}
+          <span className="font-medium">Close voting</span> on each row to control what appears on
+          the mobile Vote screen. Game settings → Voting open is the organization-wide master switch
+          and banner toggle.
         </p>
         {isLoading && !nominationsQuery.data ? (
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         ) : isError ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">Unable to load voting polls.</div>
+          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
+            Unable to load voting polls.
+          </div>
         ) : (
           <DataTable
             columns={[

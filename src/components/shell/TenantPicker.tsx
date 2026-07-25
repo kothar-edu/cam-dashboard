@@ -10,9 +10,7 @@ export function TenantPicker() {
 
   return (
     <div className="flex min-w-0 flex-1 items-center gap-2 sm:flex-initial">
-      <span className="hidden shrink-0 text-sm text-muted-foreground sm:inline">
-        Organization
-      </span>
+      <span className="hidden shrink-0 text-sm text-muted-foreground sm:inline">Organization</span>
       <SearchableSelect
         value={activeTenantId ?? ''}
         onChange={setActiveTenantId}

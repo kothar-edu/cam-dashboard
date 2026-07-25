@@ -67,7 +67,10 @@ export default function TenantsPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader title="Tenants" description="Create organizations and assign tenant administrators" />
+      <PageHeader
+        title="Tenants"
+        description="Create organizations and assign tenant administrators"
+      />
 
       <form
         onSubmit={handleCreateTenant}
@@ -109,9 +112,7 @@ export default function TenantsPage() {
           id="tenant-select"
           label="Organization"
           value={selectedTenantId?.toString() ?? ''}
-          onChange={(value) =>
-            setSelectedTenantId(value ? Number(value) : undefined)
-          }
+          onChange={(value) => setSelectedTenantId(value ? Number(value) : undefined)}
           options={tenants.map((tenant) => ({
             value: String(tenant.id),
             label: tenant.name,

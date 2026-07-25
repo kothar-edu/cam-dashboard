@@ -31,7 +31,8 @@ export function getApiErrorMessage(error: unknown, fallback: string): string {
   if (Array.isArray(data)) {
     for (let index = 0; index < data.length; index += 1) {
       const row = data[index];
-      if (!row || typeof row !== 'object' || Array.isArray(row) || Object.keys(row).length === 0) continue;
+      if (!row || typeof row !== 'object' || Array.isArray(row) || Object.keys(row).length === 0)
+        continue;
       const [field, value] = Object.entries(row as Record<string, unknown>)[0];
       const message = Array.isArray(value) ? String(value[0]) : String(value);
       return field === 'non_field_errors' || field === 'detail'

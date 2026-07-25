@@ -15,8 +15,20 @@ afterEach(() => {
 
 describe('useTeamRoster', () => {
   it('fetches every player on the given team', async () => {
-    const players = [{ id: 'p1', full_name: 'Player One', jersey_no: 7, current_team: 'team-1', is_active: true, team_name: 'Team A', user: null }];
-    const spy = vi.spyOn(playersApi, 'listPlayers').mockResolvedValue({ count: 1, results: players });
+    const players = [
+      {
+        id: 'p1',
+        full_name: 'Player One',
+        jersey_no: 7,
+        current_team: 'team-1',
+        is_active: true,
+        team_name: 'Team A',
+        user: null,
+      },
+    ];
+    const spy = vi
+      .spyOn(playersApi, 'listPlayers')
+      .mockResolvedValue({ count: 1, results: players });
 
     const { result } = renderHook(() => useTeamRoster('team-1'), { wrapper });
 

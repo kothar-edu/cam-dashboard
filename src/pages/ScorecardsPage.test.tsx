@@ -12,7 +12,13 @@ vi.mock('@/hooks/useScorecards', () => ({
           id: '1',
           opponent_a: { id: 'a', team_name: 'Team Alpha' },
           opponent_b: { id: 'b', team_name: 'Team Beta' },
-          tournament: { id: 't1', name: 'Summer League', logo: null, start: '2026-06-01', total_teams: 8 },
+          tournament: {
+            id: 't1',
+            name: 'Summer League',
+            logo: null,
+            start: '2026-06-01',
+            total_teams: 8,
+          },
           status: 'Ended',
           time: '2026-07-10T10:00:00Z',
           ground: 'Main Ground',
@@ -27,7 +33,12 @@ vi.mock('@/hooks/useScorecards', () => ({
 
 vi.mock('@/contexts/TenantContext', () => ({
   useTenant: () => ({
-    activeTenant: { id: 1, name: 'CAM Youth', schema_name: 'cam_youth_association', is_active: true },
+    activeTenant: {
+      id: 1,
+      name: 'CAM Youth',
+      schema_name: 'cam_youth_association',
+      is_active: true,
+    },
     activeTenantId: 'cam_youth_association',
   }),
 }));

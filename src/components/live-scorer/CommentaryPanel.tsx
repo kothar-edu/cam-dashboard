@@ -28,7 +28,9 @@ export function CommentaryPanel({ broadcastCommentary, disabled }: CommentaryPan
         onChange={(e) => setComment(e.target.value)}
       />
       <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-500">{comment.length}/{MAX_COMMENTARY_LENGTH}</span>
+        <span className="text-xs text-gray-500">
+          {comment.length}/{MAX_COMMENTARY_LENGTH}
+        </span>
         <Button type="button" disabled={disabled || !comment.trim()} onClick={submit}>
           Add Commentary
         </Button>

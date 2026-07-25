@@ -582,7 +582,8 @@ export default function VerificationPage() {
         title="Reject team join request"
       >
         <p className="mt-2 text-sm text-muted-foreground">
-          Rejecting {rejectJoinTarget?.user_name}&apos;s request to join {rejectJoinTarget?.team_name}.
+          Rejecting {rejectJoinTarget?.user_name}&apos;s request to join{' '}
+          {rejectJoinTarget?.team_name}.
         </p>
         <div className="mt-4 space-y-4">
           <Input

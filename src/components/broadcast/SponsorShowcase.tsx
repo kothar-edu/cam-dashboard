@@ -21,7 +21,10 @@ export function SponsorShowcase({ sponsors }: SponsorShowcaseProps) {
 
   useEffect(() => {
     if (sponsors.length < 2) return;
-    const timer = setInterval(() => setIndex((current) => (current + 1) % sponsors.length), ROTATE_MS);
+    const timer = setInterval(
+      () => setIndex((current) => (current + 1) % sponsors.length),
+      ROTATE_MS
+    );
     return () => clearInterval(timer);
   }, [sponsors.length]);
 
@@ -32,9 +35,16 @@ export function SponsorShowcase({ sponsors }: SponsorShowcaseProps) {
 
   return (
     <div className="flex h-full w-full items-center justify-center overflow-hidden">
-      <div key={sponsor.id} className="flex max-w-full items-center gap-4 animate-in fade-in zoom-in-90 duration-500">
+      <div
+        key={sponsor.id}
+        className="flex max-w-full items-center gap-4 animate-in fade-in zoom-in-90 duration-500"
+      >
         {sponsor.imageUrl && (
-          <img src={sponsor.imageUrl} alt={sponsor.name} className="h-16 max-w-[220px] shrink-0 object-contain" />
+          <img
+            src={sponsor.imageUrl}
+            alt={sponsor.name}
+            className="h-16 max-w-[220px] shrink-0 object-contain"
+          />
         )}
         <div className="flex min-w-0 flex-col items-start gap-1.5">
           <span

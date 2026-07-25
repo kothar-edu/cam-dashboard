@@ -1,5 +1,5 @@
-import * as AlertDialog from "@radix-ui/react-alert-dialog";
-import { Button } from "./button";
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import { Button } from './button';
 
 type ForfeitDialogProps = {
   open: boolean;
@@ -30,7 +30,7 @@ export function ForfeitDialog({
   pointsToAward,
   setPointsToAward,
 }: ForfeitDialogProps) {
-  const canConfirm = forfeitedOpponentId !== "";
+  const canConfirm = forfeitedOpponentId !== '';
 
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
@@ -41,8 +41,8 @@ export function ForfeitDialog({
             Forfeit / Withdraw Match
           </AlertDialog.Title>
           <AlertDialog.Description className="mt-2 text-sm text-muted-foreground">
-            Mark this match as forfeited by one team. The other team will be
-            awarded the win and points.
+            Mark this match as forfeited by one team. The other team will be awarded the win and
+            points.
           </AlertDialog.Description>
 
           <div className="mt-4 space-y-4">
@@ -61,8 +61,7 @@ export function ForfeitDialog({
                 <option value={teamBId}>{teamBName}</option>
               </select>
               <p className="mt-1 text-xs text-gray-500">
-                The forfeiting team will lose, and the opponent will be awarded
-                points
+                The forfeiting team will lose, and the opponent will be awarded points
               </p>
             </div>
 
@@ -91,11 +90,10 @@ export function ForfeitDialog({
 
             {forfeitedOpponentId && (
               <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
-                <strong>Confirmation:</strong>{" "}
-                {forfeitedOpponentId === teamAId ? teamAName : teamBName} will
-                forfeit, and{" "}
-                {forfeitedOpponentId === teamAId ? teamBName : teamAName} will
-                win with {pointsToAward} points
+                <strong>Confirmation:</strong>{' '}
+                {forfeitedOpponentId === teamAId ? teamAName : teamBName} will forfeit, and{' '}
+                {forfeitedOpponentId === teamAId ? teamBName : teamAName} will win with{' '}
+                {pointsToAward} points
               </div>
             )}
           </div>

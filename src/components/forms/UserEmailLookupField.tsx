@@ -56,7 +56,12 @@ export function UserEmailLookupField({ onResolved, onClear }: UserEmailLookupFie
             placeholder="admin@example.com"
           />
         </div>
-        <Button type="button" variant="outline" onClick={handleLookup} disabled={lookupMutation.isPending}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleLookup}
+          disabled={lookupMutation.isPending}
+        >
           {lookupMutation.isPending ? 'Searching…' : 'Look up'}
         </Button>
       </div>

@@ -19,10 +19,6 @@ const CANVAS_HEIGHT = 1080;
 
 export default function BroadcastOverlayPage() {
   const { matchId } = useParams<{ matchId: string }>();
-  // Anonymous/logged-out viewers (the whole point of a public broadcast
-  // link) have no stored tenant - the link itself carries one via
-  // `?tenant=`, so that always takes priority over whatever's in
-  // localStorage (which, for a logged-out browser, is nothing at all).
   const [searchParams] = useSearchParams();
   const tenant = searchParams.get('tenant');
 
@@ -44,9 +40,11 @@ export default function BroadcastOverlayPage() {
   const latestMilestone = state.milestones[state.milestones.length - 1] ?? null;
   const milestonePlayer =
     latestMilestone &&
-    [state.currentPlayers.striker, state.currentPlayers.non_striker, state.currentPlayers.bowler].find(
-      (p) => p?.id === latestMilestone.playerId,
-    );
+    [
+      state.currentPlayers.striker,
+      state.currentPlayers.non_striker,
+      state.currentPlayers.bowler,
+    ].find((p) => p?.id === latestMilestone.playerId);
 
   const playerNameById: Record<string, string> = {};
   for (const opponent of [state.opponents.batting, state.opponents.bowling]) {
@@ -71,7 +69,11 @@ export default function BroadcastOverlayPage() {
 
         <div className="absolute left-16 top-10 flex flex-col items-start gap-3">
           {info.livestreamOverlay.topLeftImage && (
-            <img src={info.livestreamOverlay.topLeftImage} alt="Sponsor logo" className={SPONSOR_LOGO_CLASS} />
+            <img
+              src={info.livestreamOverlay.topLeftImage}
+              alt="Sponsor logo"
+              className={SPONSOR_LOGO_CLASS}
+            />
           )}
           <div className="flex flex-col gap-2">
             <PowerplayBadge current={state.current} powerplayOvers={info.powerplayOvers} />
@@ -87,25 +89,16 @@ export default function BroadcastOverlayPage() {
         </div>
 
         <div className="absolute bottom-14 flex w-full flex-col items-center gap-2">
-          {/* items-start (not items-center): BatterBowlerCards and the
-              bowler+score group must both anchor at this row's own top
-              edge so the bowler row lands level with the striker's row -
-              centering them as blocks would offset each by half of its
-              own height difference from the tallest sibling (ScoreBug, a
-              fixed 96px pill), throwing the alignment off again. */}
           <div className="flex w-11/12 items-start justify-between gap-6 rounded-2xl bg-sky-200/80 px-6 py-3 shadow-lg">
             <BatterBowlerCards currentPlayers={state.currentPlayers} sponsors={info.sponsors} />
-            {/* Bowler grouped directly against the score box (small fixed
-                gap) instead of living inside BatterBowlerCards, where it
-                was pinned to wherever the flex-1 sponsor slot happened to
-                end - often nowhere near the score box. */}
             <div className="flex shrink-0 items-start gap-3">
               <BowlerRow player={state.currentPlayers.bowler} />
-              {/* Wide enough that a full over (up to ~9-10 balls with
-                  extras) fits on one row before OverHistoryStrip's own
-                  flex-wrap kicks in - was 420px, cramped to ~10 badges. */}
               <div className="flex w-[640px] shrink-0 flex-col items-center gap-1">
-                <ScoreBug current={state.current} battingTeam={state.opponents.batting} bowlingTeam={state.opponents.bowling} />
+                <ScoreBug
+                  current={state.current}
+                  battingTeam={state.opponents.batting}
+                  bowlingTeam={state.opponents.bowling}
+                />
                 <OverHistoryStrip thisOver={state.scoreHistory[state.current.over] ?? []} />
               </div>
             </div>

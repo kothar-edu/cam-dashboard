@@ -7,6 +7,14 @@ export const SPONSOR_LOGO_CLASS =
 
 export function SponsorCorners({ topRightImage }: SponsorCornersProps) {
   return (
-    <>{topRightImage && <img src={topRightImage} alt="Sponsor logo" className={`absolute right-16 top-10 ${SPONSOR_LOGO_CLASS}`} />}</>
+    <>
+      {topRightImage && (
+        <img
+          src={topRightImage}
+          alt="Sponsor logo"
+          className={`absolute right-16 top-10 ${SPONSOR_LOGO_CLASS}`}
+        />
+      )}
+    </>
   );
 }

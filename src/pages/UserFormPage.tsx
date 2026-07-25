@@ -109,12 +109,11 @@ export default function UserFormPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Edit user"
-        description={userQuery.data.email}
-        backTo="/dashboard/users"
-      />
-      <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
+      <PageHeader title="Edit user" description={userQuery.data.email} backTo="/dashboard/users" />
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
+      >
         <Input label="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
         <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
         <SearchableSelect

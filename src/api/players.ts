@@ -56,7 +56,10 @@ export async function createPlayer(payload: CreatePlayerPayload): Promise<Player
   return data;
 }
 
-export async function updatePlayer(id: string, payload: UpdatePlayerPayload): Promise<PlayerDetail> {
+export async function updatePlayer(
+  id: string,
+  payload: UpdatePlayerPayload
+): Promise<PlayerDetail> {
   const { data } = await apiClient.patch<PlayerDetail>(`/game/player/${id}/`, payload);
   return data;
 }

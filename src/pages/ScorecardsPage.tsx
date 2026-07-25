@@ -15,7 +15,10 @@ function formatDate(value: string) {
   });
 }
 
-function matchLabel(fixture: { opponent_a: { team_name: string }; opponent_b: { team_name: string } }) {
+function matchLabel(fixture: {
+  opponent_a: { team_name: string };
+  opponent_b: { team_name: string };
+}) {
   return `${fixture.opponent_a.team_name} vs ${fixture.opponent_b.team_name}`;
 }
 
@@ -75,9 +78,7 @@ export default function ScorecardsPage() {
         data={scorecards}
         loading={isLoading}
         emptyMessage="No completed matches found."
-        pagination={
-          data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined
-        }
+        pagination={data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined}
         onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
       />
     </div>

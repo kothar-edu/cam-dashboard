@@ -44,8 +44,6 @@ describe('UserEmailLookupField', () => {
     await user.type(screen.getByPlaceholderText('admin@example.com'), 'admin@example.com');
     await user.click(screen.getByRole('button', { name: 'Look up' }));
 
-    expect(
-      screen.getByText('You do not have permission to look up users.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('You do not have permission to look up users.')).toBeInTheDocument();
   });
 });

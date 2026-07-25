@@ -7,7 +7,10 @@ export function useTeamRoster(teamId: string | undefined) {
   return useQuery({
     queryKey: ['team-roster', teamId],
     queryFn: async () => {
-      const { results } = await listPlayers({ current_team: teamId as string, limit: ROSTER_FETCH_LIMIT });
+      const { results } = await listPlayers({
+        current_team: teamId as string,
+        limit: ROSTER_FETCH_LIMIT,
+      });
       return results;
     },
     enabled: !!teamId,

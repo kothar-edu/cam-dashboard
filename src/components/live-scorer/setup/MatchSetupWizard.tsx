@@ -44,7 +44,7 @@ export function MatchSetupWizard({ fixture }: MatchSetupWizardProps) {
       {
         onSuccess: () => toast.success('Match started — you can begin scoring now.'),
         onError: () => toast.error('Could not start the match. Check the squads and try again.'),
-      },
+      }
     );
   }
 
@@ -127,7 +127,13 @@ export function MatchSetupWizard({ fixture }: MatchSetupWizardProps) {
   );
 }
 
-function StepProgress({ steps, currentIndex }: { steps: Array<{ key: WizardStep; label: string }>; currentIndex: number }) {
+function StepProgress({
+  steps,
+  currentIndex,
+}: {
+  steps: Array<{ key: WizardStep; label: string }>;
+  currentIndex: number;
+}) {
   return (
     <div className="flex items-center">
       {steps.map((s, index) => (
@@ -144,12 +150,16 @@ function StepProgress({ steps, currentIndex }: { steps: Array<{ key: WizardStep;
             >
               {index < currentIndex ? <Check className="h-4 w-4" /> : index + 1}
             </div>
-            <span className={`hidden text-[10px] sm:block ${index === currentIndex ? 'font-bold text-[#12233D]' : 'text-gray-400'}`}>
+            <span
+              className={`hidden text-[10px] sm:block ${index === currentIndex ? 'font-bold text-[#12233D]' : 'text-gray-400'}`}
+            >
               {s.label}
             </span>
           </div>
           {index < steps.length - 1 && (
-            <div className={`mx-1 h-0.5 flex-1 ${index < currentIndex ? 'bg-green-600' : 'bg-gray-100'}`} />
+            <div
+              className={`mx-1 h-0.5 flex-1 ${index < currentIndex ? 'bg-green-600' : 'bg-gray-100'}`}
+            />
           )}
         </div>
       ))}
@@ -158,7 +168,14 @@ function StepProgress({ steps, currentIndex }: { steps: Array<{ key: WizardStep;
 }
 
 function ReviewStep({
-  fixture, squadAIds, reserveAId, squadBIds, reserveBId, isStarting, onBack, onStart,
+  fixture,
+  squadAIds,
+  reserveAId,
+  squadBIds,
+  reserveBId,
+  isStarting,
+  onBack,
+  onStart,
 }: {
   fixture: FixtureDetail;
   squadAIds: string[];
@@ -171,7 +188,8 @@ function ReviewStep({
 }) {
   const { data: rosterA } = useTeamRoster(fixture.opponent_a.team.id);
   const { data: rosterB } = useTeamRoster(fixture.opponent_b.team.id);
-  const nameById = (roster: typeof rosterA, id: string) => roster?.find((p) => p.id === id)?.full_name ?? '—';
+  const nameById = (roster: typeof rosterA, id: string) =>
+    roster?.find((p) => p.id === id)?.full_name ?? '—';
 
   return (
     <div className="flex flex-col gap-4">
@@ -181,8 +199,18 @@ function ReviewStep({
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <SquadSummaryCard teamName={fixture.opponent_a.team.name} playerIds={squadAIds} reserveId={reserveAId} nameFor={(id) => nameById(rosterA, id)} />
-        <SquadSummaryCard teamName={fixture.opponent_b.team.name} playerIds={squadBIds} reserveId={reserveBId} nameFor={(id) => nameById(rosterB, id)} />
+        <SquadSummaryCard
+          teamName={fixture.opponent_a.team.name}
+          playerIds={squadAIds}
+          reserveId={reserveAId}
+          nameFor={(id) => nameById(rosterA, id)}
+        />
+        <SquadSummaryCard
+          teamName={fixture.opponent_b.team.name}
+          playerIds={squadBIds}
+          reserveId={reserveBId}
+          nameFor={(id) => nameById(rosterB, id)}
+        />
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t pt-4">
@@ -198,7 +226,10 @@ function ReviewStep({
 }
 
 function SquadSummaryCard({
-  teamName, playerIds, reserveId, nameFor,
+  teamName,
+  playerIds,
+  reserveId,
+  nameFor,
 }: {
   teamName: string;
   playerIds: string[];

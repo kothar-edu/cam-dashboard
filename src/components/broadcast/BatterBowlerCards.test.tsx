@@ -4,8 +4,25 @@ import { BatterBowlerCards, BowlerRow } from './BatterBowlerCards';
 
 function player(overrides = {}) {
   return {
-    id: 'p1', full_name: 'Player One', picture: null, reserve: false,
-    stats: { runs_scored: 34, balls_faced: 21, fours: 3, sixes: 1, is_out: false, crr: 0, srr: 0, runs_conceded: 28, overs_bowled: 3, wickets_taken: 2, wickets_lost: 0, maidens: 0, err: 0 },
+    id: 'p1',
+    full_name: 'Player One',
+    picture: null,
+    reserve: false,
+    stats: {
+      runs_scored: 34,
+      balls_faced: 21,
+      fours: 3,
+      sixes: 1,
+      is_out: false,
+      crr: 0,
+      srr: 0,
+      runs_conceded: 28,
+      overs_bowled: 3,
+      wickets_taken: 2,
+      wickets_lost: 0,
+      maidens: 0,
+      err: 0,
+    },
     ...overrides,
   };
 }
@@ -17,8 +34,13 @@ describe('BatterBowlerCards', () => {
   it('shows striker runs/balls', () => {
     render(
       <BatterBowlerCards
-        currentPlayers={{ striker: player({ full_name: 'Striker' }), non_striker: null, bowler: null, wicket_keeper: null }}
-      />,
+        currentPlayers={{
+          striker: player({ full_name: 'Striker' }),
+          non_striker: null,
+          bowler: null,
+          wicket_keeper: null,
+        }}
+      />
     );
     expect(screen.getByText('Striker')).toBeInTheDocument();
     expect(screen.getByText('34')).toBeInTheDocument();
@@ -27,9 +49,14 @@ describe('BatterBowlerCards', () => {
   it('shows the tournament sponsor in the space next to the batters', () => {
     render(
       <BatterBowlerCards
-        currentPlayers={{ striker: player({ full_name: 'Striker' }), non_striker: null, bowler: null, wicket_keeper: null }}
+        currentPlayers={{
+          striker: player({ full_name: 'Striker' }),
+          non_striker: null,
+          bowler: null,
+          wicket_keeper: null,
+        }}
         sponsors={[{ id: 's1', name: 'Acme Corp', imageUrl: null, level: 'Title' }]}
-      />,
+      />
     );
     expect(screen.getByText('Acme Corp')).toBeInTheDocument();
   });

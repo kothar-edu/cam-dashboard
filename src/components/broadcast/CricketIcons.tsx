@@ -37,7 +37,13 @@ export function BatIcon({ className = 'h-5 w-5' }: IconProps) {
         />
 
         {/* Edge highlight */}
-        <path d="M10.1 9.2 9.9 21" stroke="white" strokeOpacity="0.2" strokeWidth="0.45" strokeLinecap="round" />
+        <path
+          d="M10.1 9.2 9.9 21"
+          stroke="white"
+          strokeOpacity="0.2"
+          strokeWidth="0.45"
+          strokeLinecap="round"
+        />
 
         {/* Center spine */}
         <path d="M12 8.3V21.5" stroke="white" strokeOpacity="0.12" strokeWidth="0.4" />

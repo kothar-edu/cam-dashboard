@@ -5,7 +5,15 @@ import { SquadPicker } from './SquadPicker';
 import * as playersApi from '@/api/players';
 
 function player(id: string, name: string) {
-  return { id, full_name: name, jersey_no: null, current_team: 'team-1', is_active: true, team_name: 'Team A', user: null };
+  return {
+    id,
+    full_name: name,
+    jersey_no: null,
+    current_team: 'team-1',
+    is_active: true,
+    team_name: 'Team A',
+    user: null,
+  };
 }
 
 const ROSTER = Array.from({ length: 12 }, (_, i) => player(`p${i + 1}`, `Player ${i + 1}`));
@@ -22,7 +30,7 @@ function renderPicker(props: Partial<React.ComponentProps<typeof SquadPicker>> =
         onConfirm={vi.fn()}
         {...props}
       />
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
 }
 
@@ -32,7 +40,10 @@ afterEach(() => {
 
 describe('SquadPicker', () => {
   it('disables Continue until exactly 11 players are selected', async () => {
-    vi.spyOn(playersApi, 'listPlayers').mockResolvedValue({ count: ROSTER.length, results: ROSTER });
+    vi.spyOn(playersApi, 'listPlayers').mockResolvedValue({
+      count: ROSTER.length,
+      results: ROSTER,
+    });
     renderPicker();
 
     expect(await screen.findByText('Player 1')).toBeInTheDocument();
@@ -46,7 +57,10 @@ describe('SquadPicker', () => {
   });
 
   it('calls onConfirm with the selected player ids', async () => {
-    vi.spyOn(playersApi, 'listPlayers').mockResolvedValue({ count: ROSTER.length, results: ROSTER });
+    vi.spyOn(playersApi, 'listPlayers').mockResolvedValue({
+      count: ROSTER.length,
+      results: ROSTER,
+    });
     const onConfirm = vi.fn();
     renderPicker({ onConfirm });
 
@@ -60,11 +74,16 @@ describe('SquadPicker', () => {
   });
 
   it('filters the roster by search text', async () => {
-    vi.spyOn(playersApi, 'listPlayers').mockResolvedValue({ count: ROSTER.length, results: ROSTER });
+    vi.spyOn(playersApi, 'listPlayers').mockResolvedValue({
+      count: ROSTER.length,
+      results: ROSTER,
+    });
     renderPicker();
 
     await screen.findByText('Player 1');
-    fireEvent.change(screen.getByPlaceholderText('Search players…'), { target: { value: 'Player 2' } });
+    fireEvent.change(screen.getByPlaceholderText('Search players…'), {
+      target: { value: 'Player 2' },
+    });
 
     expect(screen.getByText('Player 2')).toBeInTheDocument();
     expect(screen.queryByText('Player 1')).not.toBeInTheDocument();

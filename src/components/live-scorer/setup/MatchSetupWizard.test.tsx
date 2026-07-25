@@ -7,16 +7,31 @@ import * as fixturesApi from '@/api/fixtures';
 import type { FixtureDetail } from '@/api/fixtures';
 
 vi.mock('@/contexts/TenantContext', () => ({
-  useTenant: () => ({ activeTenantId: 'tenant-1', activeTenant: { id: 'tenant-1', schema_name: 'tenant-1', name: 'Tenant' } }),
+  useTenant: () => ({
+    activeTenantId: 'tenant-1',
+    activeTenant: { id: 'tenant-1', schema_name: 'tenant-1', name: 'Tenant' },
+  }),
 }));
 
 function player(id: string, name: string, team: string) {
-  return { id, full_name: name, jersey_no: null, current_team: team, is_active: true, team_name: team, user: null };
+  return {
+    id,
+    full_name: name,
+    jersey_no: null,
+    current_team: team,
+    is_active: true,
+    team_name: team,
+    user: null,
+  };
 }
 
 // 12 players per team so a reserve can be picked from whoever's left after the XI.
-const ROSTER_A = Array.from({ length: 12 }, (_, i) => player(`a${i + 1}`, `A Player ${i + 1}`, 'team-a'));
-const ROSTER_B = Array.from({ length: 12 }, (_, i) => player(`b${i + 1}`, `B Player ${i + 1}`, 'team-b'));
+const ROSTER_A = Array.from({ length: 12 }, (_, i) =>
+  player(`a${i + 1}`, `A Player ${i + 1}`, 'team-a')
+);
+const ROSTER_B = Array.from({ length: 12 }, (_, i) =>
+  player(`b${i + 1}`, `B Player ${i + 1}`, 'team-b')
+);
 
 const FIXTURE = {
   id: 'match-1',
@@ -34,7 +49,7 @@ function renderWizard() {
   return render(
     <QueryClientProvider client={queryClient}>
       <MatchSetupWizard fixture={FIXTURE} />
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
 }
 
@@ -93,7 +108,7 @@ describe('MatchSetupWizard', () => {
       expect(startSpy).toHaveBeenCalledWith('match-1', {
         opponent_a: { players: ROSTER_A.slice(0, 11).map((p) => p.id), reserves: [] },
         opponent_b: { players: ROSTER_B.slice(0, 11).map((p) => p.id), reserves: [] },
-      }),
+      })
     );
   });
 
@@ -125,7 +140,7 @@ describe('MatchSetupWizard', () => {
       expect(startSpy).toHaveBeenCalledWith('match-1', {
         opponent_a: { players: ROSTER_A.slice(0, 11).map((p) => p.id), reserves: ['a12'] },
         opponent_b: { players: ROSTER_B.slice(0, 11).map((p) => p.id), reserves: [] },
-      }),
+      })
     );
   });
 

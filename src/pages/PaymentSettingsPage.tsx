@@ -6,7 +6,10 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { useTenant } from '@/contexts/TenantContext';
-import { useTenantPaymentSettings, useUpdateTenantPaymentSettings } from '@/hooks/usePaymentSettings';
+import {
+  useTenantPaymentSettings,
+  useUpdateTenantPaymentSettings,
+} from '@/hooks/usePaymentSettings';
 
 export default function PaymentSettingsPage() {
   const { activeTenant } = useTenant();
@@ -75,7 +78,10 @@ export default function PaymentSettingsPage() {
             Unable to load payment settings.
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
+          <form
+            onSubmit={handleSubmit}
+            className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
+          >
             <Input
               label="Account name"
               value={bankAccountName}
@@ -86,8 +92,16 @@ export default function PaymentSettingsPage() {
               value={bankAccountNumber}
               onChange={(e) => setBankAccountNumber(e.target.value)}
             />
-            <Input label="Bank name" value={bankName} onChange={(e) => setBankName(e.target.value)} />
-            <Input label="Branch" value={bankBranch} onChange={(e) => setBankBranch(e.target.value)} />
+            <Input
+              label="Bank name"
+              value={bankName}
+              onChange={(e) => setBankName(e.target.value)}
+            />
+            <Input
+              label="Branch"
+              value={bankBranch}
+              onChange={(e) => setBankBranch(e.target.value)}
+            />
             <Input
               label="Verification fee (leave blank for free)"
               type="number"

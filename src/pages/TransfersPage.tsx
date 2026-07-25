@@ -21,7 +21,11 @@ export default function TransfersPage() {
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
   const [selectedTeamId, setSelectedTeamId] = useState('');
 
-  const { data: playersData, isLoading, isError } = usePlayers({
+  const {
+    data: playersData,
+    isLoading,
+    isError,
+  } = usePlayers({
     limit: PAGE_SIZE,
     offset: pageIndex * PAGE_SIZE,
   });
@@ -79,11 +83,7 @@ export default function TransfersPage() {
         title="Player Transfers"
         description={`${activeTenant.name} · move players between teams`}
         action={
-          <Button
-            type="button"
-            onClick={() => setDialogOpen(true)}
-            className="w-full sm:w-auto"
-          >
+          <Button type="button" onClick={() => setDialogOpen(true)} className="w-full sm:w-auto">
             Transfer player
           </Button>
         }

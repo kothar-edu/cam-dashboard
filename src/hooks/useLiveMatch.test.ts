@@ -64,10 +64,31 @@ describe('useLiveMatch', () => {
         event_type: 'LIVE',
         detail: {
           viewers: 3,
-          current: { over: 0, ball: 0, inning: 1, runs: 10, wickets: 0, target: 0, crr: 0, balls_remaining: 120, required_runs: 0, rrr: 0, status: 'IN_PROGRESS', projected: 0 },
-          game: { this_over: [], current_players: { bowler: null, wicket_keeper: null, striker: null, non_striker: null } },
+          current: {
+            over: 0,
+            ball: 0,
+            inning: 1,
+            runs: 10,
+            wickets: 0,
+            target: 0,
+            crr: 0,
+            balls_remaining: 120,
+            required_runs: 0,
+            rrr: 0,
+            status: 'IN_PROGRESS',
+            projected: 0,
+          },
+          game: {
+            this_over: [],
+            current_players: {
+              bowler: null,
+              wicket_keeper: null,
+              striker: null,
+              non_striker: null,
+            },
+          },
         },
-      }),
+      })
     );
 
     expect(result.current.state.current.runs).toBe(10);
@@ -113,7 +134,7 @@ describe('useLiveMatch', () => {
   it('ignores late close/message events from a socket superseded by a matchId change', async () => {
     const { result, rerender } = renderHook(
       ({ matchId }: { matchId: string }) => useLiveMatch(matchId, 'view'),
-      { initialProps: { matchId: 'match-1' } },
+      { initialProps: { matchId: 'match-1' } }
     );
 
     const first = FakeWebSocket.instances[0];
@@ -145,10 +166,31 @@ describe('useLiveMatch', () => {
         event_type: 'LIVE',
         detail: {
           viewers: 3,
-          current: { over: 0, ball: 0, inning: 1, runs: 999, wickets: 0, target: 0, crr: 0, balls_remaining: 120, required_runs: 0, rrr: 0, status: 'IN_PROGRESS', projected: 0 },
-          game: { this_over: [], current_players: { bowler: null, wicket_keeper: null, striker: null, non_striker: null } },
+          current: {
+            over: 0,
+            ball: 0,
+            inning: 1,
+            runs: 999,
+            wickets: 0,
+            target: 0,
+            crr: 0,
+            balls_remaining: 120,
+            required_runs: 0,
+            rrr: 0,
+            status: 'IN_PROGRESS',
+            projected: 0,
+          },
+          game: {
+            this_over: [],
+            current_players: {
+              bowler: null,
+              wicket_keeper: null,
+              striker: null,
+              non_striker: null,
+            },
+          },
         },
-      }),
+      })
     );
     expect(result.current.state.current.runs).not.toBe(999);
   });
@@ -156,7 +198,7 @@ describe('useLiveMatch', () => {
   it('resets state and connectionStatus when matchId changes', async () => {
     const { result, rerender } = renderHook(
       ({ matchId }: { matchId: string }) => useLiveMatch(matchId, 'view'),
-      { initialProps: { matchId: 'match-1' } },
+      { initialProps: { matchId: 'match-1' } }
     );
 
     const first = FakeWebSocket.instances[0];
@@ -170,7 +212,20 @@ describe('useLiveMatch', () => {
       first.simulateMessage({
         event_type: 'WICKET',
         detail: {
-          current: { over: 1, ball: 3, inning: 1, runs: 12, wickets: 1, target: 0, crr: 6, balls_remaining: 114, required_runs: 0, rrr: 0, status: 'IN_PROGRESS', projected: 0 },
+          current: {
+            over: 1,
+            ball: 3,
+            inning: 1,
+            runs: 12,
+            wickets: 1,
+            target: 0,
+            crr: 6,
+            balls_remaining: 114,
+            required_runs: 0,
+            rrr: 0,
+            status: 'IN_PROGRESS',
+            projected: 0,
+          },
           game: {
             this_over: [
               {
@@ -185,10 +240,15 @@ describe('useLiveMatch', () => {
                 commentary: 'bowled',
               },
             ],
-            current_players: { bowler: null, wicket_keeper: null, striker: null, non_striker: null },
+            current_players: {
+              bowler: null,
+              wicket_keeper: null,
+              striker: null,
+              non_striker: null,
+            },
           },
         },
-      }),
+      })
     );
 
     expect(result.current.state.fallOfWickets.length).toBe(1);

@@ -135,7 +135,10 @@ export default function FixtureFormPage() {
                   overlayValues.topRightFile ||
                   overlayValues.clearTopLeft ||
                   overlayValues.clearTopRight);
-              if (hasOverlayUpload || overlayCustom !== (fixtureQuery.data?.livestream_overlay_custom ?? false)) {
+              if (
+                hasOverlayUpload ||
+                overlayCustom !== (fixtureQuery.data?.livestream_overlay_custom ?? false)
+              ) {
                 await updateMatchLivestreamOverlay(id, {
                   overlayCustom,
                   sponsorText: overlayValues.sponsorText,
@@ -199,7 +202,9 @@ export default function FixtureFormPage() {
   };
 
   const pending =
-    createMutation.isPending || updateMutation.isPending || createTournamentFixtureMutation.isPending;
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    createTournamentFixtureMutation.isPending;
   const teams = teamsQuery.data?.results ?? [];
   const tournaments = tournamentsQuery.data?.results ?? [];
   const tournamentDefaults = fixtureQuery.data?.tournament;
@@ -231,7 +236,10 @@ export default function FixtureFormPage() {
         {isEdit && fixtureQuery.isLoading ? (
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         ) : (
-          <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
+          <form
+            onSubmit={handleSubmit}
+            className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
+          >
             {!isEdit ? (
               <>
                 <SearchableSelect
@@ -247,8 +255,8 @@ export default function FixtureFormPage() {
                   error={fieldErrors.tournament}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Select a tournament to create this match within it (uses the tournament's registered
-                  teams). Leave unselected for a standalone/friendly match.
+                  Select a tournament to create this match within it (uses the tournament's
+                  registered teams). Leave unselected for a standalone/friendly match.
                 </p>
               </>
             ) : null}
@@ -367,7 +375,11 @@ export default function FixtureFormPage() {
             ) : null}
             {isEdit ? (
               <label className="flex items-center gap-2 text-sm text-[#12233D]">
-                <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  checked={isPublic}
+                  onChange={(e) => setIsPublic(e.target.checked)}
+                />
                 Public match (visible to guests and non-members)
               </label>
             ) : null}
@@ -411,8 +423,14 @@ export default function FixtureFormPage() {
                         Sponsor text:{' '}
                         {tournamentDefaults?.livestream_sponsor_text?.trim() || 'None'}
                       </li>
-                      <li>Top-left logo: {tournamentDefaults?.livestream_top_left_image ? 'Set' : 'None'}</li>
-                      <li>Top-right logo: {tournamentDefaults?.livestream_top_right_image ? 'Set' : 'None'}</li>
+                      <li>
+                        Top-left logo:{' '}
+                        {tournamentDefaults?.livestream_top_left_image ? 'Set' : 'None'}
+                      </li>
+                      <li>
+                        Top-right logo:{' '}
+                        {tournamentDefaults?.livestream_top_right_image ? 'Set' : 'None'}
+                      </li>
                     </ul>
                   </div>
                 )}

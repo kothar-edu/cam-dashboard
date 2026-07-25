@@ -20,9 +20,7 @@ describe('buildLiveScoreWsUrl', () => {
 
     const url = buildLiveScoreWsUrl('match-1');
 
-    expect(url).toBe(
-      'ws://127.0.0.1:8000/ws/livescore/v2/match-1/?token=access-123&tenant=acme'
-    );
+    expect(url).toBe('ws://127.0.0.1:8000/ws/livescore/v2/match-1/?token=access-123&tenant=acme');
   });
 
   it('uses wss when the backend origin is https', () => {

@@ -9,7 +9,12 @@ import {
   LivestreamOverlayFields,
   type LivestreamOverlayFormValues,
 } from '@/components/forms/LivestreamOverlayFields';
-import { useCreateTournament, useTournament, useUpdateTournament, useAddTeamsToTournament } from '@/hooks/useTournaments';
+import {
+  useCreateTournament,
+  useTournament,
+  useUpdateTournament,
+  useAddTeamsToTournament,
+} from '@/hooks/useTournaments';
 import { useTeams } from '@/hooks/useTeams';
 import { updateTournamentLivestreamOverlay } from '@/api/tournaments';
 
@@ -143,7 +148,8 @@ export default function TournamentFormPage() {
     );
   };
 
-  const pending = createMutation.isPending || updateMutation.isPending || addTeamsMutation.isPending;
+  const pending =
+    createMutation.isPending || updateMutation.isPending || addTeamsMutation.isPending;
   const failed = createMutation.isError || updateMutation.isError || addTeamsMutation.isError;
 
   return (
@@ -156,7 +162,10 @@ export default function TournamentFormPage() {
         {isEdit && tournamentQuery.isLoading ? (
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         ) : (
-          <form onSubmit={handleSubmit} className="max-w-2xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
+          <form
+            onSubmit={handleSubmit}
+            className="max-w-2xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
+          >
             <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} required />
             <Input
               label="Start"
@@ -196,7 +205,11 @@ export default function TournamentFormPage() {
               </div>
             </div>
             <label className="flex items-center gap-2 text-sm text-[#12233D]">
-              <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+              />
               Public tournament (visible to guests and non-members)
             </label>
             <LivestreamOverlayFields

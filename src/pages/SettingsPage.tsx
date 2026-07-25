@@ -85,14 +85,39 @@ function ChangePasswordForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
+    >
       <h2 className="text-lg font-semibold text-[#12233D]">Change password</h2>
-      <Input label="Current password" type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} required />
-      <Input label="New password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
-      <Input label="Confirm new password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+      <Input
+        label="Current password"
+        type="password"
+        value={oldPassword}
+        onChange={(e) => setOldPassword(e.target.value)}
+        required
+      />
+      <Input
+        label="New password"
+        type="password"
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.target.value)}
+        required
+      />
+      <Input
+        label="Confirm new password"
+        type="password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        required
+      />
       {validationError ? <p className="text-sm text-red-600">{validationError}</p> : null}
-      {changePasswordMutation.isError ? <p className="text-sm text-red-600">Failed to change password.</p> : null}
-      {changePasswordMutation.isSuccess ? <p className="text-sm text-green-700">Password updated successfully.</p> : null}
+      {changePasswordMutation.isError ? (
+        <p className="text-sm text-red-600">Failed to change password.</p>
+      ) : null}
+      {changePasswordMutation.isSuccess ? (
+        <p className="text-sm text-green-700">Password updated successfully.</p>
+      ) : null}
       <Button type="submit" disabled={changePasswordMutation.isPending}>
         {changePasswordMutation.isPending ? 'Updating…' : 'Update password'}
       </Button>
@@ -154,15 +179,35 @@ function CreateAdminForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
+    >
       <h2 className="text-lg font-semibold text-[#12233D]">Create admin user</h2>
       <p className="text-sm text-muted-foreground">
         Creates a verified user with profile fields required by the backend registration API.
       </p>
-      <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-      <Input label="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+      <Input
+        label="Email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <Input
+        label="Full name"
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+        required
+      />
       <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
-      <Input label="Date of birth" type="date" value={dob} onChange={(e) => setDob(e.target.value)} required />
+      <Input
+        label="Date of birth"
+        type="date"
+        value={dob}
+        onChange={(e) => setDob(e.target.value)}
+        required
+      />
       <SearchableSelect
         label="Gender"
         value={gender}
@@ -186,7 +231,11 @@ function CreateAdminForm() {
         searchable
         required
       />
-      <Input label="Other country (if applicable)" value={otherCountry} onChange={(e) => setOtherCountry(e.target.value)} />
+      <Input
+        label="Other country (if applicable)"
+        value={otherCountry}
+        onChange={(e) => setOtherCountry(e.target.value)}
+      />
       <SearchableSelect
         label="Visa type"
         value={visaType}
@@ -213,9 +262,19 @@ function CreateAdminForm() {
       <FileField label="Profile picture (optional)" accept="image/*,.pdf" onChange={setPicture} />
       <FileField label="ID card (optional)" accept="image/*,.pdf" onChange={setIdCard} />
       <FileField label="Payslip (optional)" accept="image/*,.pdf" onChange={setPaySlip} />
-      <FileField label="Study document (optional)" accept="image/*,.pdf" onChange={setStudyDocument} />
-      {createMutation.isError ? <p className="text-sm text-red-600">Failed to create admin user.</p> : null}
-      {createMutation.isSuccess ? <p className="text-sm text-green-700">Admin user created. They will receive a welcome email.</p> : null}
+      <FileField
+        label="Study document (optional)"
+        accept="image/*,.pdf"
+        onChange={setStudyDocument}
+      />
+      {createMutation.isError ? (
+        <p className="text-sm text-red-600">Failed to create admin user.</p>
+      ) : null}
+      {createMutation.isSuccess ? (
+        <p className="text-sm text-green-700">
+          Admin user created. They will receive a welcome email.
+        </p>
+      ) : null}
       <Button type="submit" disabled={createMutation.isPending}>
         {createMutation.isPending ? 'Creating…' : 'Create admin user'}
       </Button>

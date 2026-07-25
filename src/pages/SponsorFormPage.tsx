@@ -55,19 +55,33 @@ export default function SponsorFormPage() {
   return (
     <TenantRequired>
       <div className="space-y-6">
-        <PageHeader title={isEdit ? 'Edit sponsor' : 'Create sponsor'} backTo="/dashboard/sponsors" />
+        <PageHeader
+          title={isEdit ? 'Edit sponsor' : 'Create sponsor'}
+          backTo="/dashboard/sponsors"
+        />
         {isEdit && sponsorQuery.isLoading ? (
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         ) : (
-          <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
+          <form
+            onSubmit={handleSubmit}
+            className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
+          >
             <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} required />
-            <Input label="Website URL" value={supportedUrl} onChange={(e) => setSupportedUrl(e.target.value)} />
+            <Input
+              label="Website URL"
+              value={supportedUrl}
+              onChange={(e) => setSupportedUrl(e.target.value)}
+            />
             <FileField
               label="Sponsor logo"
               onChange={setImage}
               currentUrl={sponsorQuery.data?.image}
             />
-            <Input label="Extra info" value={extraInfo} onChange={(e) => setExtraInfo(e.target.value)} />
+            <Input
+              label="Extra info"
+              value={extraInfo}
+              onChange={(e) => setExtraInfo(e.target.value)}
+            />
             <SearchableSelect
               label="Sponsor type"
               value={sponsorType}

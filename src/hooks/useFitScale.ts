@@ -1,10 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 
-/**
- * Measures content against its container and returns a CSS scale factor
- * (never above 1) so overflowing content shrinks to fit instead of wrapping
- * or clipping. Remeasures whenever measureKey changes.
- */
 export function useFitScale(measureKey: string | number, minScale = 0.55) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);

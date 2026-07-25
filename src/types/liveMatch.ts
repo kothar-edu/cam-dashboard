@@ -120,7 +120,9 @@ export type IncomingLiveScoreMessage =
       // fields (including current_players) are guaranteed present, unlike
       // every other event type below.
       event_type: 'LIVE';
-      detail: Pick<LiveBroadcastDetail, 'viewers' | 'current'> & { game: Partial<LiveBroadcastDetail['game']> };
+      detail: Pick<LiveBroadcastDetail, 'viewers' | 'current'> & {
+        game: Partial<LiveBroadcastDetail['game']>;
+      };
     }
   | { event_type: 'SCORE' | 'WICKET'; detail: Pick<LiveBroadcastDetail, 'current' | 'game'> }
   | {
@@ -129,11 +131,18 @@ export type IncomingLiveScoreMessage =
     }
   | {
       event_type: 'EVENT';
-      detail: Pick<LiveBroadcastDetail, 'value' | 'current' | 'game' | 'score_history' | 'opponents'>;
+      detail: Pick<
+        LiveBroadcastDetail,
+        'value' | 'current' | 'game' | 'score_history' | 'opponents'
+      >;
     }
   | {
       event_type: 'UPDATE_PLAYER';
-      detail: { playerRole: PlayerRole; playerIn: LiveMatchPlayer | null; playerOut: LiveMatchPlayer | null };
+      detail: {
+        playerRole: PlayerRole;
+        playerIn: LiveMatchPlayer | null;
+        playerOut: LiveMatchPlayer | null;
+      };
     };
 
 export type OutgoingLiveScoreMessage =

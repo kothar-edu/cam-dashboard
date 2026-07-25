@@ -51,7 +51,10 @@ export async function listNomineeVotingPlayers(
 export async function createNomineeVotingPlayer(
   payload: NomineeVotingPlayerPayload
 ): Promise<NomineeVotingPlayer> {
-  const { data } = await apiClient.post<NomineeVotingPlayer>('/game/nominee-voting-player/', payload);
+  const { data } = await apiClient.post<NomineeVotingPlayer>(
+    '/game/nominee-voting-player/',
+    payload
+  );
   return data;
 }
 

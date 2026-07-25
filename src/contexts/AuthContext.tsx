@@ -7,11 +7,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import {
-  clearAuthTokens,
-  clearStoredTenantId,
-  getStoredAccessToken,
-} from '@/api/client';
+import { clearAuthTokens, clearStoredTenantId, getStoredAccessToken } from '@/api/client';
 import { fetchMyProfile, login as loginRequest, type AuthUser } from '@/api/auth';
 
 const ROLES_KEY = 'cam_dashboard_roles';

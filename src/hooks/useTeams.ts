@@ -1,5 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createTeam, getTeam, listTeams, setTeamActive, updateTeam, type CreateTeamPayload, type UpdateTeamPayload } from '@/api/teams';
+import {
+  createTeam,
+  getTeam,
+  listTeams,
+  setTeamActive,
+  updateTeam,
+  type CreateTeamPayload,
+  type UpdateTeamPayload,
+} from '@/api/teams';
 import type { ListParams } from '@/api/pagination';
 import { useTenant } from '@/contexts/TenantContext';
 
@@ -35,7 +43,8 @@ export function useUpdateTeam() {
   const qc = useQueryClient();
   const { activeTenantId } = useTenant();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateTeamPayload }) => updateTeam(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateTeamPayload }) =>
+      updateTeam(id, payload),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['teams', activeTenantId] });
       qc.invalidateQueries({ queryKey: ['team', activeTenantId, variables.id] });
@@ -47,7 +56,8 @@ export function useSetTeamActive() {
   const qc = useQueryClient();
   const { activeTenantId } = useTenant();
   return useMutation({
-    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => setTeamActive(id, isActive),
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
+      setTeamActive(id, isActive),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['teams', activeTenantId] });
       qc.invalidateQueries({ queryKey: ['team', activeTenantId, variables.id] });

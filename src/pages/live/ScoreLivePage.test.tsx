@@ -9,9 +9,21 @@ import { createInitialLiveMatchState } from '@/lib/liveMatchReducer';
 const LINEUP_ENTRY = {
   id: 'lineup-1',
   player: { id: 'p1', full_name: 'Player One' },
-  runs_scored: 0, balls_faced: 0, fours: 0, sixes: 0, dismissed: false,
-  wickets_taken: 0, balls_thrown: 0, runs_conceded: 0, maidens: 0, hattricks: 0,
-  catches: 0, run_outs: 0, direct_hits: 0, run_out_supports: 0, stumps: 0,
+  runs_scored: 0,
+  balls_faced: 0,
+  fours: 0,
+  sixes: 0,
+  dismissed: false,
+  wickets_taken: 0,
+  balls_thrown: 0,
+  runs_conceded: 0,
+  maidens: 0,
+  hattricks: 0,
+  catches: 0,
+  run_outs: 0,
+  direct_hits: 0,
+  run_out_supports: 0,
+  stumps: 0,
 };
 
 const FIXTURE_WITH_LINEUPS = {
@@ -41,7 +53,10 @@ vi.mock('@/hooks/useTeamRoster', () => ({
   useTeamRoster: () => ({ data: [], isLoading: false }),
 }));
 vi.mock('@/contexts/TenantContext', () => ({
-  useTenant: () => ({ activeTenantId: 'tenant-1', activeTenant: { id: 'tenant-1', schema_name: 'tenant-1', name: 'Tenant' } }),
+  useTenant: () => ({
+    activeTenantId: 'tenant-1',
+    activeTenant: { id: 'tenant-1', schema_name: 'tenant-1', name: 'Tenant' },
+  }),
 }));
 
 function renderPage(matchId = 'match-1') {
@@ -53,7 +68,7 @@ function renderPage(matchId = 'match-1') {
           <Route path="/dashboard/fixtures/:id/score" element={<ScoreLivePage />} />
         </Routes>
       </MemoryRouter>
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
 }
 

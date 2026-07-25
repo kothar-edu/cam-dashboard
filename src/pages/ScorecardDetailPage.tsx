@@ -67,9 +67,11 @@ export default function ScorecardDetailPage() {
     if (payload.length) fieldingMutation.mutate(payload);
   };
 
-  const pending = battingMutation.isPending || bowlingMutation.isPending || fieldingMutation.isPending;
+  const pending =
+    battingMutation.isPending || bowlingMutation.isPending || fieldingMutation.isPending;
   const saveError = battingMutation.isError || bowlingMutation.isError || fieldingMutation.isError;
-  const saveSuccess = battingMutation.isSuccess || bowlingMutation.isSuccess || fieldingMutation.isSuccess;
+  const saveSuccess =
+    battingMutation.isSuccess || bowlingMutation.isSuccess || fieldingMutation.isSuccess;
 
   return (
     <TenantRequired>
@@ -78,7 +80,9 @@ export default function ScorecardDetailPage() {
         {isLoading && !data ? (
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         ) : isError || !data ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">Unable to load scorecard.</div>
+          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
+            Unable to load scorecard.
+          </div>
         ) : (
           <div className="space-y-6">
             <div className="rounded-lg border bg-white p-6">
@@ -86,7 +90,8 @@ export default function ScorecardDetailPage() {
                 {data.opponent_a.team.name} vs {data.opponent_b.team.name}
               </h2>
               <p className="text-sm text-muted-foreground">
-                {data.tournament?.name ?? 'Custom match'} · {data.status} · {data.ground ?? 'Venue TBC'}
+                {data.tournament?.name ?? 'Custom match'} · {data.status} ·{' '}
+                {data.ground ?? 'Venue TBC'}
               </p>
               {data.result ? <p className="mt-2 text-sm">{data.result}</p> : null}
             </div>
@@ -129,17 +134,33 @@ export default function ScorecardDetailPage() {
             />
 
             <div className="flex flex-wrap gap-3">
-              <Button type="button" onClick={saveBatting} disabled={pending || (!lineupsA.length && !lineupsB.length)}>
+              <Button
+                type="button"
+                onClick={saveBatting}
+                disabled={pending || (!lineupsA.length && !lineupsB.length)}
+              >
                 {battingMutation.isPending ? 'Saving batting…' : 'Save batting stats'}
               </Button>
-              <Button type="button" variant="outline" onClick={saveBowling} disabled={pending || (!lineupsA.length && !lineupsB.length)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={saveBowling}
+                disabled={pending || (!lineupsA.length && !lineupsB.length)}
+              >
                 {bowlingMutation.isPending ? 'Saving bowling…' : 'Save bowling stats'}
               </Button>
-              <Button type="button" variant="outline" onClick={saveFielding} disabled={pending || (!lineupsA.length && !lineupsB.length)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={saveFielding}
+                disabled={pending || (!lineupsA.length && !lineupsB.length)}
+              >
                 {fieldingMutation.isPending ? 'Saving fielding…' : 'Save fielding stats'}
               </Button>
             </div>
-            {saveError ? <p className="text-sm text-red-600">Failed to save lineup changes.</p> : null}
+            {saveError ? (
+              <p className="text-sm text-red-600">Failed to save lineup changes.</p>
+            ) : null}
             {saveSuccess ? <p className="text-sm text-green-700">Lineup stats saved.</p> : null}
           </div>
         )}
@@ -206,29 +227,46 @@ function LineupEditor({
                   {mode === 'batting' ? (
                     <>
                       <td className="px-4 py-2">
-                        <StatInput value={lineup.runs_scored} onChange={(value) => updateLineup(lineup.id, { runs_scored: value })} />
+                        <StatInput
+                          value={lineup.runs_scored}
+                          onChange={(value) => updateLineup(lineup.id, { runs_scored: value })}
+                        />
                       </td>
                       <td className="px-4 py-2">
-                        <StatInput value={lineup.balls_faced} onChange={(value) => updateLineup(lineup.id, { balls_faced: value })} />
+                        <StatInput
+                          value={lineup.balls_faced}
+                          onChange={(value) => updateLineup(lineup.id, { balls_faced: value })}
+                        />
                       </td>
                       <td className="px-4 py-2">
-                        <StatInput value={lineup.fours} onChange={(value) => updateLineup(lineup.id, { fours: value })} />
+                        <StatInput
+                          value={lineup.fours}
+                          onChange={(value) => updateLineup(lineup.id, { fours: value })}
+                        />
                       </td>
                       <td className="px-4 py-2">
-                        <StatInput value={lineup.sixes} onChange={(value) => updateLineup(lineup.id, { sixes: value })} />
+                        <StatInput
+                          value={lineup.sixes}
+                          onChange={(value) => updateLineup(lineup.id, { sixes: value })}
+                        />
                       </td>
                       <td className="px-4 py-2">
                         <input
                           type="checkbox"
                           checked={lineup.dismissed}
-                          onChange={(event) => updateLineup(lineup.id, { dismissed: event.target.checked })}
+                          onChange={(event) =>
+                            updateLineup(lineup.id, { dismissed: event.target.checked })
+                          }
                         />
                       </td>
                     </>
                   ) : mode === 'bowling' ? (
                     <>
                       <td className="px-4 py-2">
-                        <StatInput value={lineup.balls_thrown} onChange={(value) => updateLineup(lineup.id, { balls_thrown: value })} />
+                        <StatInput
+                          value={lineup.balls_thrown}
+                          onChange={(value) => updateLineup(lineup.id, { balls_thrown: value })}
+                        />
                       </td>
                       <td className="px-4 py-2">
                         <StatInput
@@ -243,22 +281,37 @@ function LineupEditor({
                         />
                       </td>
                       <td className="px-4 py-2">
-                        <StatInput value={lineup.maidens} onChange={(value) => updateLineup(lineup.id, { maidens: value })} />
+                        <StatInput
+                          value={lineup.maidens}
+                          onChange={(value) => updateLineup(lineup.id, { maidens: value })}
+                        />
                       </td>
                       <td className="px-4 py-2">
-                        <StatInput value={lineup.hattricks} onChange={(value) => updateLineup(lineup.id, { hattricks: value })} />
+                        <StatInput
+                          value={lineup.hattricks}
+                          onChange={(value) => updateLineup(lineup.id, { hattricks: value })}
+                        />
                       </td>
                     </>
                   ) : (
                     <>
                       <td className="px-4 py-2">
-                        <StatInput value={lineup.catches} onChange={(value) => updateLineup(lineup.id, { catches: value })} />
+                        <StatInput
+                          value={lineup.catches}
+                          onChange={(value) => updateLineup(lineup.id, { catches: value })}
+                        />
                       </td>
                       <td className="px-4 py-2">
-                        <StatInput value={lineup.run_outs} onChange={(value) => updateLineup(lineup.id, { run_outs: value })} />
+                        <StatInput
+                          value={lineup.run_outs}
+                          onChange={(value) => updateLineup(lineup.id, { run_outs: value })}
+                        />
                       </td>
                       <td className="px-4 py-2">
-                        <StatInput value={lineup.direct_hits} onChange={(value) => updateLineup(lineup.id, { direct_hits: value })} />
+                        <StatInput
+                          value={lineup.direct_hits}
+                          onChange={(value) => updateLineup(lineup.id, { direct_hits: value })}
+                        />
                       </td>
                       <td className="px-4 py-2">
                         <StatInput
@@ -267,7 +320,10 @@ function LineupEditor({
                         />
                       </td>
                       <td className="px-4 py-2">
-                        <StatInput value={lineup.stumps} onChange={(value) => updateLineup(lineup.id, { stumps: value })} />
+                        <StatInput
+                          value={lineup.stumps}
+                          onChange={(value) => updateLineup(lineup.id, { stumps: value })}
+                        />
                       </td>
                     </>
                   )}

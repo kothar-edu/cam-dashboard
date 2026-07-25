@@ -93,7 +93,9 @@ function BulkFixtureRowFields({
   lockedOpponents: Opponent[] | null;
 }) {
   const locked = lockedOpponents !== null;
-  const tournamentDetail = useTournament(!locked && row.tournamentId ? row.tournamentId : undefined);
+  const tournamentDetail = useTournament(
+    !locked && row.tournamentId ? row.tournamentId : undefined
+  );
   const opponents = locked ? lockedOpponents : (tournamentDetail.data?.opponents ?? []);
 
   return (
@@ -135,7 +137,10 @@ function BulkFixtureRowFields({
                 label="Team A"
                 value={row.opponentA}
                 onChange={(value) => onChange({ opponentA: value })}
-                options={opponents.map((opponent) => ({ value: opponent.id, label: opponent.team_name }))}
+                options={opponents.map((opponent) => ({
+                  value: opponent.id,
+                  label: opponent.team_name,
+                }))}
                 placeholder="Select"
                 searchable
               />
@@ -143,7 +148,10 @@ function BulkFixtureRowFields({
                 label="Team B"
                 value={row.opponentB}
                 onChange={(value) => onChange({ opponentB: value })}
-                options={opponents.map((opponent) => ({ value: opponent.id, label: opponent.team_name }))}
+                options={opponents.map((opponent) => ({
+                  value: opponent.id,
+                  label: opponent.team_name,
+                }))}
                 placeholder="Select"
                 searchable
               />
@@ -181,7 +189,11 @@ function BulkFixtureRowFields({
           value={row.time}
           onChange={(e) => onChange({ time: e.target.value })}
         />
-        <Input label="Ground" value={row.ground} onChange={(e) => onChange({ ground: e.target.value })} />
+        <Input
+          label="Ground"
+          value={row.ground}
+          onChange={(e) => onChange({ ground: e.target.value })}
+        />
       </div>
       {row.tournamentId ? (
         <SearchableSelect
@@ -195,8 +207,8 @@ function BulkFixtureRowFields({
         />
       ) : (
         <p className="text-xs text-muted-foreground">
-          No tournament selected — this row creates its own standalone match under a new one-off tournament
-          named "{row.name || '…'}".
+          No tournament selected — this row creates its own standalone match under a new one-off
+          tournament named "{row.name || '…'}".
         </p>
       )}
     </div>

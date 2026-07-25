@@ -121,11 +121,7 @@ export default function TournamentsPage() {
         data={tournaments}
         loading={isLoading}
         emptyMessage="No tournaments found."
-        pagination={
-          data
-            ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count }
-            : undefined
-        }
+        pagination={data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined}
         onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
       />
 

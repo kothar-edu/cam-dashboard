@@ -10,12 +10,6 @@ const SELECT_CLASS =
 const POPOVER_CLASS =
   'absolute left-0 z-20 mt-1 w-[min(16rem,calc(100vw-2rem))] rounded-md border border-gray-300 bg-white p-2.5 shadow-lg';
 
-// Dismissals with no fielder ambiguity - the bowler (or, for Stumped, the
-// keeper) is always the one credited, so there's nothing to ask the scorer.
-// Caught and Hit Wicket used to live here too: Caught genuinely needs a
-// named fielder (could be any of 11), and Hit Wicket never needed a runs
-// picker at all (the app doesn't ask, and hit-wicket runs aren't a thing
-// most scorers track) - the dashboard used to diverge from the app on both.
 const SIMPLE_DISMISSALS: Array<{ value: WicketType; label: string }> = [
   { value: 'BOWLED', label: 'Bowled' },
   { value: 'LBW', label: 'LBW' },
@@ -25,13 +19,24 @@ const SIMPLE_DISMISSALS: Array<{ value: WicketType; label: string }> = [
 ];
 
 type WicketControlsProps = {
-  broadcastWicket: (value: WicketType, dismissed?: string, successfulRuns?: number, fielder?: string | null, extras?: number) => void;
+  broadcastWicket: (
+    value: WicketType,
+    dismissed?: string,
+    successfulRuns?: number,
+    fielder?: string | null,
+    extras?: number
+  ) => void;
   currentPlayers: CurrentPlayersState;
   fieldingOpponent: LiveOpponent | null | undefined;
   disabled: boolean;
 };
 
-export function WicketControls({ broadcastWicket, currentPlayers, fieldingOpponent, disabled }: WicketControlsProps) {
+export function WicketControls({
+  broadcastWicket,
+  currentPlayers,
+  fieldingOpponent,
+  disabled,
+}: WicketControlsProps) {
   return (
     <div>
       <p className="mb-2 text-xs text-gray-500">Striker, fielder = bowler or keeper</p>
@@ -44,31 +49,80 @@ export function WicketControls({ broadcastWicket, currentPlayers, fieldingOppone
             variant="danger"
             disabled={disabled || !currentPlayers.striker}
             onClick={() => {
-              const credited = currentPlayers.wicket_keeper?.id ?? currentPlayers.bowler?.id ?? null;
+              const credited =
+                currentPlayers.wicket_keeper?.id ?? currentPlayers.bowler?.id ?? null;
               broadcastWicket(value, currentPlayers.striker?.id, 0, credited ?? null);
             }}
           >
             {label}
           </Button>
         ))}
-        <CaughtForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={disabled} />
-        <RunOutForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={disabled} label="Run Out" wicketValue="RUN_OUT" />
-        <RetiredForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} disabled={disabled} label="Retired Hurt" wicketValue="RETIRED_HURT" />
-        <RetiredForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} disabled={disabled} label="Retired Out" wicketValue="RETIRED_OUT" />
-        <RunOutForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={disabled} label="Wide + Run Out" wicketValue="WIDE_RUN_OUT" />
-        <RunOutForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={disabled} label="No Ball + Run Out" wicketValue="NO_BALL_RUN_OUT" />
-        <WideStumpedForm broadcastWicket={broadcastWicket} currentPlayers={currentPlayers} fieldingOpponent={fieldingOpponent} disabled={disabled} />
+        <CaughtForm
+          broadcastWicket={broadcastWicket}
+          currentPlayers={currentPlayers}
+          fieldingOpponent={fieldingOpponent}
+          disabled={disabled}
+        />
+        <RunOutForm
+          broadcastWicket={broadcastWicket}
+          currentPlayers={currentPlayers}
+          fieldingOpponent={fieldingOpponent}
+          disabled={disabled}
+          label="Run Out"
+          wicketValue="RUN_OUT"
+        />
+        <RetiredForm
+          broadcastWicket={broadcastWicket}
+          currentPlayers={currentPlayers}
+          disabled={disabled}
+          label="Retired Hurt"
+          wicketValue="RETIRED_HURT"
+        />
+        <RetiredForm
+          broadcastWicket={broadcastWicket}
+          currentPlayers={currentPlayers}
+          disabled={disabled}
+          label="Retired Out"
+          wicketValue="RETIRED_OUT"
+        />
+        <RunOutForm
+          broadcastWicket={broadcastWicket}
+          currentPlayers={currentPlayers}
+          fieldingOpponent={fieldingOpponent}
+          disabled={disabled}
+          label="Wide + Run Out"
+          wicketValue="WIDE_RUN_OUT"
+        />
+        <RunOutForm
+          broadcastWicket={broadcastWicket}
+          currentPlayers={currentPlayers}
+          fieldingOpponent={fieldingOpponent}
+          disabled={disabled}
+          label="No Ball + Run Out"
+          wicketValue="NO_BALL_RUN_OUT"
+        />
+        <WideStumpedForm
+          broadcastWicket={broadcastWicket}
+          currentPlayers={currentPlayers}
+          fieldingOpponent={fieldingOpponent}
+          disabled={disabled}
+        />
       </div>
     </div>
   );
 }
 
 function playerOptions(currentPlayers: CurrentPlayersState) {
-  return [currentPlayers.striker, currentPlayers.non_striker].filter((p): p is NonNullable<typeof p> => Boolean(p));
+  return [currentPlayers.striker, currentPlayers.non_striker].filter(
+    (p): p is NonNullable<typeof p> => Boolean(p)
+  );
 }
 
 function CaughtForm({
-  broadcastWicket, currentPlayers, fieldingOpponent, disabled,
+  broadcastWicket,
+  currentPlayers,
+  fieldingOpponent,
+  disabled,
 }: {
   broadcastWicket: WicketControlsProps['broadcastWicket'];
   currentPlayers: CurrentPlayersState;
@@ -82,17 +136,31 @@ function CaughtForm({
 
   return (
     <div className="relative" ref={containerRef}>
-      <Button type="button" size="sm" variant="danger" className="w-full" disabled={disabled || !currentPlayers.striker} onClick={() => setOpen(!open)}>
+      <Button
+        type="button"
+        size="sm"
+        variant="danger"
+        className="w-full"
+        disabled={disabled || !currentPlayers.striker}
+        onClick={() => setOpen(!open)}
+      >
         Caught
       </Button>
       {open && (
         <div className={POPOVER_CLASS}>
           <label className="text-xs font-medium text-[#12233D]">
             Fielder
-            <select aria-label="Fielder" className={SELECT_CLASS} value={fielder} onChange={(e) => setFielder(e.target.value)}>
+            <select
+              aria-label="Fielder"
+              className={SELECT_CLASS}
+              value={fielder}
+              onChange={(e) => setFielder(e.target.value)}
+            >
               <option value="">Select fielder</option>
               {(fieldingOpponent?.players ?? []).map((p) => (
-                <option key={p.id} value={p.id}>{playerOptionLabel(p, currentPlayers)}</option>
+                <option key={p.id} value={p.id}>
+                  {playerOptionLabel(p, currentPlayers)}
+                </option>
               ))}
             </select>
           </label>
@@ -117,7 +185,12 @@ function CaughtForm({
 }
 
 function RunOutForm({
-  broadcastWicket, currentPlayers, fieldingOpponent, disabled, label, wicketValue,
+  broadcastWicket,
+  currentPlayers,
+  fieldingOpponent,
+  disabled,
+  label,
+  wicketValue,
 }: {
   broadcastWicket: WicketControlsProps['broadcastWicket'];
   currentPlayers: CurrentPlayersState;
@@ -135,34 +208,62 @@ function RunOutForm({
 
   return (
     <div className="relative" ref={containerRef}>
-      <Button type="button" size="sm" variant="danger" className="w-full" disabled={disabled} onClick={() => setOpen(!open)}>
+      <Button
+        type="button"
+        size="sm"
+        variant="danger"
+        className="w-full"
+        disabled={disabled}
+        onClick={() => setOpen(!open)}
+      >
         {label}
       </Button>
       {open && (
         <div className={POPOVER_CLASS}>
           <label className="text-xs font-medium text-[#12233D]">
             Dismissed player
-            <select aria-label="Dismissed player" className={SELECT_CLASS} value={player} onChange={(e) => setPlayer(e.target.value)}>
+            <select
+              aria-label="Dismissed player"
+              className={SELECT_CLASS}
+              value={player}
+              onChange={(e) => setPlayer(e.target.value)}
+            >
               <option value="">Select player</option>
               {playerOptions(currentPlayers).map((p) => (
-                <option key={p.id} value={p.id}>{playerOptionLabel(p, currentPlayers)}</option>
+                <option key={p.id} value={p.id}>
+                  {playerOptionLabel(p, currentPlayers)}
+                </option>
               ))}
             </select>
           </label>
           <label className="mt-2 block text-xs font-medium text-[#12233D]">
             Runs completed
-            <select aria-label="Runs completed" className={SELECT_CLASS} value={runs} onChange={(e) => setRuns(Number(e.target.value))}>
+            <select
+              aria-label="Runs completed"
+              className={SELECT_CLASS}
+              value={runs}
+              onChange={(e) => setRuns(Number(e.target.value))}
+            >
               {[0, 1, 2, 3].map((r) => (
-                <option key={r} value={r}>{r} runs</option>
+                <option key={r} value={r}>
+                  {r} runs
+                </option>
               ))}
             </select>
           </label>
           <label className="mt-2 block text-xs font-medium text-[#12233D]">
             Fielder
-            <select aria-label="Fielder" className={SELECT_CLASS} value={fielder} onChange={(e) => setFielder(e.target.value)}>
+            <select
+              aria-label="Fielder"
+              className={SELECT_CLASS}
+              value={fielder}
+              onChange={(e) => setFielder(e.target.value)}
+            >
               <option value="">Select fielder</option>
               {(fieldingOpponent?.players ?? []).map((p) => (
-                <option key={p.id} value={p.id}>{playerOptionLabel(p, currentPlayers)}</option>
+                <option key={p.id} value={p.id}>
+                  {playerOptionLabel(p, currentPlayers)}
+                </option>
               ))}
             </select>
           </label>
@@ -188,7 +289,11 @@ function RunOutForm({
 }
 
 function RetiredForm({
-  broadcastWicket, currentPlayers, disabled, label, wicketValue,
+  broadcastWicket,
+  currentPlayers,
+  disabled,
+  label,
+  wicketValue,
 }: {
   broadcastWicket: WicketControlsProps['broadcastWicket'];
   currentPlayers: CurrentPlayersState;
@@ -203,17 +308,31 @@ function RetiredForm({
 
   return (
     <div className="relative" ref={containerRef}>
-      <Button type="button" size="sm" variant="secondary" className="w-full" disabled={disabled} onClick={() => setOpen(!open)}>
+      <Button
+        type="button"
+        size="sm"
+        variant="secondary"
+        className="w-full"
+        disabled={disabled}
+        onClick={() => setOpen(!open)}
+      >
         {label}
       </Button>
       {open && (
         <div className={POPOVER_CLASS}>
           <label className="text-xs font-medium text-[#12233D]">
             Player
-            <select aria-label={`${label} player`} className={SELECT_CLASS} value={player} onChange={(e) => setPlayer(e.target.value)}>
+            <select
+              aria-label={`${label} player`}
+              className={SELECT_CLASS}
+              value={player}
+              onChange={(e) => setPlayer(e.target.value)}
+            >
               <option value="">Select player</option>
               {playerOptions(currentPlayers).map((p) => (
-                <option key={p.id} value={p.id}>{playerOptionLabel(p, currentPlayers)}</option>
+                <option key={p.id} value={p.id}>
+                  {playerOptionLabel(p, currentPlayers)}
+                </option>
               ))}
             </select>
           </label>
@@ -237,7 +356,10 @@ function RetiredForm({
 }
 
 function WideStumpedForm({
-  broadcastWicket, currentPlayers, fieldingOpponent, disabled,
+  broadcastWicket,
+  currentPlayers,
+  fieldingOpponent,
+  disabled,
 }: {
   broadcastWicket: WicketControlsProps['broadcastWicket'];
   currentPlayers: CurrentPlayersState;
@@ -251,18 +373,34 @@ function WideStumpedForm({
 
   return (
     <div className="relative" ref={containerRef}>
-      <Button type="button" size="sm" variant="danger" className="w-full" disabled={disabled} onClick={() => setOpen(!open)}>
+      <Button
+        type="button"
+        size="sm"
+        variant="danger"
+        className="w-full"
+        disabled={disabled}
+        onClick={() => setOpen(!open)}
+      >
         Wide + Stumped
       </Button>
       {open && (
         <div className={POPOVER_CLASS}>
-          <p className="mb-1.5 text-[11px] text-gray-500">Striker only, no bye runs, not a legal ball.</p>
+          <p className="mb-1.5 text-[11px] text-gray-500">
+            Striker only, no bye runs, not a legal ball.
+          </p>
           <label className="text-xs font-medium text-[#12233D]">
             Wicket-keeper (stumping)
-            <select aria-label="Wicket-keeper" className={SELECT_CLASS} value={fielder} onChange={(e) => setFielder(e.target.value)}>
+            <select
+              aria-label="Wicket-keeper"
+              className={SELECT_CLASS}
+              value={fielder}
+              onChange={(e) => setFielder(e.target.value)}
+            >
               <option value="">Select wicket-keeper</option>
               {(fieldingOpponent?.players ?? []).map((p) => (
-                <option key={p.id} value={p.id}>{playerOptionLabel(p, currentPlayers)}</option>
+                <option key={p.id} value={p.id}>
+                  {playerOptionLabel(p, currentPlayers)}
+                </option>
               ))}
             </select>
           </label>

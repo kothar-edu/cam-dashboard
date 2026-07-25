@@ -7,11 +7,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import {
-  clearStoredTenantId,
-  getStoredTenantId,
-  setStoredTenantId,
-} from '@/api/client';
+import { clearStoredTenantId, getStoredTenantId, setStoredTenantId } from '@/api/client';
 import { listAccessibleTenants, type Tenant } from '@/api/tenants';
 import { useAuth } from './AuthContext';
 
@@ -29,9 +25,7 @@ const TenantContext = createContext<TenantContextValue | undefined>(undefined);
 export function TenantProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
   const [tenants, setTenants] = useState<Tenant[]>([]);
-  const [activeTenantId, setActiveTenantIdState] = useState<string | null>(
-    getStoredTenantId()
-  );
+  const [activeTenantId, setActiveTenantIdState] = useState<string | null>(getStoredTenantId());
   const [loading, setLoading] = useState(false);
 
   const refreshTenants = useCallback(async () => {

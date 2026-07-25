@@ -16,7 +16,14 @@ type SquadPickerProps = {
   onBack?: () => void;
 };
 
-export function SquadPicker({ teamId, teamName, stepLabel, initialSelectedIds, onConfirm, onBack }: SquadPickerProps) {
+export function SquadPicker({
+  teamId,
+  teamName,
+  stepLabel,
+  initialSelectedIds,
+  onConfirm,
+  onBack,
+}: SquadPickerProps) {
   const { data: roster, isLoading } = useTeamRoster(teamId);
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<string[]>(initialSelectedIds);
@@ -30,7 +37,7 @@ export function SquadPicker({ teamId, teamName, stepLabel, initialSelectedIds, o
 
   function toggle(playerId: string) {
     setSelectedIds((prev) =>
-      prev.includes(playerId) ? prev.filter((id) => id !== playerId) : [...prev, playerId],
+      prev.includes(playerId) ? prev.filter((id) => id !== playerId) : [...prev, playerId]
     );
   }
 
@@ -88,7 +95,9 @@ export function SquadPicker({ teamId, teamName, stepLabel, initialSelectedIds, o
                     >
                       {checked && <Check className="h-3.5 w-3.5 text-white" />}
                     </span>
-                    <span className="flex-1 text-sm font-medium text-[#12233D]">{player.full_name}</span>
+                    <span className="flex-1 text-sm font-medium text-[#12233D]">
+                      {player.full_name}
+                    </span>
                     {player.jersey_no != null && (
                       <span className="shrink-0 text-xs text-gray-400">#{player.jersey_no}</span>
                     )}

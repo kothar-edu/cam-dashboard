@@ -12,7 +12,6 @@ export type DataTableColumn<T> = {
   header: string;
   cell: (row: T) => React.ReactNode;
   className?: string;
-  /** Hide this column below the given Tailwind breakpoint (sm | md | lg). */
   hideBelow?: 'sm' | 'md' | 'lg';
 };
 
@@ -45,7 +44,10 @@ function LoadingRows({ columns }: { columns: DataTableColumn<unknown>[] }) {
           {columns.map((column) => (
             <TableCell
               key={`loading-cell-${column.id}`}
-              className={[column.className, column.hideBelow ? hideBelowClass[column.hideBelow] : '']
+              className={[
+                column.className,
+                column.hideBelow ? hideBelowClass[column.hideBelow] : '',
+              ]
                 .filter(Boolean)
                 .join(' ')}
             >

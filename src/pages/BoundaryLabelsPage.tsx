@@ -62,10 +62,7 @@ export default function BoundaryLabelsPage() {
         description={`${activeTenant.name} · custom four and six commentary text for live scoring`}
       />
 
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-xl space-y-6 rounded-lg border bg-white p-6"
-      >
+      <form onSubmit={handleSubmit} className="max-w-xl space-y-6 rounded-lg border bg-white p-6">
         <div className="space-y-2">
           <label htmlFor="four-boundary-label" className="text-sm font-medium text-[#12233D]">
             Four boundary label

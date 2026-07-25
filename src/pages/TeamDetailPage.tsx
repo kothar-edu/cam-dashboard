@@ -40,9 +40,7 @@ export default function TeamDetailPage() {
       setCode(teamQuery.data.code);
       const maintainer = teamQuery.data.maintainer;
       setMaintainerId(maintainer?.id ?? null);
-      setMaintainerLabel(
-        maintainer ? `${maintainer.full_name} (${maintainer.email})` : null
-      );
+      setMaintainerLabel(maintainer ? `${maintainer.full_name} (${maintainer.email})` : null);
     }
   }, [teamQuery.data]);
 
@@ -70,7 +68,8 @@ export default function TeamDetailPage() {
       },
       {
         onSuccess: () => toast.success('Team maintainer updated.'),
-        onError: () => toast.error('Failed to update maintainer. User must be an approved org member.'),
+        onError: () =>
+          toast.error('Failed to update maintainer. User must be an approved org member.'),
       }
     );
   };
@@ -122,15 +121,25 @@ export default function TeamDetailPage() {
             <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
           </div>
         ) : teamQuery.isError || !teamQuery.data ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">Team not found.</div>
+          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
+            Team not found.
+          </div>
         ) : (
           <>
-            <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
+            <form
+              onSubmit={handleSubmit}
+              className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
+            >
               <p className="text-sm text-muted-foreground">
                 {teamQuery.data.total_players} registered player
                 {teamQuery.data.total_players === 1 ? '' : 's'}
               </p>
-              <Input label="Team name" value={name} onChange={(e) => setName(e.target.value)} required />
+              <Input
+                label="Team name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
               <Input
                 label="Abbreviation"
                 value={code}
@@ -140,18 +149,23 @@ export default function TeamDetailPage() {
               />
               <FileField label="Team logo" currentUrl={teamQuery.data.logo} onChange={setLogo} />
               {updateMutation.isError ? (
-                <p className="text-sm text-red-600">Failed to update team. Check permissions and try again.</p>
+                <p className="text-sm text-red-600">
+                  Failed to update team. Check permissions and try again.
+                </p>
               ) : null}
               <Button type="submit" disabled={updateMutation.isPending}>
                 {updateMutation.isPending ? 'Saving…' : 'Save changes'}
               </Button>
             </form>
 
-            <form onSubmit={handleMaintainerSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
+            <form
+              onSubmit={handleMaintainerSubmit}
+              className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
+            >
               <h2 className="text-lg font-semibold text-[#12233D]">Team maintainer</h2>
               <p className="text-sm text-muted-foreground">
-                Assign a registered organization member as maintainer. They can manage roster join requests and edit
-                team name/logo.
+                Assign a registered organization member as maintainer. They can manage roster join
+                requests and edit team name/logo.
               </p>
               {maintainerLabel ? (
                 <p className="text-sm text-[#12233D]">
@@ -175,7 +189,10 @@ export default function TeamDetailPage() {
               </Button>
             </form>
 
-            <form onSubmit={handlePaymentSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
+            <form
+              onSubmit={handlePaymentSubmit}
+              className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
+            >
               <h2 className="text-lg font-semibold text-[#12233D]">Payment settings</h2>
               <p className="text-sm text-muted-foreground">
                 Team-level bank details and verification rules override tenant defaults when set.
@@ -194,8 +211,16 @@ export default function TeamDetailPage() {
                     value={bankAccountNumber}
                     onChange={(e) => setBankAccountNumber(e.target.value)}
                   />
-                  <Input label="Bank name" value={bankName} onChange={(e) => setBankName(e.target.value)} />
-                  <Input label="Branch" value={bankBranch} onChange={(e) => setBankBranch(e.target.value)} />
+                  <Input
+                    label="Bank name"
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
+                  />
+                  <Input
+                    label="Branch"
+                    value={bankBranch}
+                    onChange={(e) => setBankBranch(e.target.value)}
+                  />
                   <Input
                     label="Verification fee (leave blank for free)"
                     type="number"

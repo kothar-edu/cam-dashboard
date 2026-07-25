@@ -30,8 +30,16 @@ export default function TeamFormPage() {
           description="Register a new team in the active organization."
           backTo="/dashboard/teams"
         />
-        <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6">
-          <Input label="Team name" value={name} onChange={(e) => setName(e.target.value)} required />
+        <form
+          onSubmit={handleSubmit}
+          className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
+        >
+          <Input
+            label="Team name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
           <Input
             label="Abbreviation"
             value={code}
@@ -42,7 +50,9 @@ export default function TeamFormPage() {
           />
           <FileField label="Team logo (optional)" onChange={setLogo} />
           {createMutation.isError ? (
-            <p className="text-sm text-red-600">Failed to create team. Check permissions and try again.</p>
+            <p className="text-sm text-red-600">
+              Failed to create team. Check permissions and try again.
+            </p>
           ) : null}
           <Button type="submit" disabled={createMutation.isPending}>
             {createMutation.isPending ? 'Creating…' : 'Create team'}

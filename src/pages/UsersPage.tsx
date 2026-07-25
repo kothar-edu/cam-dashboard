@@ -15,9 +15,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 function VerifiedCell({ verified }: { verified: boolean }) {
   return (
-    <span className={verified ? 'text-green-700' : 'text-red-600'}>
-      {verified ? 'Yes' : 'No'}
-    </span>
+    <span className={verified ? 'text-green-700' : 'text-red-600'}>{verified ? 'Yes' : 'No'}</span>
   );
 }
 
@@ -175,9 +173,7 @@ export default function UsersPage() {
         data={users}
         loading={isLoading}
         emptyMessage="No users found."
-        pagination={
-          data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined
-        }
+        pagination={data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined}
         onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
       />
     </div>

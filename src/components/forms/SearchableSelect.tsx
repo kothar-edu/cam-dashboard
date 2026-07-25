@@ -57,10 +57,7 @@ export function SearchableSelect({
         <SelectTrigger
           id={id}
           aria-required={required}
-          className={cn(
-            error ? 'border-red-500 focus:ring-red-500' : undefined,
-            triggerClassName
-          )}
+          className={cn(error ? 'border-red-500 focus:ring-red-500' : undefined, triggerClassName)}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
@@ -77,5 +74,4 @@ export function SearchableSelect({
   );
 }
 
-/** Alias for SearchableSelect — use for all form and filter dropdowns. */
 export const FormSelect = SearchableSelect;

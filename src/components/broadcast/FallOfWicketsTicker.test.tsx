@@ -6,21 +6,39 @@ describe('FallOfWicketsTicker', () => {
   it('renders one entry per fallen wicket with score and player name', () => {
     render(
       <FallOfWicketsTicker
-        entries={[{ wicketNumber: 1, scoreAtWicket: 23, over: 4, ball: 2, playerId: 'p1', dismissalType: 'BOWLED' }]}
+        entries={[
+          {
+            wicketNumber: 1,
+            scoreAtWicket: 23,
+            over: 4,
+            ball: 2,
+            playerId: 'p1',
+            dismissalType: 'BOWLED',
+          },
+        ]}
         playerNameById={{ p1: 'Player One' }}
-      />,
+      />
     );
     expect(screen.getByText(/1-23/)).toBeInTheDocument();
     expect(screen.getByText(/Player One/)).toBeInTheDocument();
     expect(screen.getByText(/4.2/)).toBeInTheDocument();
   });
 
-  it('wraps within a fixed max-width instead of growing unboundedly - a broadcast overlay can\'t be scrolled', () => {
+  it("wraps within a fixed max-width instead of growing unboundedly - a broadcast overlay can't be scrolled", () => {
     const { container } = render(
       <FallOfWicketsTicker
-        entries={[{ wicketNumber: 1, scoreAtWicket: 23, over: 4, ball: 2, playerId: 'p1', dismissalType: 'BOWLED' }]}
+        entries={[
+          {
+            wicketNumber: 1,
+            scoreAtWicket: 23,
+            over: 4,
+            ball: 2,
+            playerId: 'p1',
+            dismissalType: 'BOWLED',
+          },
+        ]}
         playerNameById={{ p1: 'Player One' }}
-      />,
+      />
     );
     const ticker = container.firstElementChild;
     expect(ticker).toHaveClass('flex-wrap');

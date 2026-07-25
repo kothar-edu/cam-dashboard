@@ -7,7 +7,9 @@ vi.mock('@/hooks/useTournaments', () => ({
   useTournaments: () => ({
     data: {
       count: 1,
-      results: [{ id: 't1', name: 'Summer League', logo: null, start: '2026-06-01', total_teams: 8 }],
+      results: [
+        { id: 't1', name: 'Summer League', logo: null, start: '2026-06-01', total_teams: 8 },
+      ],
     },
     isLoading: false,
   }),
@@ -36,7 +38,12 @@ vi.mock('@/hooks/usePointsTable', () => ({
 
 vi.mock('@/contexts/TenantContext', () => ({
   useTenant: () => ({
-    activeTenant: { id: 1, name: 'CAM Youth', schema_name: 'cam_youth_association', is_active: true },
+    activeTenant: {
+      id: 1,
+      name: 'CAM Youth',
+      schema_name: 'cam_youth_association',
+      is_active: true,
+    },
     activeTenantId: 'cam_youth_association',
   }),
 }));

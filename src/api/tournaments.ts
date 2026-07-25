@@ -44,7 +44,9 @@ export async function getTournament(id: string): Promise<TournamentDetail> {
   return data;
 }
 
-export async function createTournament(payload: CreateTournamentPayload): Promise<TournamentDetail> {
+export async function createTournament(
+  payload: CreateTournamentPayload
+): Promise<TournamentDetail> {
   const { data } = await apiClient.post<TournamentDetail>('/game/tournament/', payload);
   return data;
 }

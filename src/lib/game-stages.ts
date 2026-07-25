@@ -1,4 +1,3 @@
-// Matches apps.game.choices.GameStages on the backend — Match.round is a fixed-choices field.
 export const ROUND_CHOICES = [
   'Group Stage',
   'Round of 16',

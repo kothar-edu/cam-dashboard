@@ -27,20 +27,30 @@ describe('CelebrationFlash', () => {
       <CelebrationFlash
         lastEvent={{ kind: 'SCORE', value: 4 }}
         boundaryLabels={{ four: 'Kothar FOUR', six: null }}
-      />,
+      />
     );
     expect(screen.getByText('Kothar FOUR')).toBeInTheDocument();
   });
 
   it('falls back to FOUR/SIX when no boundary label is configured', () => {
-    render(<CelebrationFlash lastEvent={{ kind: 'SCORE', value: 4 }} boundaryLabels={{ four: null, six: null }} />);
+    render(
+      <CelebrationFlash
+        lastEvent={{ kind: 'SCORE', value: 4 }}
+        boundaryLabels={{ four: null, six: null }}
+      />
+    );
     expect(screen.getByText('FOUR')).toBeInTheDocument();
   });
 });
 
 describe('MilestoneFlash', () => {
   it('renders a 50/100/5-wicket haul label for the named player', () => {
-    render(<MilestoneFlash milestone={{ key: 'p1:50', playerId: 'p1', kind: '50', atOver: 10, atBall: 2 }} playerName="Striker One" />);
+    render(
+      <MilestoneFlash
+        milestone={{ key: 'p1:50', playerId: 'p1', kind: '50', atOver: 10, atBall: 2 }}
+        playerName="Striker One"
+      />
+    );
     expect(screen.getByText(/50/)).toBeInTheDocument();
     expect(screen.getByText('Striker One')).toBeInTheDocument();
   });

@@ -2,7 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { useFitScale } from './useFitScale';
 
-function TestBox({ measureKey, minScale, onScale }: { measureKey: string; minScale?: number; onScale: (scale: number) => void }) {
+function TestBox({
+  measureKey,
+  minScale,
+  onScale,
+}: {
+  measureKey: string;
+  minScale?: number;
+  onScale: (scale: number) => void;
+}) {
   const { containerRef, contentRef, scale } = useFitScale(measureKey, minScale);
   onScale(scale);
   return (
@@ -14,7 +22,10 @@ function TestBox({ measureKey, minScale, onScale }: { measureKey: string; minSca
   );
 }
 
-function stubWidths(container: HTMLElement, { clientWidth, scrollWidth }: { clientWidth: number; scrollWidth: number }) {
+function stubWidths(
+  container: HTMLElement,
+  { clientWidth, scrollWidth }: { clientWidth: number; scrollWidth: number }
+) {
   const containerEl = container.querySelector('[data-testid="container"]') as HTMLElement;
   const contentEl = container.querySelector('[data-testid="content"]') as HTMLElement;
   Object.defineProperty(containerEl, 'clientWidth', { configurable: true, value: clientWidth });
@@ -30,7 +41,9 @@ describe('useFitScale', () => {
 
   it('shrinks proportionally when content overflows the container', () => {
     let latest = 0;
-    const { container, rerender } = render(<TestBox measureKey="v1" onScale={(s) => (latest = s)} />);
+    const { container, rerender } = render(
+      <TestBox measureKey="v1" onScale={(s) => (latest = s)} />
+    );
     stubWidths(container, { clientWidth: 140, scrollWidth: 200 });
     rerender(<TestBox measureKey="v2" onScale={(s) => (latest = s)} />);
     expect(latest).toBe(0.7);
@@ -38,7 +51,9 @@ describe('useFitScale', () => {
 
   it('never shrinks below minScale', () => {
     let latest = 0;
-    const { container, rerender } = render(<TestBox measureKey="v1" minScale={0.6} onScale={(s) => (latest = s)} />);
+    const { container, rerender } = render(
+      <TestBox measureKey="v1" minScale={0.6} onScale={(s) => (latest = s)} />
+    );
     stubWidths(container, { clientWidth: 50, scrollWidth: 500 });
     rerender(<TestBox measureKey="v2" minScale={0.6} onScale={(s) => (latest = s)} />);
     expect(latest).toBe(0.6);

@@ -26,12 +26,16 @@ describe('extrasBreakdown', () => {
   });
 
   it('splits mandatory + bat runs for a no-ball hit for 2', () => {
-    expect(extrasBreakdown(ball({ value: 'NO_BALL', extras: 1, runs: 2, is_bat_involved: true }))).toBe('1+2');
+    expect(
+      extrasBreakdown(ball({ value: 'NO_BALL', extras: 1, runs: 2, is_bat_involved: true }))
+    ).toBe('1+2');
   });
 
   it('splits mandatory + leg-bye runs for a no-ball taken as leg byes', () => {
     expect(
-      extrasBreakdown(ball({ value: 'NO_BALL', extras: 3, runs: 0, is_bat_involved: false, bye_type: 'LEG_BYE' })),
+      extrasBreakdown(
+        ball({ value: 'NO_BALL', extras: 3, runs: 0, is_bat_involved: false, bye_type: 'LEG_BYE' })
+      )
     ).toBe('1+2');
   });
 

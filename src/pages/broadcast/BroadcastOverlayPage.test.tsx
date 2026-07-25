@@ -19,7 +19,7 @@ function renderPage() {
           <Route path="/broadcast/:matchId" element={<BroadcastOverlayPage />} />
         </Routes>
       </MemoryRouter>
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
 }
 
@@ -51,7 +51,10 @@ describe('BroadcastOverlayPage', () => {
   });
 
   it('renders nothing (transparent) while match info is still loading', () => {
-    vi.mocked(useLiveMatchInfoModule.useLiveMatchInfo).mockReturnValue({ data: undefined, isLoading: true } as any);
+    vi.mocked(useLiveMatchInfoModule.useLiveMatchInfo).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    } as any);
     const { container } = renderPage();
     expect(container.querySelector('[data-testid="broadcast-canvas"]')).toBeNull();
   });

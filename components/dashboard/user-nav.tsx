@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
-import { Button } from "../components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
+import { Button } from '../components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,9 +10,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
-import { useAuth } from "@/hooks/use-auth";
-import { useRouter } from "next/navigation";
+} from '../components/ui/dropdown-menu';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 export function UserNav() {
   const { logout } = useAuth();
@@ -20,7 +20,7 @@ export function UserNav() {
 
   const handleLogout = async () => {
     await logout();
-    router.push("/login");
+    router.push('/login');
   };
 
   return (
@@ -37,9 +37,7 @@ export function UserNav() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">Admin User</p>
-            <p className="text-xs leading-none text-muted-foreground">
-              admin@example.com
-            </p>
+            <p className="text-xs leading-none text-muted-foreground">admin@example.com</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

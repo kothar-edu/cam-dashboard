@@ -18,9 +18,11 @@ export default function PointsPage() {
   const { data: tournamentsData, isLoading: tournamentsLoading } = useTournaments({
     limit: 100,
   });
-  const { data: pointsData, isLoading: pointsLoading, isError } = usePointsTable(
-    selectedTournamentId
-  );
+  const {
+    data: pointsData,
+    isLoading: pointsLoading,
+    isError,
+  } = usePointsTable(selectedTournamentId);
 
   const tournaments = tournamentsData?.results ?? [];
 

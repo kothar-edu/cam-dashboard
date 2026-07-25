@@ -2,12 +2,7 @@ import { BarChart2, Calendar, Trophy, Users } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useTenant } from '@/contexts/TenantContext';
 import { PageHeader } from '@/components/forms/PageHeader';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 function formatFixtureDate(value: string) {
@@ -75,7 +70,10 @@ export default function DashboardHomePage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Dashboard" description={`${activeTenant.name} · tenant-scoped cricket overview`} />
+      <PageHeader
+        title="Dashboard"
+        description={`${activeTenant.name} · tenant-scoped cricket overview`}
+      />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         {stats.map((stat) => {
@@ -109,9 +107,7 @@ export default function DashboardHomePage() {
                   <p className="break-words font-medium text-[#12233D]">
                     {fixture.opponent_a.team_name} vs {fixture.opponent_b.team_name}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatFixtureDate(fixture.time)}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{formatFixtureDate(fixture.time)}</p>
                 </div>
               </div>
             ))}

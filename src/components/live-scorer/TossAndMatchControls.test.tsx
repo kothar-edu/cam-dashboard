@@ -8,7 +8,15 @@ const teamB = { id: 'b1', name: 'Team B', code: 'B', logo: null };
 describe('TossAndMatchControls', () => {
   it('submits a TOSS event once a team and role are chosen', () => {
     const broadcastGameEvent = vi.fn();
-    render(<TossAndMatchControls broadcastGameEvent={broadcastGameEvent} teamA={teamA} teamB={teamB} disabled={false} onOpenSettings={vi.fn()} />);
+    render(
+      <TossAndMatchControls
+        broadcastGameEvent={broadcastGameEvent}
+        teamA={teamA}
+        teamB={teamB}
+        disabled={false}
+        onOpenSettings={vi.fn()}
+      />
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Toss' }));
     fireEvent.change(screen.getByLabelText('Toss winner'), { target: { value: 'a1' } });
@@ -20,7 +28,15 @@ describe('TossAndMatchControls', () => {
 
   it('fires simple one-tap match events', () => {
     const broadcastGameEvent = vi.fn();
-    render(<TossAndMatchControls broadcastGameEvent={broadcastGameEvent} teamA={teamA} teamB={teamB} disabled={false} onOpenSettings={vi.fn()} />);
+    render(
+      <TossAndMatchControls
+        broadcastGameEvent={broadcastGameEvent}
+        teamA={teamA}
+        teamB={teamB}
+        disabled={false}
+        onOpenSettings={vi.fn()}
+      />
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Undo Last Event' }));
     expect(broadcastGameEvent).toHaveBeenCalledWith('UNDO', {});

@@ -1,13 +1,5 @@
 import type { ScoreEvent } from '@/types/liveMatch';
 
-/**
- * Shared ball -> label logic for every place that renders a ball badge
- * (dashboard live-scorer "Over History", broadcast overlay "Over History"
- * strip). Both surfaces render their own markup/styling, but derive the
- * headline code, extras/runs breakdown, and dismissal-mode code from here
- * so they never diverge on what info a badge actually carries.
- */
-
 export type BallKind = 'run' | 'boundary4' | 'boundary6' | 'extra' | 'wicket';
 
 const WICKET_SHORT: Record<string, string> = {
@@ -52,19 +44,12 @@ export function ballKind(event: ScoreEvent): BallKind {
   return 'wicket';
 }
 
-/** Compact dismissal-mode code for a wicket event, e.g. "LBW", "BO", "WD+RO". Null for non-wicket balls. */
 export function wicketCode(event: ScoreEvent): string | null {
   const value = event.value;
   if (typeof value === 'number') return null;
   return COMPOUND_WICKET_SHORT[value] ?? WICKET_SHORT[value] ?? null;
 }
 
-/**
- * The extra-runs breakdown for a wide/no-ball/bye/leg-bye/penalty, e.g.
- * "1+2" for a wide run for 2 - splitting the mandatory penalty run from the
- * additional runs actually run/taken, instead of a raw combined total.
- * Null when there's nothing beyond the base event worth showing.
- */
 export function extrasBreakdown(event: ScoreEvent): string | null {
   const value = event.value;
   if (typeof value === 'number') return null;
@@ -91,7 +76,6 @@ export function extrasBreakdown(event: ScoreEvent): string | null {
   return null;
 }
 
-/** Short badge code for the ball's headline value: "WD", "NB+B", "W", "4", ... */
 export function shortCode(event: ScoreEvent): string {
   const value = event.value;
   if (typeof value === 'number') return String(value);
@@ -105,7 +89,6 @@ export function shortCode(event: ScoreEvent): string {
   return EXTRA_SHORT[value] ?? String(value).slice(0, 2);
 }
 
-/** Full-word badge label for the ball's headline value: "WIDE BALL", "LBW", ... */
 export function wordLabel(event: ScoreEvent): string {
   const value = event.value;
   if (typeof value === 'number') return String(value);

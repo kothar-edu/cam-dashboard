@@ -45,8 +45,12 @@ export async function changePassword(payload: ChangePasswordPayload): Promise<{ 
   return data;
 }
 
-export async function createAdminUser(payload: CreateAdminPayload): Promise<{ id: string; email: string }> {
-  const hasFiles = Boolean(payload.picture || payload.id_card || payload.pay_slip || payload.study_document);
+export async function createAdminUser(
+  payload: CreateAdminPayload
+): Promise<{ id: string; email: string }> {
+  const hasFiles = Boolean(
+    payload.picture || payload.id_card || payload.pay_slip || payload.study_document
+  );
   if (hasFiles) {
     const form = new FormData();
     appendCreateAdminFields(form, payload);

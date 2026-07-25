@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { createPortal } from "react-dom";
-import { Check, ChevronDown, Search } from "lucide-react";
-import { cn } from "../../lib/utils";
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { Check, ChevronDown, Search } from 'lucide-react';
+import { cn } from '../../lib/utils';
 
 const DROPDOWN_Z_INDEX = 200;
 
@@ -12,7 +12,7 @@ export function Select({ value, onValueChange, children, disabled }) {
   const containerRef = useRef(null);
   const triggerRef = useRef(null);
   const contentRef = useRef(null);
-  const [selectedDisplayText, setSelectedDisplayText] = useState("");
+  const [selectedDisplayText, setSelectedDisplayText] = useState('');
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
 
   const updatePosition = useCallback(() => {
@@ -38,17 +38,14 @@ export function Select({ value, onValueChange, children, disabled }) {
       React.Children.forEach(children, (child) => {
         if (child?.type === SelectContent) {
           React.Children.forEach(child.props.children, (contentChild) => {
-            if (
-              contentChild?.type === SelectItem &&
-              contentChild.props.value === value
-            ) {
+            if (contentChild?.type === SelectItem && contentChild.props.value === value) {
               setSelectedDisplayText(contentChild.props.children);
             }
           });
         }
       });
     } else {
-      setSelectedDisplayText("");
+      setSelectedDisplayText('');
     }
   }, [value, children]);
 
@@ -59,31 +56,28 @@ export function Select({ value, onValueChange, children, disabled }) {
 
     const handleClickOutside = (event) => {
       const target = event.target;
-      if (
-        containerRef.current?.contains(target) ||
-        contentRef.current?.contains(target)
-      ) {
+      if (containerRef.current?.contains(target) || contentRef.current?.contains(target)) {
         return;
       }
       setOpen(false);
     };
 
     const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         setOpen(false);
       }
     };
 
-    window.addEventListener("mousedown", handleClickOutside);
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("resize", updatePosition);
-    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
 
     return () => {
-      window.removeEventListener("mousedown", handleClickOutside);
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
     };
   }, [open, updatePosition]);
 
@@ -104,7 +98,7 @@ export function Select({ value, onValueChange, children, disabled }) {
             value,
             selectedDisplayText,
             disabled,
-            "aria-expanded": open,
+            'aria-expanded': open,
           });
         }
         if (child?.type === SelectContent) {
@@ -131,15 +125,7 @@ export function Select({ value, onValueChange, children, disabled }) {
 }
 
 export const SelectTrigger = React.forwardRef(function SelectTrigger(
-  {
-    className,
-    children,
-    onClick,
-    value,
-    selectedDisplayText,
-    disabled,
-    ...props
-  },
+  { className, children, onClick, value, selectedDisplayText, disabled, ...props },
   ref
 ) {
   const handleClick = (e) => {
@@ -151,7 +137,7 @@ export const SelectTrigger = React.forwardRef(function SelectTrigger(
       ref={ref}
       type="button"
       className={cn(
-        "flex h-11 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-base text-[#12233D] ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#E8A93B] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        'flex h-11 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-base text-[#12233D] ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#E8A93B] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
         className
       )}
       onClick={handleClick}
@@ -171,9 +157,7 @@ export const SelectTrigger = React.forwardRef(function SelectTrigger(
 
 export function SelectValue({ placeholder, children, selectedDisplayText }) {
   return (
-    <span className="truncate text-left">
-      {selectedDisplayText || children || placeholder}
-    </span>
+    <span className="truncate text-left">{selectedDisplayText || children || placeholder}</span>
   );
 }
 
@@ -191,17 +175,15 @@ export const SelectContent = React.forwardRef(function SelectContent(
   },
   ref
 ) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const searchInputRef = useRef(null);
   const listRef = useRef(null);
 
-  const items = React.Children.toArray(children).filter(
-    (child) => child?.type === SelectItem
-  );
+  const items = React.Children.toArray(children).filter((child) => child?.type === SelectItem);
 
   const filteredItems = items.filter((child) => {
-    const childText = child.props.children?.toString().toLowerCase() || "";
+    const childText = child.props.children?.toString().toLowerCase() || '';
     return childText.includes(searchQuery.toLowerCase());
   });
 
@@ -218,11 +200,9 @@ export const SelectContent = React.forwardRef(function SelectContent(
   }, [searchable]);
 
   useEffect(() => {
-    const highlighted = listRef.current?.querySelector(
-      '[data-highlighted="true"]'
-    );
-    if (highlighted && typeof highlighted.scrollIntoView === "function") {
-      highlighted.scrollIntoView({ block: "nearest" });
+    const highlighted = listRef.current?.querySelector('[data-highlighted="true"]');
+    if (highlighted && typeof highlighted.scrollIntoView === 'function') {
+      highlighted.scrollIntoView({ block: 'nearest' });
     }
   }, [highlightedIndex]);
 
@@ -240,21 +220,17 @@ export const SelectContent = React.forwardRef(function SelectContent(
   const handleListKeyDown = (e) => {
     if (filteredItems.length === 0) return;
 
-    if (e.key === "ArrowDown") {
+    if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev < filteredItems.length - 1 ? prev + 1 : 0
-      );
-    } else if (e.key === "ArrowUp") {
+      setHighlightedIndex((prev) => (prev < filteredItems.length - 1 ? prev + 1 : 0));
+    } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev > 0 ? prev - 1 : filteredItems.length - 1
-      );
-    } else if (e.key === "Enter") {
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : filteredItems.length - 1));
+    } else if (e.key === 'Enter') {
       e.preventDefault();
       const item = filteredItems[highlightedIndex];
       if (item) selectItem(item);
-    } else if (e.key === "Escape") {
+    } else if (e.key === 'Escape') {
       e.preventDefault();
       onClose();
     }
@@ -265,17 +241,17 @@ export const SelectContent = React.forwardRef(function SelectContent(
       ref={ref}
       role="listbox"
       className={cn(
-        "overflow-hidden rounded-md border border-border bg-white text-[#12233D] shadow-lg animate-in fade-in-80",
+        'overflow-hidden rounded-md border border-border bg-white text-[#12233D] shadow-lg animate-in fade-in-80',
         className
       )}
       style={{
-        position: "fixed",
+        position: 'fixed',
         top: position?.top ?? 0,
         left: position?.left ?? 0,
         width: position?.width ?? undefined,
         minWidth: position?.width ?? undefined,
-        maxWidth: "calc(100vw - 1rem)",
-        maxHeight: "min(20rem, calc(100dvh - 1rem))",
+        maxWidth: 'calc(100vw - 1rem)',
+        maxHeight: 'min(20rem, calc(100dvh - 1rem))',
         zIndex: DROPDOWN_Z_INDEX,
       }}
       onClick={(e) => e.stopPropagation()}
@@ -292,13 +268,13 @@ export const SelectContent = React.forwardRef(function SelectContent(
               value={searchQuery}
               onChange={handleSearchChange}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                if (e.key === 'Enter') {
                   e.preventDefault();
                   const item = filteredItems[highlightedIndex];
                   if (item) selectItem(item);
-                } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
                   handleListKeyDown(e);
-                } else if (e.key === "Escape") {
+                } else if (e.key === 'Escape') {
                   e.preventDefault();
                   onClose();
                 }
@@ -311,11 +287,7 @@ export const SelectContent = React.forwardRef(function SelectContent(
         </div>
       ) : null}
 
-      <div
-        ref={listRef}
-        className="overflow-y-auto p-1"
-        style={{ maxHeight: `${maxHeight}px` }}
-      >
+      <div ref={listRef} className="overflow-y-auto p-1" style={{ maxHeight: `${maxHeight}px` }}>
         {filteredItems.length > 0 ? (
           filteredItems.map((child, index) =>
             React.cloneElement(child, {
@@ -361,12 +333,12 @@ export function SelectItem({
     <div
       role="option"
       aria-selected={selected}
-      data-highlighted={highlighted ? "true" : undefined}
+      data-highlighted={highlighted ? 'true' : undefined}
       className={cn(
-        "relative flex w-full cursor-pointer select-none items-center rounded-sm py-2.5 pl-9 pr-3 text-base text-[#12233D] outline-none hover:bg-[#12233D]/5 focus:bg-[#12233D]/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-        selected && "bg-[#12233D]/10 font-medium",
-        highlighted && !selected && "bg-[#12233D]/5",
-        disabled && "pointer-events-none opacity-50",
+        'relative flex w-full cursor-pointer select-none items-center rounded-sm py-2.5 pl-9 pr-3 text-base text-[#12233D] outline-none hover:bg-[#12233D]/5 focus:bg-[#12233D]/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+        selected && 'bg-[#12233D]/10 font-medium',
+        highlighted && !selected && 'bg-[#12233D]/5',
+        disabled && 'pointer-events-none opacity-50',
         className
       )}
       onClick={handleSelect}

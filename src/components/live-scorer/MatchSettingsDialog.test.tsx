@@ -13,6 +13,11 @@ describe('MatchSettingsDialog', () => {
     fireEvent.click(screen.getByLabelText('DLS'));
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
 
-    expect(onSubmit).toHaveBeenCalledWith({ target: 150, max_overs: 16, bowling_limit: 4, DLS: true });
+    expect(onSubmit).toHaveBeenCalledWith({
+      target: 150,
+      max_overs: 16,
+      bowling_limit: 4,
+      DLS: true,
+    });
   });
 });

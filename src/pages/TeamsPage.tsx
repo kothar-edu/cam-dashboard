@@ -64,7 +64,11 @@ export default function TeamsPage() {
           { id: 'name', header: 'Name', cell: (row) => row.name },
           { id: 'code', header: 'Abbreviation', cell: (row) => row.code },
           { id: 'players', header: 'Players', cell: (row) => row.total_players },
-          { id: 'status', header: 'Status', cell: (row) => (row.is_active ? 'Active' : 'Inactive') },
+          {
+            id: 'status',
+            header: 'Status',
+            cell: (row) => (row.is_active ? 'Active' : 'Inactive'),
+          },
           {
             id: 'actions',
             header: 'Actions',
@@ -78,7 +82,10 @@ export default function TeamsPage() {
                 </Link>
                 <button
                   type="button"
-                  onClick={() => { setTargetRow(row); setConfirmOpen(true); }}
+                  onClick={() => {
+                    setTargetRow(row);
+                    setConfirmOpen(true);
+                  }}
                   className="ml-2 inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-red-600"
                 >
                   {row.is_active ? 'Deactivate' : 'Reactivate'}

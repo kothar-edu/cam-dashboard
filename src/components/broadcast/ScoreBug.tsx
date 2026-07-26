@@ -1,4 +1,10 @@
-import type { CurrentData, LiveOpponent, MatchOutcome, OpponentFinalScore, OpponentSummary } from '@/types/liveMatch';
+import type {
+  CurrentData,
+  LiveOpponent,
+  MatchOutcome,
+  OpponentFinalScore,
+  OpponentSummary,
+} from '@/types/liveMatch';
 
 type ScoreBugProps = {
   current: CurrentData;
@@ -39,7 +45,9 @@ function MatchEndedCard({
 }) {
   return (
     <div className="flex w-[640px] flex-col items-center gap-2 rounded-3xl bg-blue-950 px-8 py-4 text-white shadow-lg">
-      <span className="text-sm font-bold uppercase tracking-widest text-yellow-400">Match Ended</span>
+      <span className="text-sm font-bold uppercase tracking-widest text-yellow-400">
+        Match Ended
+      </span>
       {outcome.score && (
         <div className="flex w-full items-center justify-between gap-4">
           <div className="flex flex-col items-center">
@@ -58,7 +66,14 @@ function MatchEndedCard({
   );
 }
 
-export function ScoreBug({ current, battingTeam, bowlingTeam, teamA, teamB, outcome }: ScoreBugProps) {
+export function ScoreBug({
+  current,
+  battingTeam,
+  bowlingTeam,
+  teamA,
+  teamB,
+  outcome,
+}: ScoreBugProps) {
   if (current.status === 'END_OF_MATCH') {
     if (outcome) {
       return <MatchEndedCard teamA={teamA} teamB={teamB} outcome={outcome} />;

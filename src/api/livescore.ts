@@ -21,7 +21,9 @@ export function buildLiveScoreWsUrl(matchId: string, tenantOverride?: string | n
   return query ? `${base}?${query}` : base;
 }
 
-function mapOpponentFinalScore(raw: Record<string, unknown> | undefined): OpponentFinalScore | null {
+function mapOpponentFinalScore(
+  raw: Record<string, unknown> | undefined
+): OpponentFinalScore | null {
   if (!raw) return null;
   return {
     runsScored: Number(raw.runs_scored ?? 0),

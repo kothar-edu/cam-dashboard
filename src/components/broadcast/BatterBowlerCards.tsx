@@ -41,12 +41,12 @@ type BatterBowlerCardsProps = {
 
 export function BatterBowlerCards({ currentPlayers, sponsors = [] }: BatterBowlerCardsProps) {
   return (
-    <div className="flex w-full items-center px-6">
+    <div className="flex min-w-0 flex-1 items-center gap-4">
       <div className="flex shrink-0 flex-col gap-1">
         <BatterRow player={currentPlayers.striker} active />
         <BatterRow player={currentPlayers.non_striker} />
       </div>
-      <div className="mx-4 min-w-0 flex-1">
+      <div className="mx-2 min-w-0 flex-1">
         <SponsorShowcase sponsors={sponsors} />
       </div>
     </div>

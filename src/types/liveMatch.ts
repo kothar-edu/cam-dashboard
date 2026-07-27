@@ -46,6 +46,15 @@ export type PlayerStats = {
   err: number;
 };
 
+export type CareerStats = {
+  runs_scored: number;
+  fours: number;
+  sixes: number;
+  wickets_taken: number;
+  maidens: number;
+  matches_played: number;
+};
+
 export type LiveMatchPlayer = {
   id: string;
   full_name: string;
@@ -54,6 +63,7 @@ export type LiveMatchPlayer = {
   retired_hurt?: boolean;
   can_return?: boolean;
   stats: PlayerStats;
+  career_stats?: CareerStats | null;
 };
 
 export type CurrentPlayersState = {

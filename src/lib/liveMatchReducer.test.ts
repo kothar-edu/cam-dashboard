@@ -435,4 +435,55 @@ describe('derived broadcast stats', () => {
     });
     expect(state.milestones).toHaveLength(1);
   });
+
+  it('stores player change flash details on UPDATE_PLAYER', () => {
+    const state = createInitialLiveMatchState();
+    const playerIn = {
+      id: 'in-1',
+      full_name: 'Player In',
+      picture: null,
+      reserve: false,
+      stats: {
+        runs_scored: 0,
+        balls_faced: 0,
+        fours: 0,
+        sixes: 0,
+        is_out: false,
+        crr: 0,
+        srr: 0,
+        runs_conceded: 0,
+        overs_bowled: 0,
+        wickets_taken: 0,
+        wickets_lost: 0,
+        maidens: 0,
+        err: 0,
+      },
+      career_stats: {
+        runs_scored: 10,
+        fours: 1,
+        sixes: 0,
+        wickets_taken: 2,
+        maidens: 0,
+        matches_played: 3,
+      },
+    };
+    const playerOut = { ...playerIn, id: 'out-1', full_name: 'Player Out', career_stats: null };
+
+    const next = liveMatchReducer(state, {
+      event_type: 'UPDATE_PLAYER',
+      detail: {
+        playerRole: 'bowler',
+        playerIn,
+        playerOut,
+      },
+    });
+
+    expect(next.currentPlayers.bowler?.id).toBe('in-1');
+    expect(next.playerChange).toEqual({
+      id: 1,
+      playerRole: 'bowler',
+      playerIn,
+      playerOut,
+    });
+  });
 });

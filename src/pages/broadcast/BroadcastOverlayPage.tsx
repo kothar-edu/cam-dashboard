@@ -1,18 +1,20 @@
-import { useParams, useSearchParams } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useLiveMatch } from '@/hooks/useLiveMatch';
-import { useLiveMatchInfo } from '@/hooks/useLiveMatchInfo';
-import { useCanvasScale } from '@/hooks/useCanvasScale';
 import { ScoreBug } from '@/components/broadcast/ScoreBug';
 import { BatterBowlerCards, BowlerRow } from '@/components/broadcast/BatterBowlerCards';
 import { OverHistoryStrip } from '@/components/broadcast/OverHistoryStrip';
 import { CommentaryBar } from '@/components/broadcast/CommentaryBar';
 import { SponsorCorners, SPONSOR_LOGO_CLASS } from '@/components/broadcast/SponsorCorners';
 import { CelebrationFlash, MilestoneFlash } from '@/components/broadcast/CelebrationFlash';
+import { PlayerChangeFlash } from '@/components/broadcast/PlayerChangeFlash';
 import { PartnershipStrip } from '@/components/broadcast/PartnershipStrip';
 import { FallOfWicketsTicker } from '@/components/broadcast/FallOfWicketsTicker';
 import { ExtrasBreakdownChip } from '@/components/broadcast/ExtrasBreakdownChip';
 import { PowerplayBadge } from '@/components/broadcast/PowerplayBadge';
+import { TeamLogoBadge } from '@/components/broadcast/TeamLogoBadge';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useLiveMatch } from '@/hooks/useLiveMatch';
+import { useLiveMatchInfo } from '@/hooks/useLiveMatchInfo';
+import { useCanvasScale } from '@/hooks/useCanvasScale';
 
 const CANVAS_WIDTH = 1920;
 const CANVAS_HEIGHT = 1080;
@@ -61,6 +63,7 @@ export default function BroadcastOverlayPage() {
         style={{ transform: `scale(${scaleX}, ${scaleY})` }}
       >
         <CelebrationFlash lastEvent={state.lastEvent} boundaryLabels={info.boundaryLabels} />
+        <PlayerChangeFlash playerChange={state.playerChange} />
         {latestMilestone && milestonePlayer && (
           <MilestoneFlash milestone={latestMilestone} playerName={milestonePlayer.full_name} />
         )}
@@ -89,22 +92,24 @@ export default function BroadcastOverlayPage() {
         </div>
 
         <div className="absolute bottom-14 flex w-full flex-col items-center gap-2">
-          <div className="flex w-11/12 items-start justify-between gap-6 rounded-2xl bg-sky-200/80 px-6 py-3 shadow-lg">
+          <div className="flex w-11/12 items-center gap-4 rounded-2xl bg-sky-200/80 px-4 py-3 shadow-lg">
+            <TeamLogoBadge team={state.opponents.batting} side="batting" />
             <BatterBowlerCards currentPlayers={state.currentPlayers} sponsors={info.sponsors} />
-            <div className="flex shrink-0 items-start gap-3">
-              <BowlerRow player={state.currentPlayers.bowler} />
-              <div className="flex w-[640px] shrink-0 flex-col items-center gap-1">
-                <ScoreBug
-                  current={state.current}
-                  battingTeam={state.opponents.batting}
-                  bowlingTeam={state.opponents.bowling}
-                  teamA={state.opponents.team_a}
-                  teamB={state.opponents.team_b}
-                  outcome={info.outcome}
-                />
-                <OverHistoryStrip thisOver={state.scoreHistory[state.current.over] ?? []} />
-              </div>
+            <div className="flex w-[640px] shrink-0 flex-col items-center gap-1">
+              <ScoreBug
+                current={state.current}
+                battingTeam={state.opponents.batting}
+                bowlingTeam={state.opponents.bowling}
+                teamA={state.opponents.team_a}
+                teamB={state.opponents.team_b}
+                outcome={info.outcome}
+              />
+              <OverHistoryStrip thisOver={state.scoreHistory[state.current.over] ?? []} />
             </div>
+            <div className="flex min-w-[220px] shrink-0 flex-col justify-center">
+              <BowlerRow player={state.currentPlayers.bowler} />
+            </div>
+            <TeamLogoBadge team={state.opponents.bowling} side="bowling" />
           </div>
         </div>
 

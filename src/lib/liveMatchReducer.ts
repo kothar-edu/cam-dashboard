@@ -2,7 +2,9 @@ import type {
   CurrentData,
   CurrentPlayersState,
   IncomingLiveScoreMessage,
+  LiveMatchPlayer,
   OpponentsState,
+  PlayerRole,
   ScoreEvent,
 } from '@/types/liveMatch';
 
@@ -42,6 +44,14 @@ export type MilestoneEvent = {
   atBall: number;
 };
 
+export type PlayerChangeFlash = {
+  /** Monotonic id so repeated changes re-trigger the overlay flash. */
+  id: number;
+  playerRole: PlayerRole;
+  playerIn: LiveMatchPlayer | null;
+  playerOut: LiveMatchPlayer | null;
+};
+
 export type LiveMatchState = {
   current: CurrentData;
   scoreHistory: ScoreEvent[][];
@@ -54,6 +64,7 @@ export type LiveMatchState = {
   partnership: PartnershipState;
   milestones: MilestoneEvent[];
   firedMilestoneKeys: string[];
+  playerChange: PlayerChangeFlash | null;
 };
 
 const ZERO_CURRENT: CurrentData = {
@@ -91,6 +102,7 @@ export function createInitialLiveMatchState(): LiveMatchState {
     partnership: { runsAtStart: 0, ballsSinceWicket: 0, batterIds: [null, null] },
     milestones: [],
     firedMilestoneKeys: [],
+    playerChange: null,
   };
 }
 
@@ -318,6 +330,12 @@ export function liveMatchReducer(
         currentPlayers: {
           ...state.currentPlayers,
           [message.detail.playerRole]: message.detail.playerIn,
+        },
+        playerChange: {
+          id: (state.playerChange?.id ?? 0) + 1,
+          playerRole: message.detail.playerRole,
+          playerIn: message.detail.playerIn,
+          playerOut: message.detail.playerOut,
         },
       };
 

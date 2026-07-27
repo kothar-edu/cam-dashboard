@@ -54,7 +54,7 @@ export function BatterBowlerCards({ currentPlayers, sponsors = [] }: BatterBowle
         <BatterRow player={currentPlayers.striker} active />
         <BatterRow player={currentPlayers.non_striker} />
       </div>
-      <div className="flex min-w-0 flex-1 items-center justify-end pr-1">
+      <div className="flex min-w-0 flex-1 items-center justify-end overflow-visible pl-4 pr-1">
         <SponsorShowcase sponsors={sponsors} />
       </div>
     </div>

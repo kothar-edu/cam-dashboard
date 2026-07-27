@@ -1,20 +1,20 @@
-import { useEffect, useState } from 'react';
-import { DataTable } from '@/components/data-table/DataTable';
+import { useEffect, useMemo, useState } from 'react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { SearchableSelect } from '@/components/forms/SearchableSelect';
-import { useTenant } from '@/contexts/TenantContext';
 import { PageHeader } from '@/components/forms/PageHeader';
+import { StandingsTable } from '@/components/points/StandingsTable';
+import { PointsStatsPanel } from '@/components/points/PointsStatsPanel';
+import { useTenant } from '@/contexts/TenantContext';
 import { useTournaments } from '@/hooks/useTournaments';
-import { usePointsTable } from '@/hooks/usePointsTable';
-
-function formatNrr(value: number) {
-  const formatted = value >= 0 ? `+${value.toFixed(3)}` : value.toFixed(3);
-  return formatted;
-}
+import { usePointsTable, useTournamentPlayerStats } from '@/hooks/usePointsTable';
+import { filterByGroup, uniqueGroups } from '@/lib/pointsTable';
+import { cn } from '@/lib/utils';
 
 export default function PointsPage() {
   const { activeTenant } = useTenant();
   const [selectedTournamentId, setSelectedTournamentId] = useState<string | null>(null);
+  const [groupFilter, setGroupFilter] = useState<string | 'all'>('all');
+
   const { data: tournamentsData, isLoading: tournamentsLoading } = useTournaments({
     limit: 100,
   });
@@ -24,13 +24,32 @@ export default function PointsPage() {
     isError,
   } = usePointsTable(selectedTournamentId);
 
+  const battersQuery = useTournamentPlayerStats(selectedTournamentId, {
+    limit: 5,
+    ordering: '-total_runs_scored',
+  });
+  const bowlersQuery = useTournamentPlayerStats(selectedTournamentId, {
+    limit: 5,
+    ordering: '-total_wickets_taken',
+  });
+
   const tournaments = tournamentsData?.results ?? [];
+  const allRows = pointsData ?? [];
+  const groups = useMemo(() => uniqueGroups(allRows), [allRows]);
+  const filteredRows = useMemo(
+    () => filterByGroup(allRows, groupFilter),
+    [allRows, groupFilter]
+  );
 
   useEffect(() => {
     if (!selectedTournamentId && tournaments.length > 0) {
       setSelectedTournamentId(tournaments[0].id);
     }
   }, [selectedTournamentId, tournaments]);
+
+  useEffect(() => {
+    setGroupFilter('all');
+  }, [selectedTournamentId]);
 
   if (!activeTenant) {
     return (
@@ -53,11 +72,17 @@ export default function PointsPage() {
     );
   }
 
+  const selectedTournament = tournaments.find((t) => t.id === selectedTournamentId);
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Points Table"
-        description={`${activeTenant.name} · tournament standings`}
+        description={
+          selectedTournament
+            ? `${activeTenant.name} · ${selectedTournament.name}`
+            : `${activeTenant.name} · tournament standings`
+        }
         action={
           tournaments.length > 0 ? (
             <SearchableSelect
@@ -76,29 +101,72 @@ export default function PointsPage() {
       />
 
       {tournaments.length === 0 ? (
-        <div className="rounded-lg border bg-white p-8 text-center text-muted-foreground">
-          No tournaments found. Create a tournament to view standings.
+        <div className="rounded-xl border border-dashed border-slate-200 bg-white px-6 py-14 text-center">
+          <p className="text-sm font-medium text-[#12233D]">No tournaments found</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Create a tournament to view standings and statistics.
+          </p>
         </div>
       ) : isError ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
           Unable to load points table. Check your API connection and tenant access.
         </div>
       ) : (
-        <DataTable
-          columns={[
-            { id: 'team', header: 'Team', cell: (row) => row.team.name },
-            { id: 'played', header: 'Played', cell: (row) => row.matches_played },
-            { id: 'won', header: 'Won', cell: (row) => row.matches_won },
-            { id: 'lost', header: 'Lost', cell: (row) => row.matches_lost },
-            { id: 'tied', header: 'Tied', cell: (row) => row.tied },
-            { id: 'points', header: 'Points', cell: (row) => row.points },
-            { id: 'nrr', header: 'NRR', cell: (row) => formatNrr(row.nrr) },
-          ]}
-          data={pointsData ?? []}
-          loading={pointsLoading}
-          emptyMessage="No standings data for this tournament."
-        />
+        <div className="space-y-6">
+          {groups.length > 0 ? (
+            <div className="filter-chip-row">
+              <GroupChip
+                active={groupFilter === 'all'}
+                onClick={() => setGroupFilter('all')}
+                label="All groups"
+              />
+              {groups.map((group) => (
+                <GroupChip
+                  key={group}
+                  active={groupFilter === group}
+                  onClick={() => setGroupFilter(group)}
+                  label={`Group ${group}`}
+                />
+              ))}
+            </div>
+          ) : null}
+
+          <StandingsTable rows={filteredRows} loading={pointsLoading} />
+
+          {!pointsLoading ? (
+            <PointsStatsPanel
+              rows={filteredRows}
+              topBatters={battersQuery.data?.results ?? []}
+              topBowlers={bowlersQuery.data?.results ?? []}
+            />
+          ) : null}
+        </div>
       )}
     </div>
+  );
+}
+
+function GroupChip({
+  active,
+  onClick,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
+        active
+          ? 'border-[#12233D] bg-[#12233D] text-white'
+          : 'border-slate-200 bg-white text-muted-foreground hover:border-[#12233D]/40 hover:text-[#12233D]'
+      )}
+    >
+      {label}
+    </button>
   );
 }

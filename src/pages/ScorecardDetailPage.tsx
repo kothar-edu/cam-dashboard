@@ -1,5 +1,6 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
@@ -11,6 +12,7 @@ import {
   useUpdateLineupBowling,
   useUpdateLineupFielding,
 } from '@/hooks/useScorecards';
+import { getApiErrorMessage } from '@/lib/api-errors';
 import type { LineupEntry } from '@/api/scorecards';
 import { cn } from '@/lib/utils';
 
@@ -27,55 +29,136 @@ export default function ScorecardDetailPage() {
   const [tab, setTab] = useState<DetailTab>('overview');
   const [lineupsA, setLineupsA] = useState<EditableLineup[]>([]);
   const [lineupsB, setLineupsB] = useState<EditableLineup[]>([]);
+  const [baselineA, setBaselineA] = useState<EditableLineup[]>([]);
+  const [baselineB, setBaselineB] = useState<EditableLineup[]>([]);
+  const [savingAll, setSavingAll] = useState(false);
 
   useEffect(() => {
     if (data) {
-      setLineupsA((data.lineups_a ?? []).map(normalizeLineup));
-      setLineupsB((data.lineups_b ?? []).map(normalizeLineup));
+      const nextA = (data.lineups_a ?? []).map(normalizeLineup);
+      const nextB = (data.lineups_b ?? []).map(normalizeLineup);
+      setLineupsA(nextA);
+      setLineupsB(nextB);
+      setBaselineA(nextA);
+      setBaselineB(nextB);
     }
   }, [data]);
 
-  const saveBatting = () => {
-    const payload = [...lineupsA, ...lineupsB].map((lineup) => ({
-      id: lineup.id,
-      runs_scored: lineup.runs_scored,
-      balls_faced: lineup.balls_faced,
-      fours: lineup.fours,
-      sixes: lineup.sixes,
-      dismissed: lineup.dismissed,
-    }));
-    if (payload.length) battingMutation.mutate(payload);
+  const allLineups = useMemo(() => [...lineupsA, ...lineupsB], [lineupsA, lineupsB]);
+  const allBaseline = useMemo(() => [...baselineA, ...baselineB], [baselineA, baselineB]);
+
+  const battingDirty = useMemo(
+    () => isSectionDirty(allLineups, allBaseline, battingSnapshot),
+    [allBaseline, allLineups]
+  );
+  const bowlingDirty = useMemo(
+    () => isSectionDirty(allLineups, allBaseline, bowlingSnapshot),
+    [allBaseline, allLineups]
+  );
+  const fieldingDirty = useMemo(
+    () => isSectionDirty(allLineups, allBaseline, fieldingSnapshot),
+    [allBaseline, allLineups]
+  );
+  const anyDirty = battingDirty || bowlingDirty || fieldingDirty;
+
+  const battingPayload = () => allLineups.map(toBattingPayload);
+  const bowlingPayload = () => allLineups.map(toBowlingPayload);
+  const fieldingPayload = () => allLineups.map(toFieldingPayload);
+
+  const markSaved = (sections: Array<'batting' | 'bowling' | 'fielding'>) => {
+    const nextBaseline = allLineups.map((lineup) => {
+      const base = allBaseline.find((item) => item.id === lineup.id) ?? lineup;
+      return {
+        ...base,
+        ...(sections.includes('batting') ? battingFields(lineup) : battingFields(base)),
+        ...(sections.includes('bowling') ? bowlingFields(lineup) : bowlingFields(base)),
+        ...(sections.includes('fielding') ? fieldingFields(lineup) : fieldingFields(base)),
+        player: lineup.player,
+        id: lineup.id,
+      };
+    });
+    const idsA = new Set(lineupsA.map((l) => l.id));
+    setBaselineA(nextBaseline.filter((l) => idsA.has(l.id)));
+    setBaselineB(nextBaseline.filter((l) => !idsA.has(l.id)));
   };
 
-  const saveBowling = () => {
-    const payload = [...lineupsA, ...lineupsB].map((lineup) => ({
-      id: lineup.id,
-      balls_thrown: lineup.balls_thrown,
-      runs_conceded: lineup.runs_conceded,
-      wickets_taken: lineup.wickets_taken,
-      maidens: lineup.maidens,
-      hattricks: lineup.hattricks,
-    }));
-    if (payload.length) bowlingMutation.mutate(payload);
+  const saveBatting = async () => {
+    if (!allLineups.length) return;
+    try {
+      await battingMutation.mutateAsync(battingPayload());
+      markSaved(['batting']);
+      toast.success('Batting stats saved.');
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to save batting stats.'));
+    }
   };
 
-  const saveFielding = () => {
-    const payload = [...lineupsA, ...lineupsB].map((lineup) => ({
-      id: lineup.id,
-      catches: lineup.catches,
-      run_outs: lineup.run_outs,
-      direct_hits: lineup.direct_hits,
-      run_out_supports: lineup.run_out_supports,
-      stumps: lineup.stumps,
-    }));
-    if (payload.length) fieldingMutation.mutate(payload);
+  const saveBowling = async () => {
+    if (!allLineups.length) return;
+    try {
+      await bowlingMutation.mutateAsync(bowlingPayload());
+      markSaved(['bowling']);
+      toast.success('Bowling stats saved.');
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to save bowling stats.'));
+    }
+  };
+
+  const saveFielding = async () => {
+    if (!allLineups.length) return;
+    try {
+      await fieldingMutation.mutateAsync(fieldingPayload());
+      markSaved(['fielding']);
+      toast.success('Fielding stats saved.');
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to save fielding stats.'));
+    }
+  };
+
+  const saveAll = async () => {
+    if (!allLineups.length || !anyDirty) return;
+    setSavingAll(true);
+    const saved: Array<'batting' | 'bowling' | 'fielding'> = [];
+    try {
+      const tasks: Array<Promise<unknown>> = [];
+      if (battingDirty) {
+        tasks.push(
+          battingMutation.mutateAsync(battingPayload()).then(() => {
+            saved.push('batting');
+          })
+        );
+      }
+      if (bowlingDirty) {
+        tasks.push(
+          bowlingMutation.mutateAsync(bowlingPayload()).then(() => {
+            saved.push('bowling');
+          })
+        );
+      }
+      if (fieldingDirty) {
+        tasks.push(
+          fieldingMutation.mutateAsync(fieldingPayload()).then(() => {
+            saved.push('fielding');
+          })
+        );
+      }
+      await Promise.all(tasks);
+      markSaved(saved);
+      toast.success('All changed stats saved.');
+    } catch (error) {
+      if (saved.length) markSaved(saved);
+      toast.error(getApiErrorMessage(error, 'Failed to save some lineup stats.'));
+    } finally {
+      setSavingAll(false);
+    }
   };
 
   const pending =
-    battingMutation.isPending || bowlingMutation.isPending || fieldingMutation.isPending;
-  const saveError = battingMutation.isError || bowlingMutation.isError || fieldingMutation.isError;
-  const saveSuccess =
-    battingMutation.isSuccess || bowlingMutation.isSuccess || fieldingMutation.isSuccess;
+    savingAll ||
+    battingMutation.isPending ||
+    bowlingMutation.isPending ||
+    fieldingMutation.isPending;
+  const hasLineups = allLineups.length > 0;
 
   const title =
     data != null
@@ -110,7 +193,8 @@ export default function ScorecardDetailPage() {
             ) : (
               <div className="space-y-6">
                 <p className="text-sm text-muted-foreground">
-                  Adjust batting, bowling, and fielding figures, then save each section.
+                  Adjust batting, bowling, and fielding figures. Use Save all for every change, or
+                  save one section at a time.
                 </p>
                 <LineupEditor
                   title={`${data.opponent_a.team.name} — batting`}
@@ -149,37 +233,60 @@ export default function ScorecardDetailPage() {
                   mode="fielding"
                 />
 
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3 border-t border-slate-100 pt-4">
                   <Button
                     type="button"
-                    onClick={saveBatting}
-                    disabled={pending || (!lineupsA.length && !lineupsB.length)}
+                    onClick={() => void saveAll()}
+                    disabled={pending || !hasLineups || !anyDirty}
                   >
-                    {battingMutation.isPending ? 'Saving batting…' : 'Save batting stats'}
+                    {savingAll ? 'Saving all…' : 'Save all'}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={saveBowling}
-                    disabled={pending || (!lineupsA.length && !lineupsB.length)}
+                    onClick={() => void saveBatting()}
+                    disabled={pending || !hasLineups || !battingDirty}
                   >
-                    {bowlingMutation.isPending ? 'Saving bowling…' : 'Save bowling stats'}
+                    {battingMutation.isPending && !savingAll
+                      ? 'Saving batting…'
+                      : 'Save batting stats'}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={saveFielding}
-                    disabled={pending || (!lineupsA.length && !lineupsB.length)}
+                    onClick={() => void saveBowling()}
+                    disabled={pending || !hasLineups || !bowlingDirty}
                   >
-                    {fieldingMutation.isPending ? 'Saving fielding…' : 'Save fielding stats'}
+                    {bowlingMutation.isPending && !savingAll
+                      ? 'Saving bowling…'
+                      : 'Save bowling stats'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => void saveFielding()}
+                    disabled={pending || !hasLineups || !fieldingDirty}
+                  >
+                    {fieldingMutation.isPending && !savingAll
+                      ? 'Saving fielding…'
+                      : 'Save fielding stats'}
                   </Button>
                 </div>
-                {saveError ? (
-                  <p className="text-sm text-red-600">Failed to save lineup changes.</p>
-                ) : null}
-                {saveSuccess ? (
-                  <p className="text-sm text-green-700">Lineup stats saved.</p>
-                ) : null}
+                {anyDirty ? (
+                  <p className="text-xs text-muted-foreground">
+                    Unsaved changes:{' '}
+                    {[
+                      battingDirty ? 'batting' : null,
+                      bowlingDirty ? 'bowling' : null,
+                      fieldingDirty ? 'fielding' : null,
+                    ]
+                      .filter(Boolean)
+                      .join(', ')}
+                    .
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">All stats match the saved scorecard.</p>
+                )}
               </div>
             )}
           </div>
@@ -416,4 +523,72 @@ function normalizeLineup(lineup: LineupEntry): EditableLineup {
     run_out_supports: lineup.run_out_supports ?? 0,
     stumps: lineup.stumps ?? 0,
   };
+}
+
+function battingFields(lineup: EditableLineup) {
+  return {
+    runs_scored: lineup.runs_scored,
+    balls_faced: lineup.balls_faced,
+    fours: lineup.fours,
+    sixes: lineup.sixes,
+    dismissed: lineup.dismissed,
+  };
+}
+
+function bowlingFields(lineup: EditableLineup) {
+  return {
+    balls_thrown: lineup.balls_thrown,
+    runs_conceded: lineup.runs_conceded,
+    wickets_taken: lineup.wickets_taken,
+    maidens: lineup.maidens,
+    hattricks: lineup.hattricks,
+  };
+}
+
+function fieldingFields(lineup: EditableLineup) {
+  return {
+    catches: lineup.catches,
+    run_outs: lineup.run_outs,
+    direct_hits: lineup.direct_hits,
+    run_out_supports: lineup.run_out_supports,
+    stumps: lineup.stumps,
+  };
+}
+
+function toBattingPayload(lineup: EditableLineup) {
+  return { id: lineup.id, ...battingFields(lineup) };
+}
+
+function toBowlingPayload(lineup: EditableLineup) {
+  return { id: lineup.id, ...bowlingFields(lineup) };
+}
+
+function toFieldingPayload(lineup: EditableLineup) {
+  return { id: lineup.id, ...fieldingFields(lineup) };
+}
+
+function battingSnapshot(lineup: EditableLineup) {
+  return JSON.stringify(battingFields(lineup));
+}
+
+function bowlingSnapshot(lineup: EditableLineup) {
+  return JSON.stringify(bowlingFields(lineup));
+}
+
+function fieldingSnapshot(lineup: EditableLineup) {
+  return JSON.stringify(fieldingFields(lineup));
+}
+
+function isSectionDirty(
+  current: EditableLineup[],
+  baseline: EditableLineup[],
+  snapshot: (lineup: EditableLineup) => string
+) {
+  if (current.length !== baseline.length) return true;
+  const baselineById = new Map(baseline.map((lineup) => [lineup.id, lineup]));
+  return current.some((lineup) => {
+    const base = baselineById.get(lineup.id);
+    if (!base) return true;
+    return snapshot(lineup) !== snapshot(base);
+  });
 }

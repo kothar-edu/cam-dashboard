@@ -14,7 +14,7 @@ vi.mock('@/hooks/usePosts', () => ({
           post_type: 'Event',
           title: 'Season Opener',
           slug: 'season-opener',
-          description: 'Opening day',
+          description: 'Opening day festivities at the ground',
           post_date: '2026-06-01T00:00:00Z',
           post_time: null,
           like_count: 12,
@@ -45,7 +45,7 @@ vi.mock('@/contexts/TenantContext', () => ({
 }));
 
 describe('PostsPage', () => {
-  it('renders post table headers and row data', () => {
+  it('renders post cards with summary and actions', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
@@ -55,12 +55,10 @@ describe('PostsPage', () => {
       </QueryClientProvider>
     );
 
-    expect(screen.getByText('Title')).toBeInTheDocument();
-    expect(screen.getByText('Type')).toBeInTheDocument();
-    expect(screen.getByText('Date')).toBeInTheDocument();
-    expect(screen.getByText('Likes')).toBeInTheDocument();
     expect(screen.getByText('Season Opener')).toBeInTheDocument();
     expect(screen.getByText('Event')).toBeInTheDocument();
-    expect(screen.getByText('12')).toBeInTheDocument();
+    expect(screen.getByText('Opening day festivities at the ground')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Edit/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Delete/i })).toBeInTheDocument();
   });
 });

@@ -41,7 +41,7 @@ vi.mock('@/contexts/TenantContext', () => ({
 }));
 
 describe('SponsorsPage', () => {
-  it('renders sponsor table headers and row data', () => {
+  it('renders sponsor cards with tier and website', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
@@ -51,11 +51,9 @@ describe('SponsorsPage', () => {
       </QueryClientProvider>
     );
 
-    expect(screen.getByText('Name')).toBeInTheDocument();
-    expect(screen.getByText('Tier')).toBeInTheDocument();
-    expect(screen.getByText('Website')).toBeInTheDocument();
     expect(screen.getByText('Acme Corp')).toBeInTheDocument();
-    expect(screen.getByText('Title')).toBeInTheDocument();
-    expect(screen.getByText('https://acme.example')).toBeInTheDocument();
+    expect(screen.getAllByText('Title').length).toBeGreaterThan(0);
+    expect(screen.getByText('acme.example')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Edit/i })).toBeInTheDocument();
   });
 });

@@ -139,10 +139,10 @@ describe('SettingsPage', () => {
   it('shows app settings toggles when selected', () => {
     renderSettings();
     fireEvent.click(screen.getByRole('button', { name: /App settings/i }));
-    expect(screen.getByRole('button', { name: 'Features' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Posts' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Sponsors' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Boundary labels' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Features' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Posts' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Sponsors' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Boundary labels' })).toBeInTheDocument();
     expect(screen.getByText('Registration open')).toBeInTheDocument();
     expect(screen.getByText('Voting open')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save app settings' })).toBeInTheDocument();
@@ -150,7 +150,7 @@ describe('SettingsPage', () => {
 
   it('opens posts tab from app settings query', () => {
     renderSettings('/dashboard/settings?section=app&tab=posts');
-    expect(screen.getByRole('link', { name: 'New Post' })).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /New post/i }).length).toBeGreaterThan(0);
   });
 
   it('shows registration settings when selected', () => {

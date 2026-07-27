@@ -1,14 +1,33 @@
-import { useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { DataTable } from '@/components/data-table/DataTable';
+import {
+  Award,
+  ExternalLink,
+  Pencil,
+  Plus,
+  Trash2,
+} from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
+import {
+  SettingsEmptyState,
+  SettingsSummaryChip,
+} from '@/components/settings/AppSettingsPanel';
 import { useTenant } from '@/contexts/TenantContext';
 import { useDeleteSponsor, useSponsors } from '@/hooks/useSponsors';
 import type { Sponsor } from '@/api/sponsors';
+import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 20;
+
+const TIER_STYLES: Record<string, string> = {
+  Title: 'bg-[#E8A93B]/20 text-[#8a5b00]',
+  Gold: 'bg-amber-100 text-amber-800',
+  Silver: 'bg-slate-200 text-slate-700',
+  Bronze: 'bg-orange-100 text-orange-800',
+  General: 'bg-[#12233D]/8 text-[#12233D]',
+};
 
 type SponsorsPageProps = {
   embedded?: boolean;
@@ -24,6 +43,18 @@ export default function SponsorsPage({ embedded = false }: SponsorsPageProps) {
     offset: pageIndex * PAGE_SIZE,
   });
   const deleteSponsor = useDeleteSponsor();
+
+  const sponsors = data?.results ?? [];
+  const totalCount = data?.count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  const tierCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const sponsor of sponsors) {
+      counts[sponsor.sponsor_type] = (counts[sponsor.sponsor_type] ?? 0) + 1;
+    }
+    return counts;
+  }, [sponsors]);
 
   if (!activeTenant) {
     return (
@@ -52,26 +83,23 @@ export default function SponsorsPage({ embedded = false }: SponsorsPageProps) {
     );
   }
 
-  const sponsors = data?.results ?? [];
   const newSponsorLink = (
     <Link
       to="/dashboard/sponsors/new"
-      className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
+      className="inline-flex items-center justify-center gap-1.5 rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#1a3358]"
     >
-      New Sponsor
+      <Plus className="h-4 w-4" />
+      New sponsor
     </Link>
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {embedded ? (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-[#12233D]">Sponsors</h2>
-            <p className="text-sm text-muted-foreground">
-              {activeTenant.name} · league sponsors
-            </p>
-          </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            League sponsors shown on the home screen and live scoreboard for {activeTenant.name}.
+          </p>
           {newSponsorLink}
         </div>
       ) : (
@@ -82,46 +110,66 @@ export default function SponsorsPage({ embedded = false }: SponsorsPageProps) {
         />
       )}
 
-      <DataTable
-        columns={[
-          { id: 'name', header: 'Name', cell: (row) => row.name },
-          { id: 'tier', header: 'Tier', cell: (row) => row.sponsor_type },
-          {
-            id: 'website',
-            header: 'Website',
-            cell: (row) => row.supported_url ?? '—',
-          },
-          {
-            id: 'actions',
-            header: 'Actions',
-            cell: (row) => (
-              <>
-                <Link
-                  to={`/dashboard/sponsors/${row.id}`}
-                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D]"
+      {sponsors.length === 0 && pageIndex === 0 ? (
+        <SettingsEmptyState
+          title="No sponsors yet"
+          description="Add sponsor logos and tiers to feature partners in the mobile app."
+          action={newSponsorLink}
+        />
+      ) : (
+        <>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <SettingsSummaryChip
+              icon={<Award className="h-3.5 w-3.5" />}
+              label="Sponsors"
+              value={String(totalCount)}
+            />
+            {(['Title', 'Gold', 'Silver'] as const).map((tier) => (
+              <SettingsSummaryChip
+                key={tier}
+                icon={<span className="text-[10px] font-bold">{tier[0]}</span>}
+                label={tier}
+                value={String(tierCounts[tier] ?? 0)}
+              />
+            ))}
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {sponsors.map((sponsor) => (
+              <SponsorCard
+                key={sponsor.id}
+                sponsor={sponsor}
+                onDelete={() => {
+                  setTargetRow(sponsor);
+                  setConfirmOpen(true);
+                }}
+              />
+            ))}
+          </div>
+
+          {totalCount > PAGE_SIZE ? (
+            <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+              <p className="text-xs text-muted-foreground">
+                Page {pageIndex + 1} of {totalPages}
+              </p>
+              <div className="flex gap-2">
+                <PaginationButton
+                  disabled={pageIndex === 0}
+                  onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
                 >
-                  Edit
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTargetRow(row);
-                    setConfirmOpen(true);
-                  }}
-                  className="ml-2 inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-red-600"
+                  Previous
+                </PaginationButton>
+                <PaginationButton
+                  disabled={pageIndex + 1 >= totalPages}
+                  onClick={() => setPageIndex((p) => p + 1)}
                 >
-                  Delete
-                </button>
-              </>
-            ),
-          },
-        ]}
-        data={sponsors}
-        loading={isLoading}
-        emptyMessage="No sponsors found."
-        pagination={data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined}
-        onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
-      />
+                  Next
+                </PaginationButton>
+              </div>
+            </div>
+          ) : null}
+        </>
+      )}
 
       <ConfirmDialog
         open={confirmOpen}
@@ -136,5 +184,91 @@ export default function SponsorsPage({ embedded = false }: SponsorsPageProps) {
         }}
       />
     </div>
+  );
+}
+
+function SponsorCard({ sponsor, onDelete }: { sponsor: Sponsor; onDelete: () => void }) {
+  const tierClass = TIER_STYLES[sponsor.sponsor_type] ?? TIER_STYLES.General;
+  return (
+    <article className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:border-[#E8A93B]/40">
+      <div className="flex h-28 items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4">
+        {sponsor.image ? (
+          <img
+            src={sponsor.image}
+            alt={sponsor.name}
+            className="max-h-20 max-w-full object-contain"
+          />
+        ) : (
+          <Award className="h-10 w-10 text-slate-300" />
+        )}
+      </div>
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <h3 className="text-sm font-semibold leading-snug text-[#12233D]">{sponsor.name}</h3>
+          <span
+            className={cn(
+              'shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+              tierClass
+            )}
+          >
+            {sponsor.sponsor_type}
+          </span>
+        </div>
+        {sponsor.supported_url ? (
+          <a
+            href={sponsor.supported_url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 truncate text-xs text-[#12233D]/70 hover:text-[#12233D]"
+          >
+            <ExternalLink className="h-3 w-3 shrink-0" />
+            <span className="truncate">{sponsor.supported_url.replace(/^https?:\/\//, '')}</span>
+          </a>
+        ) : (
+          <p className="text-xs text-muted-foreground">No website</p>
+        )}
+        <div className="mt-auto flex gap-1.5 border-t border-slate-100 pt-3">
+          <Link
+            to={`/dashboard/sponsors/${sponsor.id}`}
+            className="inline-flex flex-1 items-center justify-center gap-1 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-[#12233D] transition hover:border-[#E8A93B]/50 hover:bg-[#E8A93B]/5"
+          >
+            <Pencil className="h-3 w-3" />
+            Edit
+          </Link>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="inline-flex items-center justify-center gap-1 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-red-600 transition hover:border-red-200 hover:bg-red-50"
+          >
+            <Trash2 className="h-3 w-3" />
+            Delete
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function PaginationButton({
+  children,
+  disabled,
+  onClick,
+}: {
+  children: ReactNode;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={cn(
+        'rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-[#12233D]',
+        disabled ? 'opacity-40' : 'hover:border-[#E8A93B]/50 hover:bg-[#E8A93B]/5'
+      )}
+    >
+      {children}
+    </button>
   );
 }

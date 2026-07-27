@@ -1,6 +1,13 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import {
+  Award,
+  FileText,
+  Settings2,
+  Tag,
+  type LucideIcon,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useTenant } from '@/contexts/TenantContext';
@@ -12,11 +19,11 @@ import { cn } from '@/lib/utils';
 
 export type AppSettingsTab = 'features' | 'posts' | 'sponsors' | 'boundary-labels';
 
-const APP_TABS: Array<{ id: AppSettingsTab; label: string }> = [
-  { id: 'features', label: 'Features' },
-  { id: 'posts', label: 'Posts' },
-  { id: 'sponsors', label: 'Sponsors' },
-  { id: 'boundary-labels', label: 'Boundary labels' },
+const APP_TABS: Array<{ id: AppSettingsTab; label: string; icon: LucideIcon }> = [
+  { id: 'features', label: 'Features', icon: Settings2 },
+  { id: 'posts', label: 'Posts', icon: FileText },
+  { id: 'sponsors', label: 'Sponsors', icon: Award },
+  { id: 'boundary-labels', label: 'Boundary labels', icon: Tag },
 ];
 
 const TAB_ALIASES: Record<string, AppSettingsTab> = {
@@ -47,22 +54,33 @@ export function AppSettingsPanel() {
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
-        {APP_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setTab(tab.id)}
-            className={cn(
-              'rounded-full px-3 py-1.5 text-xs font-semibold transition',
-              activeTab === tab.id
-                ? 'bg-[#12233D] text-white'
-                : 'bg-slate-100 text-muted-foreground hover:bg-slate-200 hover:text-[#12233D]'
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div
+        role="tablist"
+        aria-label="App settings sections"
+        className="flex gap-1 overflow-x-auto rounded-xl bg-slate-100 p-1"
+      >
+        {APP_TABS.map((tab) => {
+          const Icon = tab.icon;
+          const active = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setTab(tab.id)}
+              className={cn(
+                'inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition sm:text-sm',
+                active
+                  ? 'bg-[#12233D] text-white shadow-sm'
+                  : 'text-muted-foreground hover:bg-white/70 hover:text-[#12233D]'
+              )}
+            >
+              <Icon className={cn('h-3.5 w-3.5', active ? 'text-[#E8A93B]' : '')} />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {activeTab === 'features' ? <FeatureTogglesPanel /> : null}
@@ -122,27 +140,87 @@ function FeatureTogglesPanel() {
     );
   }
 
+  const dirty =
+    data != null &&
+    (isRegistrationOpen !== data.is_registration_open || isVotingOpen !== data.is_voting_open);
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        {activeTenant.name} · organization-wide feature toggles for the mobile app
-      </p>
-      <ToggleRow
-        title="Registration open"
-        description="Show registration banner and allow new player sign-ups."
-        checked={isRegistrationOpen}
-        onChange={setIsRegistrationOpen}
-      />
-      <ToggleRow
-        title="Voting open"
-        description="Master switch for the voting banner. Individual polls must also be open to accept ballots."
-        checked={isVotingOpen}
-        onChange={setIsVotingOpen}
-      />
-      <Button type="submit" disabled={updateMutation.isPending}>
-        {updateMutation.isPending ? 'Saving…' : 'Save app settings'}
-      </Button>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <StatusChip
+          label="Registration"
+          open={isRegistrationOpen}
+          openText="Registration open banner shown"
+          closedText="Registration open banner hidden"
+        />
+        <StatusChip
+          label="Voting banner"
+          open={isVotingOpen}
+          openText="Master switch on"
+          closedText="Master switch off"
+        />
+      </div>
+
+      <div className="space-y-3">
+        <ToggleRow
+          title="Registration open"
+          description="Show the registration banner and allow new player sign-ups in the app."
+          checked={isRegistrationOpen}
+          onChange={setIsRegistrationOpen}
+        />
+        <ToggleRow
+          title="Voting open"
+          description="Organization-wide voting banner. Individual polls must also be open to accept ballots."
+          checked={isVotingOpen}
+          onChange={setIsVotingOpen}
+        />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4">
+        <Button type="submit" disabled={updateMutation.isPending || !dirty}>
+          {updateMutation.isPending ? 'Saving…' : 'Save app settings'}
+        </Button>
+        {dirty ? (
+          <p className="text-xs text-muted-foreground">You have unsaved changes.</p>
+        ) : (
+          <p className="text-xs text-muted-foreground">All changes saved.</p>
+        )}
+      </div>
     </form>
+  );
+}
+
+function StatusChip({
+  label,
+  open,
+  openText,
+  closedText,
+}: {
+  label: string;
+  open: boolean;
+  openText: string;
+  closedText: string;
+}) {
+  return (
+    <div
+      className={cn(
+        'rounded-xl border px-4 py-3 shadow-sm',
+        open ? 'border-emerald-200 bg-emerald-50/60' : 'border-slate-200 bg-slate-50'
+      )}
+    >
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-[#12233D]">
+        <span
+          className={cn(
+            'inline-block h-2 w-2 rounded-full',
+            open ? 'bg-emerald-500' : 'bg-slate-400'
+          )}
+        />
+        {open ? openText : closedText}
+      </p>
+    </div>
   );
 }
 
@@ -158,17 +236,31 @@ function ToggleRow({
   onChange: (value: boolean) => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-lg border border-slate-200 p-4 transition hover:border-[#E8A93B]/40">
+    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 transition hover:border-[#E8A93B]/40">
       <div className="min-w-0">
-        <p className="text-sm font-medium text-[#12233D]">{title}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+        <p className="text-sm font-semibold text-[#12233D]">{title}</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{description}</p>
       </div>
-      <input
-        type="checkbox"
-        className="h-4 w-4 shrink-0"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-      />
+      <span
+        className={cn(
+          'relative h-6 w-11 shrink-0 rounded-full transition',
+          checked ? 'bg-[#12233D]' : 'bg-slate-200'
+        )}
+        aria-hidden
+      >
+        <span
+          className={cn(
+            'absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition',
+            checked && 'translate-x-5 bg-[#E8A93B]'
+          )}
+        />
+        <input
+          type="checkbox"
+          className="sr-only"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+        />
+      </span>
     </label>
   );
 }
@@ -196,5 +288,43 @@ export function TenantNeededMessage({ topic }: { topic: string }) {
 export function SettingsCard({ children }: { children: ReactNode }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">{children}</div>
+  );
+}
+
+export function SettingsSummaryChip({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+      <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        <span className="text-[#E8A93B]">{icon}</span>
+        {label}
+      </div>
+      <p className="text-xl font-bold tabular-nums text-[#12233D]">{value}</p>
+    </div>
+  );
+}
+
+export function SettingsEmptyState({
+  title,
+  description,
+  action,
+}: {
+  title: string;
+  description: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-14 text-center">
+      <p className="text-sm font-semibold text-[#12233D]">{title}</p>
+      <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
+      {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
+    </div>
   );
 }

@@ -73,6 +73,32 @@ module.exports = {
           '0%': { opacity: '1' },
           '100%': { opacity: '0' },
         },
+        'celebration-flip': {
+          '0%': {
+            opacity: '0',
+            transform: 'perspective(900px) rotateX(-88deg) translateY(18px) scale(0.92)',
+          },
+          '14%': {
+            opacity: '1',
+            transform: 'perspective(900px) rotateX(10deg) translateY(0) scale(1.03)',
+          },
+          '20%': {
+            opacity: '1',
+            transform: 'perspective(900px) rotateX(-4deg) translateY(0) scale(1)',
+          },
+          '26%, 74%': {
+            opacity: '1',
+            transform: 'perspective(900px) rotateX(0deg) translateY(0) scale(1)',
+          },
+          '84%': {
+            opacity: '1',
+            transform: 'perspective(900px) rotateX(12deg) translateY(0) scale(1)',
+          },
+          '100%': {
+            opacity: '0',
+            transform: 'perspective(900px) rotateX(88deg) translateY(-14px) scale(0.94)',
+          },
+        },
       },
       animation: {
         marquee: 'marquee linear infinite',
@@ -82,6 +108,7 @@ module.exports = {
         'player-in-out': 'player-in-out 420ms cubic-bezier(0.4, 0, 1, 1) both',
         'player-change-backdrop-in': 'player-change-backdrop-in 280ms ease-out both',
         'player-change-backdrop-out': 'player-change-backdrop-out 360ms ease-in both',
+        'celebration-flip': 'celebration-flip 4.8s cubic-bezier(0.22, 1, 0.36, 1) both',
       },
     },
   },

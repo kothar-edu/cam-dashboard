@@ -33,6 +33,11 @@ vi.mock('@/contexts/TenantContext', () => ({
       is_active: true,
     },
     activeTenantId: 'cam_youth_association',
+    tenants: [
+      { id: 1, name: 'CAM Youth', schema_name: 'cam_youth_association', is_active: true },
+    ],
+    loading: false,
+    refreshTenants: vi.fn(),
   }),
 }));
 
@@ -94,6 +99,21 @@ vi.mock('@/hooks/useSponsors', () => ({
   useDeleteSponsor: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
+vi.mock('@/hooks/useTenantAdmin', () => ({
+  useTenantMemberships: () => ({
+    data: { count: 0, results: [] },
+    isLoading: false,
+    isError: false,
+  }),
+  useCreateTenant: () => ({ mutate: vi.fn(), isPending: false }),
+  useAssignTenantAdmin: () => ({ mutate: vi.fn(), isPending: false }),
+  useRevokeTenantAdmin: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
+vi.mock('@/components/forms/UserEmailLookupField', () => ({
+  UserEmailLookupField: () => <div>Email lookup</div>,
+}));
+
 vi.mock('@/hooks/usePaymentSettings', () => ({
   useTenantPaymentSettings: () => ({
     data: {
@@ -132,6 +152,7 @@ describe('SettingsPage', () => {
     const nav = screen.getByRole('navigation', { name: 'Settings sections' });
     expect(nav).toHaveTextContent('App settings');
     expect(nav).toHaveTextContent('Registration settings');
+    expect(nav).toHaveTextContent('Tenants');
     expect(nav).toHaveTextContent('Account');
     expect(nav).toHaveTextContent('Create admin');
     expect(screen.getByRole('tab', { name: 'Features' })).toBeInTheDocument();
@@ -152,6 +173,11 @@ describe('SettingsPage', () => {
   it('opens posts tab from app settings query', () => {
     renderSettings('/dashboard/settings?section=app&tab=posts');
     expect(screen.getAllByRole('link', { name: /New post/i }).length).toBeGreaterThan(0);
+  });
+
+  it('opens tenants section for tenant managers', () => {
+    renderSettings('/dashboard/settings?section=tenants');
+    expect(screen.getByRole('button', { name: /New organization/i })).toBeInTheDocument();
   });
 
   it('shows registration settings when selected', () => {

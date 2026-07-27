@@ -6,6 +6,7 @@ describe('buildSettingsSections', () => {
     expect(buildSettingsSections(true).map((s) => s.id)).toEqual([
       'app',
       'registration',
+      'tenants',
       'account',
       'create-admin',
     ]);

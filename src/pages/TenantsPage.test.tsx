@@ -12,6 +12,12 @@ vi.mock('@/contexts/AuthContext', () => ({
 vi.mock('@/contexts/TenantContext', () => ({
   useTenant: () => ({
     tenants: [{ id: 1, name: 'CAM Youth', schema_name: 'cam_youth_association', is_active: true }],
+    activeTenant: {
+      id: 1,
+      name: 'CAM Youth',
+      schema_name: 'cam_youth_association',
+      is_active: true,
+    },
     loading: false,
   }),
 }));
@@ -40,6 +46,10 @@ vi.mock('@/hooks/useTenantAdmin', () => ({
   useRevokeTenantAdmin: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
+vi.mock('@/components/forms/UserEmailLookupField', () => ({
+  UserEmailLookupField: () => <div>Email lookup</div>,
+}));
+
 describe('TenantsPage', () => {
   it('renders tenant management for superusers', () => {
     const qc = new QueryClient();
@@ -49,7 +59,10 @@ describe('TenantsPage', () => {
       </QueryClientProvider>
     );
 
-    expect(screen.getByText('Tenants')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Create tenant' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Tenants' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /New organization/i })).toBeInTheDocument();
+    expect(screen.getAllByText('CAM Youth').length).toBeGreaterThan(0);
+    expect(screen.getByText('admin@example.com')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Assign tenant admin/i })).toBeInTheDocument();
   });
 });

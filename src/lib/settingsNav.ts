@@ -1,4 +1,9 @@
-export type SettingsSection = 'account' | 'app' | 'registration' | 'create-admin';
+export type SettingsSection =
+  | 'account'
+  | 'app'
+  | 'registration'
+  | 'tenants'
+  | 'create-admin';
 
 export type SettingsSectionDef = {
   id: SettingsSection;
@@ -16,6 +21,12 @@ const ALL_SECTIONS: Array<SettingsSectionDef & { requiresTenantManager?: boolean
     id: 'registration',
     label: 'Registration settings',
     description: 'Bank details & fees',
+  },
+  {
+    id: 'tenants',
+    label: 'Tenants',
+    description: 'Organizations & admins',
+    requiresTenantManager: true,
   },
   {
     id: 'account',
@@ -36,6 +47,8 @@ export const LEGACY_SECTION_ALIASES: Record<string, SettingsSection> = {
   game: 'app',
   'payment-settings': 'registration',
   payment: 'registration',
+  tenants: 'tenants',
+  organizations: 'tenants',
   'create-admin': 'create-admin',
 };
 

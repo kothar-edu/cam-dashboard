@@ -12,7 +12,6 @@ import {
   VoteIcon,
   LogOut,
   BirdIcon as CricketBall,
-  Building2,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
@@ -48,16 +47,8 @@ type ShellSidebarProps = {
 
 export function ShellSidebar({ className, onNavigate }: ShellSidebarProps) {
   const location = useLocation();
-  const { user, logout, canManageTenants } = useAuth();
+  const { user, logout } = useAuth();
   const { activeTenant } = useTenant();
-
-  const navRoutes = canManageTenants
-    ? [
-        ...routes.slice(0, 5),
-        { title: 'Tenants', href: '/dashboard/tenants', icon: Building2 },
-        ...routes.slice(5),
-      ]
-    : routes;
 
   return (
     <aside
@@ -80,7 +71,7 @@ export function ShellSidebar({ className, onNavigate }: ShellSidebarProps) {
 
       <nav className="flex-1 overflow-y-auto overscroll-contain px-2 py-4">
         <ul className="space-y-1">
-          {navRoutes.map((route) => {
+          {routes.map((route) => {
             const Icon = route.icon;
             const active = isActive(location.pathname, route.href);
             return (

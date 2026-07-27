@@ -1,6 +1,13 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { CreditCard, KeyRound, Settings2, UserPlus, type LucideIcon } from 'lucide-react';
+import {
+  Building2,
+  CreditCard,
+  KeyRound,
+  Settings2,
+  UserPlus,
+  type LucideIcon,
+} from 'lucide-react';
 import { PageHeader } from '@/components/forms/PageHeader';
 import {
   ChangePasswordPanel,
@@ -16,11 +23,13 @@ import {
   type SettingsSection,
 } from '@/lib/settingsNav';
 import { cn } from '@/lib/utils';
+import TenantsPage from '@/pages/TenantsPage';
 
 const SECTION_ICONS: Record<SettingsSection, LucideIcon> = {
   account: KeyRound,
   app: Settings2,
   registration: CreditCard,
+  tenants: Building2,
   'create-admin': UserPlus,
 };
 
@@ -106,6 +115,8 @@ function SectionContent({ section }: { section: SettingsSection }) {
       return <AppSettingsPanel />;
     case 'registration':
       return <RegistrationSettingsPanel />;
+    case 'tenants':
+      return <TenantsPage embedded />;
     case 'create-admin':
       return <CreateAdminPanel />;
     case 'account':

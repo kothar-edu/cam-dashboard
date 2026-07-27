@@ -25,7 +25,6 @@ import VerificationPage from '@/pages/VerificationPage';
 import TransfersPage from '@/pages/TransfersPage';
 import UsersPage from '@/pages/UsersPage';
 import UserFormPage from '@/pages/UserFormPage';
-import TenantsPage from '@/pages/TenantsPage';
 import SettingsPage from '@/pages/SettingsPage';
 import VotingListPage from '@/pages/VotingListPage';
 import VotingFormPage from '@/pages/VotingFormPage';
@@ -96,7 +95,10 @@ export default function App() {
           <Route path="transfers" element={<TransfersPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="users/:id" element={<UserFormPage />} />
-          <Route path="tenants" element={<TenantsPage />} />
+          <Route
+            path="tenants"
+            element={<Navigate to="/dashboard/settings?section=tenants" replace />}
+          />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="voting" element={<VotingListPage />} />
           <Route path="voting/new" element={<VotingFormPage />} />

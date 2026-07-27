@@ -6,13 +6,17 @@ function BatterRow({ player, active }: { player: LiveMatchPlayer | null; active?
   if (!player) return null;
   return (
     <div
-      className={`flex h-10 items-center gap-2 text-xl ${active ? 'text-blue-800' : 'text-slate-700'}`}
+      className={`flex min-h-11 items-center gap-2.5 ${active ? 'text-blue-900' : 'text-slate-700'}`}
     >
       {active && <BatIcon className="h-5 w-5 shrink-0 text-blue-800" />}
-      <span className="uppercase">{player.full_name}</span>
-      <span className="ml-auto flex items-end gap-1 text-3xl">
+      <span className="max-w-[280px] truncate text-2xl font-semibold uppercase tracking-wide leading-tight">
+        {player.full_name}
+      </span>
+      <span className="ml-auto flex shrink-0 items-end gap-1.5 text-3xl font-bold tabular-nums leading-none">
         <span>{player.stats.runs_scored}</span>
-        <span className="text-xl font-semibold">{player.stats.balls_faced}</span>
+        <span className="pb-0.5 text-xl font-semibold text-slate-600">
+          {player.stats.balls_faced}
+        </span>
       </span>
     </div>
   );
@@ -21,14 +25,18 @@ function BatterRow({ player, active }: { player: LiveMatchPlayer | null; active?
 export function BowlerRow({ player }: { player: LiveMatchPlayer | null }) {
   if (!player) return null;
   return (
-    <div className="flex h-10 items-center gap-2 text-xl text-slate-700">
+    <div className="flex min-h-11 items-center gap-2.5 text-slate-800">
       <BallIcon className="h-5 w-5 shrink-0" />
-      <span className="uppercase">{player.full_name}</span>
-      <span className="ml-auto flex items-end gap-1 text-3xl">
+      <span className="max-w-[220px] truncate text-2xl font-semibold uppercase tracking-wide leading-tight">
+        {player.full_name}
+      </span>
+      <span className="ml-auto flex shrink-0 items-end gap-1.5 text-3xl font-bold tabular-nums leading-none">
         <span>
           {player.stats.wickets_taken}-{player.stats.runs_conceded}
         </span>
-        <span className="text-lg font-semibold">{player.stats.overs_bowled}</span>
+        <span className="pb-0.5 text-lg font-semibold text-slate-600">
+          {player.stats.overs_bowled}
+        </span>
       </span>
     </div>
   );

@@ -32,10 +32,10 @@ export function SponsorShowcase({ sponsors }: SponsorShowcaseProps) {
   if (!sponsor) return null;
 
   return (
-    <div className="flex h-full w-full items-center justify-center overflow-hidden px-2">
+    <div className="flex h-full max-w-full items-center justify-end overflow-hidden">
       <div
         key={sponsor.id}
-        className="flex max-w-full flex-col items-center gap-1.5 animate-in fade-in zoom-in-90 duration-500"
+        className="flex max-w-full flex-col items-center gap-1 animate-in fade-in zoom-in-90 duration-500"
       >
         <span
           className={cn(
@@ -49,11 +49,11 @@ export function SponsorShowcase({ sponsors }: SponsorShowcaseProps) {
           <img
             src={sponsor.imageUrl}
             alt={sponsor.name}
-            className="h-16 max-h-16 max-w-[280px] object-contain"
+            className="h-[5.5rem] max-h-[5.5rem] max-w-[340px] object-contain"
           />
         ) : (
           <p
-            className="max-w-[280px] truncate text-center text-xl font-extrabold leading-tight text-[#12233D]"
+            className="max-w-[340px] truncate text-center text-2xl font-extrabold leading-tight text-[#12233D]"
             title={sponsor.name}
           >
             {sponsor.name}

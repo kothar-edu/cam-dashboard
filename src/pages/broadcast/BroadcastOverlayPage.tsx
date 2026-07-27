@@ -92,10 +92,10 @@ export default function BroadcastOverlayPage() {
         </div>
 
         <div className="absolute bottom-14 flex w-full flex-col items-center gap-2">
-          <div className="flex w-11/12 items-center gap-4 rounded-2xl bg-sky-200/80 px-4 py-3 shadow-lg">
+          <div className="flex w-11/12 items-center gap-3 rounded-2xl bg-sky-200/80 px-4 py-3 shadow-lg">
             <TeamLogoBadge team={state.opponents.batting} side="batting" />
             <BatterBowlerCards currentPlayers={state.currentPlayers} sponsors={info.sponsors} />
-            <div className="flex w-[640px] shrink-0 flex-col items-center gap-1">
+            <div className="flex w-[640px] shrink-0 flex-col items-center gap-1 pl-1">
               <ScoreBug
                 current={state.current}
                 battingTeam={state.opponents.batting}

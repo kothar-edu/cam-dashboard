@@ -2,52 +2,17 @@ type IconProps = {
   className?: string;
 };
 
-export function BatIcon({ className = 'h-5 w-5' }: IconProps) {
+/** Classic diagonal cricket bat (+ ball) from the legacy OBS overlay. */
+export function BatIcon({ className = 'h-7 w-7' }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <g transform="rotate(32 12 12)">
-        {/* Handle */}
-        <rect x="11.35" y="1.2" width="1.3" height="5.8" rx="0.65" fill="currentColor" />
-
-        {/* Grip cap */}
-        <rect x="11.15" y="0.8" width="1.7" height="1" rx="0.5" fill="currentColor" />
-
-        {/* Grip rings */}
-        <path
-          d="M11.35 2.2H12.65M11.35 3.2H12.65M11.35 4.2H12.65M11.35 5.2H12.65M11.35 6.2H12.65"
-          stroke="white"
-          strokeOpacity="0.45"
-          strokeWidth="0.35"
-          strokeLinecap="round"
-        />
-
-        {/* Shoulder / splice */}
-        <path d="M10.9 7c0 .5-.5.9-1.4 1.4H14.5C13.6 7.9 13.1 7.5 13.1 7Z" fill="currentColor" />
-
-        {/* Blade */}
-        <path
-          d="M9.5 8.4
-             H14.5
-             V19.8
-             Q14.5 21.6 12.7 21.7
-             H11.3
-             Q9.5 21.6 9.5 19.8
-             Z"
-          fill="currentColor"
-        />
-
-        {/* Edge highlight */}
-        <path
-          d="M10.1 9.2 9.9 21"
-          stroke="white"
-          strokeOpacity="0.2"
-          strokeWidth="0.45"
-          strokeLinecap="round"
-        />
-
-        {/* Center spine */}
-        <path d="M12 8.3V21.5" stroke="white" strokeOpacity="0.12" strokeWidth="0.4" />
-      </g>
+    <svg
+      className={className}
+      fill="currentColor"
+      viewBox="0 0 421.47 421.47"
+      aria-hidden="true"
+    >
+      <path d="M415.276,61.627L359.829,6.18C355.841,2.195,350.532,0,344.881,0s-10.96,2.194-14.949,6.181L86.029,250.083c-8.234,8.243-8.233,21.655,0.003,29.899l10.887,10.882l-93.08,93.08c-0.93,0.84-3.664,3.645-3.831,7.678c-0.076,1.867,0.385,4.646,3.021,7.281l19.448,19.443c2.581,2.582,5.261,3.124,7.055,3.123c4.228,0,7.114-2.85,8.02-3.881l93.044-93.048l10.886,10.885c3.986,3.99,9.294,6.188,14.947,6.188c5.651,0,10.961-2.197,14.948-6.186l243.9-243.9c3.994-3.994,6.194-9.302,6.194-14.948C421.47,70.94,419.272,65.631,415.276,61.627z" />
+      <path d="M344.752,247.03c-24.937,0-45.224,20.287-45.224,45.224c0,24.936,20.287,45.223,45.224,45.223s45.224-20.287,45.224-45.223C389.975,267.317,369.688,247.03,344.752,247.03z" />
     </svg>
   );
 }

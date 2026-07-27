@@ -8,7 +8,7 @@ function BatterRow({ player, active }: { player: LiveMatchPlayer | null; active?
     <div
       className={`flex min-h-11 items-center gap-2.5 ${active ? 'text-blue-900' : 'text-slate-700'}`}
     >
-      {active && <BatIcon className="h-5 w-5 shrink-0 text-blue-800" />}
+      {active && <BatIcon className="h-7 w-7 shrink-0 text-blue-800" />}
       <span className="max-w-[280px] truncate text-2xl font-semibold uppercase tracking-wide leading-tight">
         {player.full_name}
       </span>
@@ -49,12 +49,12 @@ type BatterBowlerCardsProps = {
 
 export function BatterBowlerCards({ currentPlayers, sponsors = [] }: BatterBowlerCardsProps) {
   return (
-    <div className="flex min-w-0 flex-1 items-center gap-4">
-      <div className="flex shrink-0 flex-col gap-1">
+    <div className="flex min-w-0 flex-1 items-center">
+      <div className="flex shrink-0 flex-col gap-1 pr-6">
         <BatterRow player={currentPlayers.striker} active />
         <BatterRow player={currentPlayers.non_striker} />
       </div>
-      <div className="mx-2 min-w-0 flex-1">
+      <div className="flex min-w-0 flex-1 items-center justify-end pr-1">
         <SponsorShowcase sponsors={sponsors} />
       </div>
     </div>

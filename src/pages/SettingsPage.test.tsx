@@ -125,15 +125,16 @@ function renderSettings(initialEntry = '/dashboard/settings') {
 }
 
 describe('SettingsPage', () => {
-  it('renders unified settings navigation with account by default', () => {
+  it('renders unified settings navigation with app settings by default', () => {
     renderSettings();
 
     expect(screen.getByText('Settings')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Account/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /App settings/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Registration settings/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Account/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Create admin/i })).toBeInTheDocument();
-    expect(screen.getByText('Current password')).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Features' })).toBeInTheDocument();
+    expect(screen.getByText('Registration open')).toBeInTheDocument();
   });
 
   it('shows app settings toggles when selected', () => {

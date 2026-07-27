@@ -8,11 +8,6 @@ export type SettingsSectionDef = {
 
 const ALL_SECTIONS: Array<SettingsSectionDef & { requiresTenantManager?: boolean }> = [
   {
-    id: 'account',
-    label: 'Account',
-    description: 'Password & login',
-  },
-  {
     id: 'app',
     label: 'App settings',
     description: 'Features, posts, sponsors & labels',
@@ -21,6 +16,11 @@ const ALL_SECTIONS: Array<SettingsSectionDef & { requiresTenantManager?: boolean
     id: 'registration',
     label: 'Registration settings',
     description: 'Bank details & fees',
+  },
+  {
+    id: 'account',
+    label: 'Account',
+    description: 'Password & login',
   },
   {
     id: 'create-admin',
@@ -49,10 +49,11 @@ export function resolveSettingsSection(
   requested: string | null,
   sections: SettingsSectionDef[]
 ): SettingsSection {
-  const raw = requested ?? 'account';
+  const fallback = sections[0]?.id ?? 'app';
+  const raw = requested ?? fallback;
   const normalized = LEGACY_SECTION_ALIASES[raw] ?? raw;
   if (sections.some((section) => section.id === normalized)) {
     return normalized as SettingsSection;
   }
-  return sections[0]?.id ?? 'account';
+  return fallback;
 }

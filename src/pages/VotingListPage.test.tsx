@@ -25,7 +25,10 @@ vi.mock('@/hooks/useVoting', () => ({
           id: 'a7096220-0000-4000-8000-000000000001',
           is_voting_open: true,
           tournament: { id: 't1', name: 'Premier League', logo: null, start: '', total_teams: 4 },
-          player: [{ id: 'p1', full_name: 'Player One' }],
+          player: [
+            { id: 'p1', full_name: 'Player One', team_name: 'Team A' },
+            { id: 'p2', full_name: 'Player Two', team_name: 'Team B' },
+          ],
         },
       ],
     },
@@ -38,7 +41,10 @@ vi.mock('@/hooks/useVoting', () => ({
       results: [
         {
           tournament: { id: 't1', name: 'Premier League', logo: null, start: '', total_teams: 4 },
-          player: [{ id: 'p1', full_name: 'Player One', total_votes: 12 }],
+          player: [
+            { id: 'p1', full_name: 'Player One', total_votes: 12, team_name: 'Team A' },
+            { id: 'p2', full_name: 'Player Two', total_votes: 5, team_name: 'Team B' },
+          ],
         },
       ],
     },
@@ -52,7 +58,7 @@ vi.mock('@/hooks/useVoting', () => ({
 }));
 
 describe('VotingListPage', () => {
-  it('renders voting nominations table', () => {
+  it('renders poll cards with graphical standings for all nominees', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
@@ -64,9 +70,15 @@ describe('VotingListPage', () => {
 
     expect(screen.getByText('Voting polls')).toBeInTheDocument();
     expect(screen.getByText('Premier League')).toBeInTheDocument();
-    expect(screen.getByText('Player One (12)')).toBeInTheDocument();
     expect(screen.getByText('Create nomination')).toBeInTheDocument();
-    expect(screen.getByText('Open')).toBeInTheDocument();
+    expect(screen.getByText('Voting open')).toBeInTheDocument();
+    expect(screen.getByText('Vote standings')).toBeInTheDocument();
+    expect(screen.getAllByText('Player One').length).toBeGreaterThan(0);
+    expect(screen.getByText('Player Two')).toBeInTheDocument();
+    expect(screen.getAllByText('12').length).toBeGreaterThan(0);
+    expect(screen.getByText('5')).toBeInTheDocument();
+    expect(screen.getByText(/17 total votes/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Close voting' })).toBeInTheDocument();
+    expect(screen.getByText('Votes cast')).toBeInTheDocument();
   });
 });

@@ -49,9 +49,39 @@ module.exports = {
           '0%': { transform: 'translateX(0)' },
           '100%': { transform: 'translateX(-50%)' },
         },
+        'player-out-in': {
+          '0%': { opacity: '0', transform: 'translateX(-72px) scale(0.96)' },
+          '100%': { opacity: '1', transform: 'translateX(0) scale(1)' },
+        },
+        'player-out-out': {
+          '0%': { opacity: '1', transform: 'translateX(0) scale(1)' },
+          '100%': { opacity: '0', transform: 'translateX(-56px) scale(0.96)' },
+        },
+        'player-in-in': {
+          '0%': { opacity: '0', transform: 'translateX(72px) scale(0.96)' },
+          '100%': { opacity: '1', transform: 'translateX(0) scale(1)' },
+        },
+        'player-in-out': {
+          '0%': { opacity: '1', transform: 'translateX(0) scale(1)' },
+          '100%': { opacity: '0', transform: 'translateX(56px) scale(0.96)' },
+        },
+        'player-change-backdrop-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        'player-change-backdrop-out': {
+          '0%': { opacity: '1' },
+          '100%': { opacity: '0' },
+        },
       },
       animation: {
         marquee: 'marquee linear infinite',
+        'player-out-in': 'player-out-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both',
+        'player-out-out': 'player-out-out 420ms cubic-bezier(0.4, 0, 1, 1) both',
+        'player-in-in': 'player-in-in 520ms cubic-bezier(0.22, 1, 0.36, 1) 140ms both',
+        'player-in-out': 'player-in-out 420ms cubic-bezier(0.4, 0, 1, 1) both',
+        'player-change-backdrop-in': 'player-change-backdrop-in 280ms ease-out both',
+        'player-change-backdrop-out': 'player-change-backdrop-out 360ms ease-in both',
       },
     },
   },

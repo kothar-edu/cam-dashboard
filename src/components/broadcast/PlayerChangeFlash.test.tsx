@@ -76,7 +76,7 @@ describe('PlayerChangeFlash', () => {
     expect(screen.getByText('Career')).toBeInTheDocument();
   });
 
-  it('hides after the flash duration', () => {
+  it('hides after the hold and exit animation', () => {
     render(
       <PlayerChangeFlash
         playerChange={{
@@ -89,8 +89,15 @@ describe('PlayerChangeFlash', () => {
     );
 
     expect(screen.getByTestId('player-change-flash')).toBeInTheDocument();
+    expect(screen.getByTestId('player-change-flash')).toHaveAttribute('data-phase', 'entering');
+
     act(() => {
-      vi.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(4600);
+    });
+    expect(screen.getByTestId('player-change-flash')).toHaveAttribute('data-phase', 'exiting');
+
+    act(() => {
+      vi.advanceTimersByTime(420);
     });
     expect(screen.queryByTestId('player-change-flash')).toBeNull();
   });

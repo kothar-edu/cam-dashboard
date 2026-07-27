@@ -3,46 +3,70 @@ import type { CareerStats, LiveMatchPlayer, PlayerRole } from '@/types/liveMatch
 import type { PlayerChangeFlash as PlayerChangeFlashState } from '@/lib/liveMatchReducer';
 import { cn } from '@/lib/utils';
 
-const FLASH_DURATION_MS = 5000;
+/** Time cards stay fully visible before exit begins. */
+const HOLD_MS = 4600;
+/** Must match `player-*-out` animation duration in tailwind.config.js. */
+const EXIT_MS = 420;
+
+type Phase = 'hidden' | 'entering' | 'exiting';
 
 type PlayerChangeFlashProps = {
   playerChange: PlayerChangeFlashState | null;
 };
 
 export function PlayerChangeFlash({ playerChange }: PlayerChangeFlashProps) {
-  const [visible, setVisible] = useState(false);
+  const [phase, setPhase] = useState<Phase>('hidden');
+  const [activeChange, setActiveChange] = useState<PlayerChangeFlashState | null>(null);
 
   useEffect(() => {
     if (!playerChange || (!playerChange.playerIn && !playerChange.playerOut)) {
-      setVisible(false);
       return;
     }
-    setVisible(true);
-    const timer = setTimeout(() => setVisible(false), FLASH_DURATION_MS);
-    return () => clearTimeout(timer);
+
+    setActiveChange(playerChange);
+    setPhase('entering');
+
+    const exitTimer = setTimeout(() => setPhase('exiting'), HOLD_MS);
+    const hideTimer = setTimeout(() => {
+      setPhase('hidden');
+      setActiveChange(null);
+    }, HOLD_MS + EXIT_MS);
+
+    return () => {
+      clearTimeout(exitTimer);
+      clearTimeout(hideTimer);
+    };
   }, [playerChange]);
 
-  if (!visible || !playerChange) return null;
+  if (phase === 'hidden' || !activeChange) return null;
+
+  const isExiting = phase === 'exiting';
 
   return (
     <div
       data-testid="player-change-flash"
-      className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-black/35 px-16"
+      data-phase={phase}
+      className={cn(
+        'pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-black/40 px-16',
+        isExiting ? 'animate-player-change-backdrop-out' : 'animate-player-change-backdrop-in'
+      )}
     >
       <div className="flex max-w-[1600px] items-stretch gap-10">
-        {playerChange.playerOut ? (
+        {activeChange.playerOut ? (
           <PlayerStatsCard
             action="out"
-            player={playerChange.playerOut}
-            role={playerChange.playerRole}
+            player={activeChange.playerOut}
+            role={activeChange.playerRole}
+            motionClass={isExiting ? 'animate-player-out-out' : 'animate-player-out-in'}
           />
         ) : null}
-        {playerChange.playerIn ? (
+        {activeChange.playerIn ? (
           <PlayerStatsCard
             action="in"
-            player={playerChange.playerIn}
-            role={playerChange.playerRole}
+            player={activeChange.playerIn}
+            role={activeChange.playerRole}
             showCareer
+            motionClass={isExiting ? 'animate-player-in-out' : 'animate-player-in-in'}
           />
         ) : null}
       </div>
@@ -55,11 +79,13 @@ function PlayerStatsCard({
   player,
   role,
   showCareer = false,
+  motionClass,
 }: {
   action: 'in' | 'out';
   player: LiveMatchPlayer;
   role: PlayerRole;
   showCareer?: boolean;
+  motionClass: string;
 }) {
   const isBatter = role === 'striker' || role === 'non_striker';
   const career = showCareer ? player.career_stats : null;
@@ -68,8 +94,9 @@ function PlayerStatsCard({
   return (
     <article
       className={cn(
-        'w-[420px] overflow-hidden rounded-2xl border border-white/15 bg-slate-950/90 text-white shadow-2xl backdrop-blur-sm',
-        action === 'in' ? 'ring-2 ring-emerald-400/50' : 'ring-2 ring-red-400/40'
+        'w-[420px] overflow-hidden rounded-2xl border border-white/15 bg-slate-950/90 text-white shadow-2xl backdrop-blur-sm will-change-transform',
+        action === 'in' ? 'ring-2 ring-emerald-400/50' : 'ring-2 ring-red-400/40',
+        motionClass
       )}
     >
       <header

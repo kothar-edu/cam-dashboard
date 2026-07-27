@@ -61,7 +61,7 @@ export function CelebrationFlash({ lastEvent, boundaryLabels }: CelebrationFlash
       <span
         key={playId}
         className={cn(
-          'animate-celebration-flip origin-center text-8xl font-extrabold uppercase tracking-[0.08em]',
+          'animate-celebration-flip origin-center text-9xl font-extrabold uppercase tracking-[0.08em]',
           'drop-shadow-[0_4px_18px_rgba(0,0,0,0.85)] [transform-style:preserve-3d] [backface-visibility:hidden]',
           textTone(lastEvent.kind)
         )}
@@ -86,10 +86,10 @@ type MilestoneFlashProps = {
 export function MilestoneFlash({ milestone, playerName }: MilestoneFlashProps) {
   return (
     <div className="pointer-events-none absolute inset-x-0 top-1/3 flex flex-col items-center justify-center gap-2 text-yellow-400">
-      <span className="animate-celebration-flip text-6xl font-extrabold drop-shadow-[0_4px_18px_rgba(0,0,0,0.85)]">
+      <span className="animate-celebration-flip text-7xl font-extrabold drop-shadow-[0_4px_18px_rgba(0,0,0,0.85)]">
         {MILESTONE_LABEL[milestone.kind]}
       </span>
-      <span className="text-3xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+      <span className="text-4xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
         {playerName}
       </span>
     </div>

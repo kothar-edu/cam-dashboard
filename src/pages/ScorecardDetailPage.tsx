@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
+import { ScorecardOverview } from '@/components/scorecards/ScorecardOverview';
 import {
   useScorecard,
   useUpdateLineupBatting,
@@ -11,8 +12,10 @@ import {
   useUpdateLineupFielding,
 } from '@/hooks/useScorecards';
 import type { LineupEntry } from '@/api/scorecards';
+import { cn } from '@/lib/utils';
 
 type EditableLineup = LineupEntry;
+type DetailTab = 'overview' | 'edit';
 
 export default function ScorecardDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +24,7 @@ export default function ScorecardDetailPage() {
   const bowlingMutation = useUpdateLineupBowling(id);
   const fieldingMutation = useUpdateLineupFielding(id);
 
+  const [tab, setTab] = useState<DetailTab>('overview');
   const [lineupsA, setLineupsA] = useState<EditableLineup[]>([]);
   const [lineupsB, setLineupsB] = useState<EditableLineup[]>([]);
 
@@ -73,99 +77,140 @@ export default function ScorecardDetailPage() {
   const saveSuccess =
     battingMutation.isSuccess || bowlingMutation.isSuccess || fieldingMutation.isSuccess;
 
+  const title =
+    data != null
+      ? `${data.opponent_a.team.name} vs ${data.opponent_b.team.name}`
+      : 'Scorecard';
+
   return (
     <TenantRequired>
       <div className="space-y-6">
-        <PageHeader title="Scorecard editor" backTo="/dashboard/scorecards" />
+        <PageHeader title={title} backTo="/dashboard/scorecards" backLabel="All scorecards" />
         {isLoading && !data ? (
-          <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
+          <div className="flex min-h-[30vh] items-center justify-center">
+            <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
+          </div>
         ) : isError || !data ? (
           <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
             Unable to load scorecard.
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="rounded-lg border bg-white p-6">
-              <h2 className="text-lg font-semibold text-[#12233D]">
-                {data.opponent_a.team.name} vs {data.opponent_b.team.name}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {data.tournament?.name ?? 'Custom match'} · {data.status} ·{' '}
-                {data.ground ?? 'Venue TBC'}
-              </p>
-              {data.result ? <p className="mt-2 text-sm">{data.result}</p> : null}
+            <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1">
+              <TabButton active={tab === 'overview'} onClick={() => setTab('overview')}>
+                Scorecard
+              </TabButton>
+              <TabButton active={tab === 'edit'} onClick={() => setTab('edit')}>
+                Edit stats
+              </TabButton>
             </div>
 
-            <LineupEditor
-              title={`${data.opponent_a.team.name} — batting`}
-              lineups={lineupsA}
-              onChange={setLineupsA}
-              mode="batting"
-            />
-            <LineupEditor
-              title={`${data.opponent_b.team.name} — batting`}
-              lineups={lineupsB}
-              onChange={setLineupsB}
-              mode="batting"
-            />
-            <LineupEditor
-              title={`${data.opponent_a.team.name} — bowling`}
-              lineups={lineupsA}
-              onChange={setLineupsA}
-              mode="bowling"
-            />
-            <LineupEditor
-              title={`${data.opponent_b.team.name} — bowling`}
-              lineups={lineupsB}
-              onChange={setLineupsB}
-              mode="bowling"
-            />
-            <LineupEditor
-              title={`${data.opponent_a.team.name} — fielding`}
-              lineups={lineupsA}
-              onChange={setLineupsA}
-              mode="fielding"
-            />
-            <LineupEditor
-              title={`${data.opponent_b.team.name} — fielding`}
-              lineups={lineupsB}
-              onChange={setLineupsB}
-              mode="fielding"
-            />
+            {tab === 'overview' ? (
+              <ScorecardOverview data={data} />
+            ) : (
+              <div className="space-y-6">
+                <p className="text-sm text-muted-foreground">
+                  Adjust batting, bowling, and fielding figures, then save each section.
+                </p>
+                <LineupEditor
+                  title={`${data.opponent_a.team.name} — batting`}
+                  lineups={lineupsA}
+                  onChange={setLineupsA}
+                  mode="batting"
+                />
+                <LineupEditor
+                  title={`${data.opponent_b.team.name} — batting`}
+                  lineups={lineupsB}
+                  onChange={setLineupsB}
+                  mode="batting"
+                />
+                <LineupEditor
+                  title={`${data.opponent_a.team.name} — bowling`}
+                  lineups={lineupsA}
+                  onChange={setLineupsA}
+                  mode="bowling"
+                />
+                <LineupEditor
+                  title={`${data.opponent_b.team.name} — bowling`}
+                  lineups={lineupsB}
+                  onChange={setLineupsB}
+                  mode="bowling"
+                />
+                <LineupEditor
+                  title={`${data.opponent_a.team.name} — fielding`}
+                  lineups={lineupsA}
+                  onChange={setLineupsA}
+                  mode="fielding"
+                />
+                <LineupEditor
+                  title={`${data.opponent_b.team.name} — fielding`}
+                  lineups={lineupsB}
+                  onChange={setLineupsB}
+                  mode="fielding"
+                />
 
-            <div className="flex flex-wrap gap-3">
-              <Button
-                type="button"
-                onClick={saveBatting}
-                disabled={pending || (!lineupsA.length && !lineupsB.length)}
-              >
-                {battingMutation.isPending ? 'Saving batting…' : 'Save batting stats'}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={saveBowling}
-                disabled={pending || (!lineupsA.length && !lineupsB.length)}
-              >
-                {bowlingMutation.isPending ? 'Saving bowling…' : 'Save bowling stats'}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={saveFielding}
-                disabled={pending || (!lineupsA.length && !lineupsB.length)}
-              >
-                {fieldingMutation.isPending ? 'Saving fielding…' : 'Save fielding stats'}
-              </Button>
-            </div>
-            {saveError ? (
-              <p className="text-sm text-red-600">Failed to save lineup changes.</p>
-            ) : null}
-            {saveSuccess ? <p className="text-sm text-green-700">Lineup stats saved.</p> : null}
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    type="button"
+                    onClick={saveBatting}
+                    disabled={pending || (!lineupsA.length && !lineupsB.length)}
+                  >
+                    {battingMutation.isPending ? 'Saving batting…' : 'Save batting stats'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={saveBowling}
+                    disabled={pending || (!lineupsA.length && !lineupsB.length)}
+                  >
+                    {bowlingMutation.isPending ? 'Saving bowling…' : 'Save bowling stats'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={saveFielding}
+                    disabled={pending || (!lineupsA.length && !lineupsB.length)}
+                  >
+                    {fieldingMutation.isPending ? 'Saving fielding…' : 'Save fielding stats'}
+                  </Button>
+                </div>
+                {saveError ? (
+                  <p className="text-sm text-red-600">Failed to save lineup changes.</p>
+                ) : null}
+                {saveSuccess ? (
+                  <p className="text-sm text-green-700">Lineup stats saved.</p>
+                ) : null}
+              </div>
+            )}
           </div>
         )}
       </div>
     </TenantRequired>
+  );
+}
+
+function TabButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'rounded-md px-3 py-1.5 text-sm font-medium transition',
+        active
+          ? 'bg-[#12233D] text-white shadow-sm'
+          : 'text-muted-foreground hover:text-[#12233D]'
+      )}
+    >
+      {children}
+    </button>
   );
 }
 

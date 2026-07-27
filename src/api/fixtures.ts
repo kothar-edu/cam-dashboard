@@ -5,6 +5,32 @@ import type { Tournament } from './tournaments';
 export type FixtureOpponent = {
   id: string;
   team_name: string;
+  team_id?: string;
+  team_logo?: string | null;
+};
+
+/** Summarized final scores from FixtureListSerializer.result / FixtureDetailSerializer.result_summary */
+export type FixtureScoreSummary = {
+  runs_scored: number;
+  overs_bowled: number;
+  wickets_lost: number;
+  wickets_taken: number;
+};
+
+export type FixtureResultSummary = {
+  opponent_a?: FixtureScoreSummary;
+  opponent_b?: FixtureScoreSummary;
+};
+
+export type FixtureWinner = {
+  id: string;
+  team: string;
+};
+
+export type FixtureManOfTheMatch = {
+  id: string;
+  full_name?: string;
+  name?: string;
 };
 
 export type Fixture = {
@@ -20,6 +46,14 @@ export type Fixture = {
   live_stream_url?: string | null;
   over_limit?: number;
   bowling_limit?: number;
+  /** List endpoint: summarized scores. Detail endpoint: raw engine dump. */
+  result?: FixtureResultSummary | Record<string, unknown> | null;
+  result_summary?: FixtureResultSummary | null;
+  winner?: FixtureWinner | null;
+  man_of_the_match?: FixtureManOfTheMatch | null;
+  abandoned?: boolean;
+  tied?: boolean;
+  dls?: boolean;
 };
 
 export async function listFixtures(params?: ListParams): Promise<Paginated<Fixture>> {
@@ -65,11 +99,13 @@ export type FixtureDetailOpponent = {
   };
 };
 
-export type FixtureDetail = Omit<Fixture, 'opponent_a' | 'opponent_b'> & {
+export type FixtureDetail = Omit<Fixture, 'opponent_a' | 'opponent_b' | 'result'> & {
   opponent_a: FixtureDetailOpponent;
   opponent_b: FixtureDetailOpponent;
   round: string | null;
-  result: string | null;
+  /** Raw live-scoring engine dump (ball-by-ball). Prefer result_summary for scores. */
+  result?: Record<string, unknown> | null;
+  result_summary?: FixtureResultSummary | null;
   lineups_a?: LineupEntry[];
   lineups_b?: LineupEntry[];
   livestream_overlay_custom?: boolean;

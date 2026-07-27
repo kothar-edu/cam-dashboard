@@ -10,7 +10,11 @@ import type { Sponsor } from '@/api/sponsors';
 
 const PAGE_SIZE = 20;
 
-export default function SponsorsPage() {
+type SponsorsPageProps = {
+  embedded?: boolean;
+};
+
+export default function SponsorsPage({ embedded = false }: SponsorsPageProps) {
   const { activeTenant } = useTenant();
   const [pageIndex, setPageIndex] = useState(0);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -49,21 +53,34 @@ export default function SponsorsPage() {
   }
 
   const sponsors = data?.results ?? [];
+  const newSponsorLink = (
+    <Link
+      to="/dashboard/sponsors/new"
+      className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
+    >
+      New Sponsor
+    </Link>
+  );
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Sponsors"
-        description={`${activeTenant.name} · league sponsors`}
-        action={
-          <Link
-            to="/dashboard/sponsors/new"
-            className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
-          >
-            New Sponsor
-          </Link>
-        }
-      />
+      {embedded ? (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-[#12233D]">Sponsors</h2>
+            <p className="text-sm text-muted-foreground">
+              {activeTenant.name} · league sponsors
+            </p>
+          </div>
+          {newSponsorLink}
+        </div>
+      ) : (
+        <PageHeader
+          title="Sponsors"
+          description={`${activeTenant.name} · league sponsors`}
+          action={newSponsorLink}
+        />
+      )}
 
       <DataTable
         columns={[
@@ -73,11 +90,6 @@ export default function SponsorsPage() {
             id: 'website',
             header: 'Website',
             cell: (row) => row.supported_url ?? '—',
-          },
-          {
-            id: 'info',
-            header: 'Extra info',
-            cell: (row) => row.extra_info ?? '—',
           },
           {
             id: 'actions',

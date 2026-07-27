@@ -64,10 +64,15 @@ export default function PostFormPage() {
     event.preventDefault();
     const payload = buildPayload();
     if (isEdit && id) {
-      updateMutation.mutate({ id, payload }, { onSuccess: () => navigate('/dashboard/posts') });
+      updateMutation.mutate(
+        { id, payload },
+        { onSuccess: () => navigate('/dashboard/settings?section=app&tab=posts') }
+      );
       return;
     }
-    createMutation.mutate(payload, { onSuccess: () => navigate('/dashboard/posts') });
+    createMutation.mutate(payload, {
+      onSuccess: () => navigate('/dashboard/settings?section=app&tab=posts'),
+    });
   };
 
   const pending = createMutation.isPending || updateMutation.isPending;
@@ -75,7 +80,11 @@ export default function PostFormPage() {
   return (
     <TenantRequired>
       <div className="space-y-6">
-        <PageHeader title={isEdit ? 'Edit post' : 'Create post'} backTo="/dashboard/posts" />
+        <PageHeader
+          title={isEdit ? 'Edit post' : 'Create post'}
+          backTo="/dashboard/settings?section=app&tab=posts"
+          backLabel="Posts"
+        />
         {isEdit && postQuery.isLoading ? (
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         ) : (

@@ -10,6 +10,10 @@ import { usePosts, useDeletePost } from '@/hooks/usePosts';
 
 const PAGE_SIZE = 20;
 
+type PostsPageProps = {
+  embedded?: boolean;
+};
+
 function formatDate(value: string | null) {
   if (!value) return '—';
   return new Date(value).toLocaleDateString(undefined, {
@@ -19,7 +23,7 @@ function formatDate(value: string | null) {
   });
 }
 
-export default function PostsPage() {
+export default function PostsPage({ embedded = false }: PostsPageProps) {
   const { activeTenant } = useTenant();
   const [pageIndex, setPageIndex] = useState(0);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -58,21 +62,32 @@ export default function PostsPage() {
   }
 
   const posts = data?.results ?? [];
+  const newPostLink = (
+    <Link
+      to="/dashboard/posts/new"
+      className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
+    >
+      New Post
+    </Link>
+  );
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Posts"
-        description={`${activeTenant.name} · news and events`}
-        action={
-          <Link
-            to="/dashboard/posts/new"
-            className="inline-flex w-full items-center justify-center rounded-md bg-[#12233D] px-4 py-2 text-sm font-medium text-white sm:w-auto"
-          >
-            New Post
-          </Link>
-        }
-      />
+      {embedded ? (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-[#12233D]">Posts</h2>
+            <p className="text-sm text-muted-foreground">{activeTenant.name} · news and events</p>
+          </div>
+          {newPostLink}
+        </div>
+      ) : (
+        <PageHeader
+          title="Posts"
+          description={`${activeTenant.name} · news and events`}
+          action={newPostLink}
+        />
+      )}
 
       <DataTable
         columns={[

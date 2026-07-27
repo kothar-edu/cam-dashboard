@@ -64,11 +64,34 @@ vi.mock('@/hooks/useRoles', () => ({
 
 vi.mock('@/hooks/useGameConfig', () => ({
   useGameConfig: () => ({
-    data: { is_registration_open: true, is_voting_open: false },
+    data: {
+      is_registration_open: true,
+      is_voting_open: false,
+      four_boundary_label: '',
+      six_boundary_label: '',
+    },
     isLoading: false,
     isError: false,
   }),
   useUpdateGameConfig: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
+vi.mock('@/hooks/usePosts', () => ({
+  usePosts: () => ({
+    data: { count: 0, results: [] },
+    isLoading: false,
+    isError: false,
+  }),
+  useDeletePost: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
+vi.mock('@/hooks/useSponsors', () => ({
+  useSponsors: () => ({
+    data: { count: 0, results: [] },
+    isLoading: false,
+    isError: false,
+  }),
+  useDeleteSponsor: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('@/hooks/usePaymentSettings', () => ({
@@ -116,9 +139,18 @@ describe('SettingsPage', () => {
   it('shows app settings toggles when selected', () => {
     renderSettings();
     fireEvent.click(screen.getByRole('button', { name: /App settings/i }));
+    expect(screen.getByRole('button', { name: 'Features' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Posts' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sponsors' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Boundary labels' })).toBeInTheDocument();
     expect(screen.getByText('Registration open')).toBeInTheDocument();
     expect(screen.getByText('Voting open')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save app settings' })).toBeInTheDocument();
+  });
+
+  it('opens posts tab from app settings query', () => {
+    renderSettings('/dashboard/settings?section=app&tab=posts');
+    expect(screen.getByRole('link', { name: 'New Post' })).toBeInTheDocument();
   });
 
   it('shows registration settings when selected', () => {

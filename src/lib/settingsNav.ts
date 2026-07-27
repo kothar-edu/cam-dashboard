@@ -15,7 +15,7 @@ const ALL_SECTIONS: Array<SettingsSectionDef & { requiresTenantManager?: boolean
   {
     id: 'app',
     label: 'App settings',
-    description: 'Registration & voting toggles',
+    description: 'Features, posts, sponsors & labels',
   },
   {
     id: 'registration',

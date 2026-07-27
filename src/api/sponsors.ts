@@ -20,7 +20,6 @@ export async function listSponsors(params?: ListParams): Promise<Paginated<Spons
 export type SponsorPayload = {
   name: string;
   supported_url?: string | null;
-  extra_info?: string | null;
   sponsor_type?: string;
   image?: File | null;
 };
@@ -33,7 +32,6 @@ export async function getSponsor(id: string): Promise<Sponsor> {
 function appendSponsorFields(form: FormData, payload: SponsorPayload) {
   form.append('name', payload.name);
   if (payload.supported_url) form.append('supported_url', payload.supported_url);
-  if (payload.extra_info) form.append('extra_info', payload.extra_info);
   if (payload.sponsor_type) form.append('sponsor_type', payload.sponsor_type);
   if (payload.image) form.append('image', payload.image);
 }
@@ -50,7 +48,6 @@ export async function createSponsor(payload: SponsorPayload): Promise<Sponsor> {
   const { data } = await apiClient.post<Sponsor>('/game/sponsor/', {
     name: payload.name,
     supported_url: payload.supported_url ?? null,
-    extra_info: payload.extra_info ?? null,
     sponsor_type: payload.sponsor_type,
   });
   return data;
@@ -68,7 +65,6 @@ export async function updateSponsor(id: string, payload: SponsorPayload): Promis
   const { data } = await apiClient.patch<Sponsor>(`/game/sponsor/${id}/`, {
     name: payload.name,
     supported_url: payload.supported_url ?? null,
-    extra_info: payload.extra_info ?? null,
     sponsor_type: payload.sponsor_type,
   });
   return data;

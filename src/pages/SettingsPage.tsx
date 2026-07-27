@@ -37,6 +37,10 @@ export default function SettingsPage() {
   const activeSection = resolveSettingsSection(searchParams.get('section'), sections);
 
   const setSection = (section: SettingsSection) => {
+    if (section === 'app') {
+      setSearchParams({ section, tab: 'features' }, { replace: true });
+      return;
+    }
     setSearchParams({ section }, { replace: true });
   };
 

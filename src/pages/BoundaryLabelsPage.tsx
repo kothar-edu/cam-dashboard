@@ -1,12 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useTenant } from '@/contexts/TenantContext';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { useGameConfig, useUpdateGameConfig } from '@/hooks/useGameConfig';
+import { cn } from '@/lib/utils';
 
-export default function BoundaryLabelsPage() {
+type BoundaryLabelsPageProps = {
+  embedded?: boolean;
+};
+
+export default function BoundaryLabelsPage({ embedded = false }: BoundaryLabelsPageProps) {
   const { activeTenant } = useTenant();
   const { data, isLoading, isError } = useGameConfig();
   const updateMutation = useUpdateGameConfig();
@@ -47,7 +52,7 @@ export default function BoundaryLabelsPage() {
     );
   }
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     updateMutation.mutate({
       four_boundary_label: fourLabel,
@@ -57,12 +62,24 @@ export default function BoundaryLabelsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Boundary Labels"
-        description={`${activeTenant.name} · custom four and six commentary text for live scoring`}
-      />
+      {embedded ? (
+        <div>
+          <h2 className="text-lg font-semibold text-[#12233D]">Boundary labels</h2>
+          <p className="text-sm text-muted-foreground">
+            {activeTenant.name} · custom four and six commentary text for live scoring
+          </p>
+        </div>
+      ) : (
+        <PageHeader
+          title="Boundary Labels"
+          description={`${activeTenant.name} · custom four and six commentary text for live scoring`}
+        />
+      )}
 
-      <form onSubmit={handleSubmit} className="max-w-xl space-y-6 rounded-lg border bg-white p-6">
+      <form
+        onSubmit={handleSubmit}
+        className={cn('max-w-xl space-y-6', embedded ? '' : 'rounded-lg border bg-white p-6')}
+      >
         <div className="space-y-2">
           <label htmlFor="four-boundary-label" className="text-sm font-medium text-[#12233D]">
             Four boundary label
@@ -70,9 +87,7 @@ export default function BoundaryLabelsPage() {
           <Input
             id="four-boundary-label"
             value={fourLabel}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              setFourLabel(event.target.value)
-            }
+            onChange={(event: ChangeEvent<HTMLInputElement>) => setFourLabel(event.target.value)}
             placeholder="e.g. That's a boundary!"
           />
           <p className="text-xs text-muted-foreground">
@@ -87,9 +102,7 @@ export default function BoundaryLabelsPage() {
           <Input
             id="six-boundary-label"
             value={sixLabel}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              setSixLabel(event.target.value)
-            }
+            onChange={(event: ChangeEvent<HTMLInputElement>) => setSixLabel(event.target.value)}
             placeholder="e.g. Maximum!"
           />
           <p className="text-xs text-muted-foreground">

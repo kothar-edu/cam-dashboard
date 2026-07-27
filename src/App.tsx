@@ -19,11 +19,8 @@ import BulkFixtureFormPage from '@/pages/BulkFixtureFormPage';
 import ScorecardsPage from '@/pages/ScorecardsPage';
 import ScorecardDetailPage from '@/pages/ScorecardDetailPage';
 import PointsPage from '@/pages/PointsPage';
-import PostsPage from '@/pages/PostsPage';
 import PostFormPage from '@/pages/PostFormPage';
-import SponsorsPage from '@/pages/SponsorsPage';
 import SponsorFormPage from '@/pages/SponsorFormPage';
-import BoundaryLabelsPage from '@/pages/BoundaryLabelsPage';
 import VerificationPage from '@/pages/VerificationPage';
 import TransfersPage from '@/pages/TransfersPage';
 import UsersPage from '@/pages/UsersPage';
@@ -69,13 +66,24 @@ export default function App() {
           <Route path="scorecards" element={<ScorecardsPage />} />
           <Route path="scorecards/:id" element={<ScorecardDetailPage />} />
           <Route path="points" element={<PointsPage />} />
-          <Route path="posts" element={<PostsPage />} />
+          <Route
+            path="posts"
+            element={<Navigate to="/dashboard/settings?section=app&tab=posts" replace />}
+          />
           <Route path="posts/new" element={<PostFormPage />} />
           <Route path="posts/:id" element={<PostFormPage />} />
-          <Route path="sponsors" element={<SponsorsPage />} />
+          <Route
+            path="sponsors"
+            element={<Navigate to="/dashboard/settings?section=app&tab=sponsors" replace />}
+          />
           <Route path="sponsors/new" element={<SponsorFormPage />} />
           <Route path="sponsors/:id" element={<SponsorFormPage />} />
-          <Route path="boundary-labels" element={<BoundaryLabelsPage />} />
+          <Route
+            path="boundary-labels"
+            element={
+              <Navigate to="/dashboard/settings?section=app&tab=boundary-labels" replace />
+            }
+          />
           <Route
             path="game-settings"
             element={<Navigate to="/dashboard/settings?section=app" replace />}

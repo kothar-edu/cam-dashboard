@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { TenantRequired } from '@/components/forms/TenantRequired';
 import { useCreateSponsor, useSponsor, useUpdateSponsor } from '@/hooks/useSponsors';
 
 const SPONSOR_TYPES = ['Title', 'Gold', 'Silver', 'Bronze', 'General'];
+const SPONSORS_LIST_PATH = '/dashboard/settings?section=app&tab=sponsors';
 
 export default function SponsorFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -21,7 +22,6 @@ export default function SponsorFormPage() {
 
   const [name, setName] = useState('');
   const [supportedUrl, setSupportedUrl] = useState('');
-  const [extraInfo, setExtraInfo] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [sponsorType, setSponsorType] = useState('Gold');
 
@@ -29,25 +29,23 @@ export default function SponsorFormPage() {
     if (sponsorQuery.data) {
       setName(sponsorQuery.data.name);
       setSupportedUrl(sponsorQuery.data.supported_url ?? '');
-      setExtraInfo(sponsorQuery.data.extra_info ?? '');
       setSponsorType(sponsorQuery.data.sponsor_type);
     }
   }, [sponsorQuery.data]);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     const payload = {
       name: name.trim(),
       supported_url: supportedUrl || null,
-      extra_info: extraInfo || null,
       image,
       sponsor_type: sponsorType,
     };
     if (isEdit && id) {
-      updateMutation.mutate({ id, payload }, { onSuccess: () => navigate('/dashboard/sponsors') });
+      updateMutation.mutate({ id, payload }, { onSuccess: () => navigate(SPONSORS_LIST_PATH) });
       return;
     }
-    createMutation.mutate(payload, { onSuccess: () => navigate('/dashboard/sponsors') });
+    createMutation.mutate(payload, { onSuccess: () => navigate(SPONSORS_LIST_PATH) });
   };
 
   const pending = createMutation.isPending || updateMutation.isPending;
@@ -57,7 +55,8 @@ export default function SponsorFormPage() {
       <div className="space-y-6">
         <PageHeader
           title={isEdit ? 'Edit sponsor' : 'Create sponsor'}
-          backTo="/dashboard/sponsors"
+          backTo={SPONSORS_LIST_PATH}
+          backLabel="Sponsors"
         />
         {isEdit && sponsorQuery.isLoading ? (
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
@@ -76,11 +75,6 @@ export default function SponsorFormPage() {
               label="Sponsor logo"
               onChange={setImage}
               currentUrl={sponsorQuery.data?.image}
-            />
-            <Input
-              label="Extra info"
-              value={extraInfo}
-              onChange={(e) => setExtraInfo(e.target.value)}
             />
             <SearchableSelect
               label="Sponsor type"

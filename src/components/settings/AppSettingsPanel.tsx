@@ -1,11 +1,79 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useTenant } from '@/contexts/TenantContext';
 import { useGameConfig, useUpdateGameConfig } from '@/hooks/useGameConfig';
+import PostsPage from '@/pages/PostsPage';
+import SponsorsPage from '@/pages/SponsorsPage';
+import BoundaryLabelsPage from '@/pages/BoundaryLabelsPage';
+import { cn } from '@/lib/utils';
+
+export type AppSettingsTab = 'features' | 'posts' | 'sponsors' | 'boundary-labels';
+
+const APP_TABS: Array<{ id: AppSettingsTab; label: string }> = [
+  { id: 'features', label: 'Features' },
+  { id: 'posts', label: 'Posts' },
+  { id: 'sponsors', label: 'Sponsors' },
+  { id: 'boundary-labels', label: 'Boundary labels' },
+];
+
+const TAB_ALIASES: Record<string, AppSettingsTab> = {
+  features: 'features',
+  toggles: 'features',
+  posts: 'posts',
+  sponsors: 'sponsors',
+  'boundary-labels': 'boundary-labels',
+  boundary: 'boundary-labels',
+  labels: 'boundary-labels',
+};
 
 export function AppSettingsPanel() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawTab = searchParams.get('tab') ?? 'features';
+  const activeTab = TAB_ALIASES[rawTab] ?? 'features';
+
+  const setTab = (tab: AppSettingsTab) => {
+    setSearchParams({ section: 'app', tab }, { replace: true });
+  };
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-lg font-semibold text-[#12233D]">App settings</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Feature toggles, posts, sponsors, and live scoring labels for the mobile app.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
+        {APP_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setTab(tab.id)}
+            className={cn(
+              'rounded-full px-3 py-1.5 text-xs font-semibold transition',
+              activeTab === tab.id
+                ? 'bg-[#12233D] text-white'
+                : 'bg-slate-100 text-muted-foreground hover:bg-slate-200 hover:text-[#12233D]'
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'features' ? <FeatureTogglesPanel /> : null}
+      {activeTab === 'posts' ? <PostsPage embedded /> : null}
+      {activeTab === 'sponsors' ? <SponsorsPage embedded /> : null}
+      {activeTab === 'boundary-labels' ? <BoundaryLabelsPage embedded /> : null}
+    </div>
+  );
+}
+
+function FeatureTogglesPanel() {
   const { activeTenant } = useTenant();
   const { data, isLoading, isError } = useGameConfig();
   const updateMutation = useUpdateGameConfig();
@@ -56,10 +124,9 @@ export function AppSettingsPanel() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <PanelIntro
-        title="App settings"
-        description={`${activeTenant.name} · organization-wide feature toggles for the mobile app`}
-      />
+      <p className="text-sm text-muted-foreground">
+        {activeTenant.name} · organization-wide feature toggles for the mobile app
+      </p>
       <ToggleRow
         title="Registration open"
         description="Show registration banner and allow new player sign-ups."

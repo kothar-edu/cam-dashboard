@@ -6,6 +6,47 @@ import { Check, ChevronDown, Search } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 const DROPDOWN_Z_INDEX = 200;
+const VIEWPORT_PADDING = 8;
+const GAP = 4;
+const DEFAULT_MAX_LIST_HEIGHT = 320;
+
+/**
+ * Position the menu in the larger available space (below or above the trigger)
+ * and clamp height so the full panel — including search — stays on-screen and scrollable.
+ */
+function computeDropdownPosition(triggerRect) {
+  const preferredWidth = Math.max(triggerRect.width, 160);
+  const maxWidth = Math.min(preferredWidth, window.innerWidth - VIEWPORT_PADDING * 2);
+  let left = triggerRect.left;
+  if (left + maxWidth > window.innerWidth - VIEWPORT_PADDING) {
+    left = Math.max(VIEWPORT_PADDING, window.innerWidth - VIEWPORT_PADDING - maxWidth);
+  }
+  if (left < VIEWPORT_PADDING) left = VIEWPORT_PADDING;
+
+  const spaceBelow = window.innerHeight - triggerRect.bottom - VIEWPORT_PADDING - GAP;
+  const spaceAbove = triggerRect.top - VIEWPORT_PADDING - GAP;
+  const placeAbove = spaceBelow < 180 && spaceAbove > spaceBelow;
+  const available = Math.max(120, placeAbove ? spaceAbove : spaceBelow);
+  const panelMaxHeight = Math.min(DEFAULT_MAX_LIST_HEIGHT + 72, available);
+
+  if (placeAbove) {
+    return {
+      top: Math.max(VIEWPORT_PADDING, triggerRect.top - GAP - panelMaxHeight),
+      left,
+      width: maxWidth,
+      maxHeight: panelMaxHeight,
+      placement: 'top',
+    };
+  }
+
+  return {
+    top: triggerRect.bottom + GAP,
+    left,
+    width: maxWidth,
+    maxHeight: panelMaxHeight,
+    placement: 'bottom',
+  };
+}
 
 export function Select({ value, onValueChange, children, disabled }) {
   const [open, setOpen] = useState(false);
@@ -13,24 +54,17 @@ export function Select({ value, onValueChange, children, disabled }) {
   const triggerRef = useRef(null);
   const contentRef = useRef(null);
   const [selectedDisplayText, setSelectedDisplayText] = useState('');
-  const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [position, setPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+    maxHeight: DEFAULT_MAX_LIST_HEIGHT,
+    placement: 'bottom',
+  });
 
   const updatePosition = useCallback(() => {
     if (!triggerRef.current) return;
-    const rect = triggerRef.current.getBoundingClientRect();
-    const viewportPadding = 8;
-    const preferredWidth = Math.max(rect.width, 160);
-    const maxWidth = Math.min(preferredWidth, window.innerWidth - viewportPadding * 2);
-    let left = rect.left;
-    if (left + maxWidth > window.innerWidth - viewportPadding) {
-      left = Math.max(viewportPadding, window.innerWidth - viewportPadding - maxWidth);
-    }
-    if (left < viewportPadding) left = viewportPadding;
-    setPosition({
-      top: rect.bottom + 4,
-      left,
-      width: maxWidth,
-    });
+    setPosition(computeDropdownPosition(triggerRef.current.getBoundingClientRect()));
   }, []);
 
   useEffect(() => {
@@ -169,7 +203,7 @@ export const SelectContent = React.forwardRef(function SelectContent(
     onValueChange,
     onClose,
     position,
-    maxHeight = 320,
+    maxHeight = DEFAULT_MAX_LIST_HEIGHT,
     searchable = true,
     ...props
   },
@@ -186,6 +220,8 @@ export const SelectContent = React.forwardRef(function SelectContent(
     const childText = child.props.children?.toString().toLowerCase() || '';
     return childText.includes(searchQuery.toLowerCase());
   });
+
+  const panelMaxHeight = position?.maxHeight ?? maxHeight;
 
   useEffect(() => {
     setHighlightedIndex(0);
@@ -241,7 +277,7 @@ export const SelectContent = React.forwardRef(function SelectContent(
       ref={ref}
       role="listbox"
       className={cn(
-        'overflow-hidden rounded-md border border-border bg-white text-[#12233D] shadow-lg animate-in fade-in-80',
+        'flex flex-col overflow-hidden rounded-md border border-border bg-white text-[#12233D] shadow-lg animate-in fade-in-80',
         className
       )}
       style={{
@@ -251,7 +287,7 @@ export const SelectContent = React.forwardRef(function SelectContent(
         width: position?.width ?? undefined,
         minWidth: position?.width ?? undefined,
         maxWidth: 'calc(100vw - 1rem)',
-        maxHeight: 'min(20rem, calc(100dvh - 1rem))',
+        maxHeight: panelMaxHeight,
         zIndex: DROPDOWN_Z_INDEX,
       }}
       onClick={(e) => e.stopPropagation()}
@@ -259,7 +295,7 @@ export const SelectContent = React.forwardRef(function SelectContent(
       {...props}
     >
       {searchable ? (
-        <div className="sticky top-0 border-b bg-white p-2">
+        <div className="shrink-0 border-b bg-white p-2">
           <div className="flex items-center rounded-md border px-3 py-2 focus-within:ring-1 focus-within:ring-[#E8A93B]">
             <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
             <input
@@ -287,7 +323,7 @@ export const SelectContent = React.forwardRef(function SelectContent(
         </div>
       ) : null}
 
-      <div ref={listRef} className="overflow-y-auto p-1" style={{ maxHeight: `${maxHeight}px` }}>
+      <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-1">
         {filteredItems.length > 0 ? (
           filteredItems.map((child, index) =>
             React.cloneElement(child, {

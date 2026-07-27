@@ -13,9 +13,19 @@ import { cn } from '@/lib/utils';
 type StandingsTableProps = {
   rows: PointsTableRow[];
   loading?: boolean;
+  /** When filtering a single group, hide the redundant group label under each team. */
+  showGroupLabel?: boolean;
 };
 
-function TeamCell({ row, position }: { row: PointsTableRow; position: number }) {
+function TeamCell({
+  row,
+  position,
+  showGroupLabel,
+}: {
+  row: PointsTableRow;
+  position: number;
+  showGroupLabel: boolean;
+}) {
   const logo = row.team.logo;
   const initials = row.team.name
     .split(/\s+/)
@@ -49,14 +59,14 @@ function TeamCell({ row, position }: { row: PointsTableRow; position: number }) 
         <p className="truncate font-semibold text-[#12233D]">{row.team.name}</p>
         <p className="truncate text-[11px] text-muted-foreground">
           {row.team.code}
-          {row.group ? ` · Group ${row.group}` : ''}
+          {showGroupLabel && row.group ? ` · Group ${row.group}` : ''}
         </p>
       </div>
     </div>
   );
 }
 
-export function StandingsTable({ rows, loading }: StandingsTableProps) {
+export function StandingsTable({ rows, loading, showGroupLabel = true }: StandingsTableProps) {
   const sorted = sortStandings(rows);
 
   if (loading) {
@@ -119,7 +129,7 @@ export function StandingsTable({ rows, loading }: StandingsTableProps) {
                   )}
                 >
                   <TableCell>
-                    <TeamCell row={row} position={position} />
+                    <TeamCell row={row} position={position} showGroupLabel={showGroupLabel} />
                   </TableCell>
                   <TableCell className="text-center tabular-nums">{row.matches_played}</TableCell>
                   <TableCell className="text-center tabular-nums text-emerald-700">

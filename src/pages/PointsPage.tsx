@@ -131,7 +131,11 @@ export default function PointsPage() {
             </div>
           ) : null}
 
-          <StandingsTable rows={filteredRows} loading={pointsLoading} />
+          <StandingsTable
+            rows={filteredRows}
+            loading={pointsLoading}
+            showGroupLabel={groupFilter === 'all'}
+          />
 
           {!pointsLoading ? (
             <PointsStatsPanel

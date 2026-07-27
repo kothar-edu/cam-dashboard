@@ -30,7 +30,13 @@ export const SelectContent: React.ForwardRefExoticComponent<
     children?: React.ReactNode;
     searchable?: boolean;
     maxHeight?: number;
-    position?: { top: number; left: number; width: number };
+    position?: {
+      top: number;
+      left: number;
+      width: number;
+      maxHeight?: number;
+      placement?: 'top' | 'bottom';
+    };
     value?: string;
     onValueChange?: (value: string, displayText: React.ReactNode) => void;
     onClose?: () => void;

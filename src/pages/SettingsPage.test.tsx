@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
@@ -129,17 +129,17 @@ describe('SettingsPage', () => {
     renderSettings();
 
     expect(screen.getByText('Settings')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /App settings/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Registration settings/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Account/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Create admin/i })).toBeInTheDocument();
+    const nav = screen.getByRole('navigation', { name: 'Settings sections' });
+    expect(nav).toHaveTextContent('App settings');
+    expect(nav).toHaveTextContent('Registration settings');
+    expect(nav).toHaveTextContent('Account');
+    expect(nav).toHaveTextContent('Create admin');
     expect(screen.getByRole('tab', { name: 'Features' })).toBeInTheDocument();
     expect(screen.getByText('Registration open')).toBeInTheDocument();
   });
 
   it('shows app settings toggles when selected', () => {
-    renderSettings();
-    fireEvent.click(screen.getByRole('button', { name: /App settings/i }));
+    renderSettings('/dashboard/settings?section=app');
     expect(screen.getByRole('tab', { name: 'Features' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Posts' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Sponsors' })).toBeInTheDocument();

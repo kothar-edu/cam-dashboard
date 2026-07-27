@@ -14,7 +14,6 @@ export type TenantMembership = {
 
 export type CreateTenantPayload = {
   name: string;
-  schema_name: string;
 };
 
 export type AssignTenantAdminPayload = {

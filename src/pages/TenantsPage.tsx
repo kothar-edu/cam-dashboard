@@ -41,7 +41,6 @@ export default function TenantsPage({ embedded = false }: TenantsPageProps) {
   const [selectedTenantId, setSelectedTenantId] = useState<number | undefined>(undefined);
   const [showCreate, setShowCreate] = useState(false);
   const [newTenantName, setNewTenantName] = useState('');
-  const [newSchemaName, setNewSchemaName] = useState('');
   const [adminUserId, setAdminUserId] = useState('');
   const [resolvedAdminLabel, setResolvedAdminLabel] = useState('');
   const [revokeTarget, setRevokeTarget] = useState<TenantMembership | null>(null);
@@ -78,16 +77,15 @@ export default function TenantsPage({ embedded = false }: TenantsPageProps) {
 
   const handleCreateTenant = (event: FormEvent) => {
     event.preventDefault();
-    if (!newTenantName.trim() || !newSchemaName.trim()) return;
+    if (!newTenantName.trim()) return;
     createTenantMutation.mutate(
-      { name: newTenantName.trim(), schema_name: newSchemaName.trim() },
+      { name: newTenantName.trim() },
       {
         onSuccess: (tenant) => {
           setNewTenantName('');
-          setNewSchemaName('');
           setShowCreate(false);
           setSelectedTenantId(tenant.id);
-          toast.success('Organization created.');
+          toast.success(`Organization created · schema ${tenant.schema_name}`);
         },
         onError: (error) => {
           toast.error(getApiErrorMessage(error, 'Failed to create organization.'));
@@ -146,29 +144,20 @@ export default function TenantsPage({ embedded = false }: TenantsPageProps) {
           <div>
             <h3 className="text-sm font-semibold text-[#12233D]">Create organization</h3>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Schema names should be lowercase with underscores (e.g. cam_youth_association).
+              Enter the display name. The technical schema id is generated automatically on the
+              server.
             </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Input
-              label="Organization name"
-              value={newTenantName}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                setNewTenantName(event.target.value)
-              }
-              required
-            />
-            <Input
-              label="Schema name"
-              value={newSchemaName}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                setNewSchemaName(event.target.value)
-              }
-              placeholder="e.g. cam_youth_association"
-              required
-            />
-          </div>
-          <Button type="submit" disabled={createTenantMutation.isPending}>
+          <Input
+            label="Organization name"
+            value={newTenantName}
+            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+              setNewTenantName(event.target.value)
+            }
+            placeholder="e.g. CAM Youth Association"
+            required
+          />
+          <Button type="submit" disabled={createTenantMutation.isPending || !newTenantName.trim()}>
             {createTenantMutation.isPending ? 'Creating…' : 'Create organization'}
           </Button>
         </form>

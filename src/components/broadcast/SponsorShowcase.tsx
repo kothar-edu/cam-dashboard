@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { BroadcastSponsor } from '@/types/liveMatch';
-import { useFitScale } from '@/hooks/useFitScale';
+import { cn } from '@/lib/utils';
 
 type SponsorShowcaseProps = {
   sponsors: BroadcastSponsor[];
@@ -29,39 +29,36 @@ export function SponsorShowcase({ sponsors }: SponsorShowcaseProps) {
   }, [sponsors.length]);
 
   const sponsor = sponsors.length > 0 ? sponsors[index % sponsors.length] : null;
-  const { containerRef, contentRef, scale } = useFitScale(sponsor?.id ?? '');
-
   if (!sponsor) return null;
 
   return (
-    <div className="flex h-full w-full items-center justify-center overflow-hidden">
+    <div className="flex h-full w-full items-center justify-center overflow-hidden px-2">
       <div
         key={sponsor.id}
-        className="flex max-w-full items-center gap-4 animate-in fade-in zoom-in-90 duration-500"
+        className="flex max-w-full flex-col items-center gap-1.5 animate-in fade-in zoom-in-90 duration-500"
       >
-        {sponsor.imageUrl && (
+        <span
+          className={cn(
+            'w-fit shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide',
+            LEVEL_CLASS[sponsor.level]
+          )}
+        >
+          {sponsor.level} Sponsor
+        </span>
+        {sponsor.imageUrl ? (
           <img
             src={sponsor.imageUrl}
             alt={sponsor.name}
-            className="h-16 max-w-[220px] shrink-0 object-contain"
+            className="h-16 max-h-16 max-w-[280px] object-contain"
           />
-        )}
-        <div className="flex min-w-0 flex-col items-start gap-1.5">
-          <span
-            className={`w-fit shrink-0 rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wide ${LEVEL_CLASS[sponsor.level]}`}
+        ) : (
+          <p
+            className="max-w-[280px] truncate text-center text-xl font-extrabold leading-tight text-[#12233D]"
+            title={sponsor.name}
           >
-            {sponsor.level} Sponsor
-          </span>
-          <div ref={containerRef} className="max-w-[460px] overflow-hidden">
-            <div
-              ref={contentRef}
-              className="w-max whitespace-nowrap text-2xl font-extrabold leading-none text-[#12233D]"
-              style={{ transform: `scale(${scale})`, transformOrigin: 'left center' }}
-            >
-              {sponsor.name}
-            </div>
-          </div>
-        </div>
+            {sponsor.name}
+          </p>
+        )}
       </div>
     </div>
   );

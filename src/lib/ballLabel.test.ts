@@ -62,6 +62,10 @@ describe('wicketCode', () => {
 });
 
 describe('shortCode / wordLabel', () => {
+  it('renders a filled circle for a dot ball', () => {
+    expect(shortCode(ball({ value: 0 }))).toBe('⬤');
+  });
+
   it('marks a no-ball taken as byes distinctly from a plain no-ball', () => {
     expect(shortCode(ball({ value: 'NO_BALL', bye_type: 'BYE' }))).toBe('NB+B');
     expect(shortCode(ball({ value: 'NO_BALL' }))).toBe('NB');

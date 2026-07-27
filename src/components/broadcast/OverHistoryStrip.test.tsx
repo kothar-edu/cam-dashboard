@@ -22,4 +22,11 @@ describe('OverHistoryStrip', () => {
     render(<OverHistoryStrip thisOver={[ball(1), ball(4), ball('WIDE_BALL', 1)]} />);
     expect(screen.getAllByTestId('ball-badge')).toHaveLength(3);
   });
+
+  it('shows a big filled dot instead of 0 for a dot ball', () => {
+    render(<OverHistoryStrip thisOver={[ball(0), ball(1)]} />);
+    expect(screen.getByTestId('dot-ball')).toBeInTheDocument();
+    expect(screen.queryByText('0')).not.toBeInTheDocument();
+    expect(screen.getByText('1')).toBeInTheDocument();
+  });
 });

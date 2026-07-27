@@ -78,6 +78,7 @@ export function extrasBreakdown(event: ScoreEvent): string | null {
 
 export function shortCode(event: ScoreEvent): string {
   const value = event.value;
+  if (value === 0) return '⬤';
   if (typeof value === 'number') return String(value);
   if (value === 'NO_BALL') {
     if (event.bye_type === 'LEG_BYE') return 'NB+LB';

@@ -19,13 +19,23 @@ export function OverHistoryStrip({ thisOver }: OverHistoryStripProps) {
       {thisOver.map((event, index) => {
         const kind = ballKind(event);
         const detail = kind === 'wicket' ? wicketCode(event) : extrasBreakdown(event);
+        const code = shortCode(event);
+        const isDot = event.value === 0;
         return (
           <div
             key={index}
             data-testid="ball-badge"
             className={`flex h-8 w-8 shrink-0 flex-col items-center justify-center rounded border border-white/10 text-[10px] font-bold leading-tight ${badgeColor(kind)}`}
           >
-            <span>{shortCode(event)}</span>
+            {isDot ? (
+              <span
+                data-testid="dot-ball"
+                className="block h-3 w-3 rounded-full bg-slate-900"
+                aria-label="0"
+              />
+            ) : (
+              <span>{code}</span>
+            )}
             {detail ? <span className="text-[8px] font-semibold opacity-90">{detail}</span> : null}
           </div>
         );

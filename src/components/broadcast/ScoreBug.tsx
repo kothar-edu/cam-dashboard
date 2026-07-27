@@ -86,18 +86,20 @@ export function ScoreBug({
   }
 
   return (
-    <div className="flex h-24 w-[420px] flex-col rounded-full bg-gradient-to-br from-blue-800 to-blue-950 leading-none text-white">
-      <div className="flex h-1/2 items-center justify-center gap-4 px-6 pt-2 text-xl font-bold uppercase">
-        <span>{battingTeam?.code ?? bowlingTeam?.code ?? '—'}</span>
-        <span className="text-4xl">
+    <div className="flex h-[6.5rem] w-[460px] flex-col rounded-full bg-gradient-to-br from-blue-800 to-blue-950 leading-none text-white shadow-lg">
+      <div className="flex h-[58%] items-center justify-center gap-5 px-7 pt-2">
+        <span className="text-lg font-bold uppercase tracking-wide text-blue-100/80">
+          {battingTeam?.code ?? bowlingTeam?.code ?? '—'}
+        </span>
+        <span className="text-5xl font-extrabold tabular-nums tracking-tight text-yellow-400">
           {current.runs}-{current.wickets}
         </span>
-        <span>
+        <span className="text-xl font-bold tabular-nums text-white">
           {current.over}.{current.ball}
         </span>
       </div>
-      <div className="flex h-1/2 items-center justify-between px-6 text-base font-bold">
-        <span className="text-blue-200/80">CRR: {current.crr}</span>
+      <div className="flex h-[42%] items-center justify-between px-8 text-sm font-semibold text-blue-200/75">
+        <span>CRR: {current.crr}</span>
         <span>Balls Left: {current.balls_remaining}</span>
         <span>{current.target ? `Target: ${current.target}` : `Inning ${current.inning}`}</span>
       </div>

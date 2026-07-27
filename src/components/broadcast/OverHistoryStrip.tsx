@@ -6,7 +6,7 @@ function badgeColor(kind: ReturnType<typeof ballKind>): string {
   if (kind === 'boundary6') return 'bg-purple-700 text-white';
   if (kind === 'extra') return 'bg-blue-600 text-white';
   if (kind === 'wicket') return 'bg-red-600 text-white';
-  return 'bg-slate-300 text-slate-900';
+  return 'bg-blue-950 text-white';
 }
 
 type OverHistoryStripProps = {
@@ -30,7 +30,7 @@ export function OverHistoryStrip({ thisOver }: OverHistoryStripProps) {
             {isDot ? (
               <span
                 data-testid="dot-ball"
-                className="block h-3 w-3 rounded-full bg-slate-900"
+                className="block h-3 w-3 rounded-full bg-white"
                 aria-label="0"
               />
             ) : (

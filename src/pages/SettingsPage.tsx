@@ -1,283 +1,111 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { SearchableSelect } from '@/components/forms/SearchableSelect';
-import { FileField } from '@/components/forms/FileField';
+import { useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { CreditCard, KeyRound, Settings2, UserPlus, type LucideIcon } from 'lucide-react';
 import { PageHeader } from '@/components/forms/PageHeader';
-import { useChangePassword } from '@/hooks/useSettings';
-import { useCreateAdminUser } from '@/hooks/useCreateAdmin';
-import { useCountries } from '@/hooks/useCountries';
-import { useRoles } from '@/hooks/useRoles';
+import {
+  ChangePasswordPanel,
+  CreateAdminPanel,
+} from '@/components/settings/AccountSettingsPanels';
+import { AppSettingsPanel, SettingsCard } from '@/components/settings/AppSettingsPanel';
+import { RegistrationSettingsPanel } from '@/components/settings/RegistrationSettingsPanel';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/contexts/TenantContext';
+import {
+  buildSettingsSections,
+  resolveSettingsSection,
+  type SettingsSection,
+} from '@/lib/settingsNav';
+import { cn } from '@/lib/utils';
 
-type SettingsTab = 'password' | 'create-admin';
+const SECTION_ICONS: Record<SettingsSection, LucideIcon> = {
+  account: KeyRound,
+  app: Settings2,
+  registration: CreditCard,
+  'create-admin': UserPlus,
+};
 
 export default function SettingsPage() {
-  const [tab, setTab] = useState<SettingsTab>('password');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { canManageTenants } = useAuth();
+  const { activeTenant } = useTenant();
+
+  const sections = useMemo(
+    () => buildSettingsSections(canManageTenants),
+    [canManageTenants]
+  );
+
+  const activeSection = resolveSettingsSection(searchParams.get('section'), sections);
+
+  const setSection = (section: SettingsSection) => {
+    setSearchParams({ section }, { replace: true });
+  };
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Settings" description="Manage your account and admin users" />
+      <PageHeader
+        title="Settings"
+        description={
+          activeTenant
+            ? `${activeTenant.name} · account and organization configuration`
+            : 'Account and organization configuration'
+        }
+      />
 
-      <div className="flex gap-2 border-b">
-        <TabButton active={tab === 'password'} onClick={() => setTab('password')}>
-          Change password
-        </TabButton>
-        <TabButton active={tab === 'create-admin'} onClick={() => setTab('create-admin')}>
-          Create admin
-        </TabButton>
+      <div className="grid gap-6 lg:grid-cols-[16rem_minmax(0,1fr)]">
+        <nav
+          aria-label="Settings sections"
+          className="flex gap-2 overflow-x-auto overscroll-x-contain pb-1 lg:flex-col lg:overflow-visible lg:pb-0"
+        >
+          {sections.map((section) => {
+            const Icon = SECTION_ICONS[section.id];
+            const active = section.id === activeSection;
+            return (
+              <button
+                key={section.id}
+                type="button"
+                onClick={() => setSection(section.id)}
+                className={cn(
+                  'flex min-w-[11rem] shrink-0 items-start gap-3 rounded-xl border px-3 py-3 text-left transition lg:min-w-0 lg:w-full',
+                  active
+                    ? 'border-[#E8A93B]/50 bg-[#12233D] text-white shadow-sm'
+                    : 'border-slate-200 bg-white text-[#12233D] hover:border-[#E8A93B]/40'
+                )}
+              >
+                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-[#E8A93B]" />
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold">{section.label}</span>
+                  <span
+                    className={cn(
+                      'mt-0.5 block text-[11px] leading-snug',
+                      active ? 'text-white/70' : 'text-muted-foreground'
+                    )}
+                  >
+                    {section.description}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <SettingsCard>
+          <SectionContent section={activeSection} />
+        </SettingsCard>
       </div>
-
-      {tab === 'password' ? <ChangePasswordForm /> : <CreateAdminForm />}
     </div>
   );
 }
 
-function TabButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`border-b-2 px-4 py-2 text-sm font-medium ${
-        active ? 'border-[#E8A93B] text-[#12233D]' : 'border-transparent text-muted-foreground'
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function ChangePasswordForm() {
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [validationError, setValidationError] = useState<string | null>(null);
-  const changePasswordMutation = useChangePassword();
-
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    setValidationError(null);
-    if (newPassword !== confirmPassword) {
-      setValidationError('New passwords do not match.');
-      return;
-    }
-    if (newPassword.length < 8) {
-      setValidationError('Password must be at least 8 characters.');
-      return;
-    }
-    changePasswordMutation.mutate(
-      { old_password: oldPassword, new_password: newPassword, re_new_password: confirmPassword },
-      {
-        onSuccess: () => {
-          setOldPassword('');
-          setNewPassword('');
-          setConfirmPassword('');
-        },
-      }
-    );
-  };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
-    >
-      <h2 className="text-lg font-semibold text-[#12233D]">Change password</h2>
-      <Input
-        label="Current password"
-        type="password"
-        value={oldPassword}
-        onChange={(e) => setOldPassword(e.target.value)}
-        required
-      />
-      <Input
-        label="New password"
-        type="password"
-        value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
-        required
-      />
-      <Input
-        label="Confirm new password"
-        type="password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        required
-      />
-      {validationError ? <p className="text-sm text-red-600">{validationError}</p> : null}
-      {changePasswordMutation.isError ? (
-        <p className="text-sm text-red-600">Failed to change password.</p>
-      ) : null}
-      {changePasswordMutation.isSuccess ? (
-        <p className="text-sm text-green-700">Password updated successfully.</p>
-      ) : null}
-      <Button type="submit" disabled={changePasswordMutation.isPending}>
-        {changePasswordMutation.isPending ? 'Updating…' : 'Update password'}
-      </Button>
-    </form>
-  );
-}
-
-function CreateAdminForm() {
-  const countriesQuery = useCountries();
-  const rolesQuery = useRoles();
-  const createMutation = useCreateAdminUser();
-
-  const [email, setEmail] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [gender, setGender] = useState('m');
-  const [dob, setDob] = useState('');
-  const [nationality, setNationality] = useState('');
-  const [otherCountry, setOtherCountry] = useState('');
-  const [visaType, setVisaType] = useState('citizen');
-  const [role, setRole] = useState('');
-  const [picture, setPicture] = useState<File | null>(null);
-  const [idCard, setIdCard] = useState<File | null>(null);
-  const [paySlip, setPaySlip] = useState<File | null>(null);
-  const [studyDocument, setStudyDocument] = useState<File | null>(null);
-
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    createMutation.mutate(
-      {
-        email: email.trim(),
-        full_name: fullName.trim(),
-        phone: phone.trim() || undefined,
-        gender,
-        dob,
-        nationality: Number(nationality),
-        other_country: otherCountry || undefined,
-        visa_type: visaType,
-        role: role ? Number(role) : undefined,
-        picture,
-        id_card: idCard,
-        pay_slip: paySlip,
-        study_document: studyDocument,
-      },
-      {
-        onSuccess: () => {
-          setEmail('');
-          setFullName('');
-          setPhone('');
-          setDob('');
-          setOtherCountry('');
-          setPicture(null);
-          setIdCard(null);
-          setPaySlip(null);
-          setStudyDocument(null);
-        },
-      }
-    );
-  };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
-    >
-      <h2 className="text-lg font-semibold text-[#12233D]">Create admin user</h2>
-      <p className="text-sm text-muted-foreground">
-        Creates a verified user with profile fields required by the backend registration API.
-      </p>
-      <Input
-        label="Email"
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <Input
-        label="Full name"
-        value={fullName}
-        onChange={(e) => setFullName(e.target.value)}
-        required
-      />
-      <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
-      <Input
-        label="Date of birth"
-        type="date"
-        value={dob}
-        onChange={(e) => setDob(e.target.value)}
-        required
-      />
-      <SearchableSelect
-        label="Gender"
-        value={gender}
-        onChange={setGender}
-        options={[
-          { value: 'm', label: 'Male' },
-          { value: 'f', label: 'Female' },
-          { value: 'o', label: 'Other' },
-        ]}
-        searchable={false}
-      />
-      <SearchableSelect
-        label="Nationality"
-        value={nationality}
-        onChange={setNationality}
-        options={(countriesQuery.data ?? []).map((country) => ({
-          value: String(country.id),
-          label: country.name,
-        }))}
-        placeholder="Select"
-        searchable
-        required
-      />
-      <Input
-        label="Other country (if applicable)"
-        value={otherCountry}
-        onChange={(e) => setOtherCountry(e.target.value)}
-      />
-      <SearchableSelect
-        label="Visa type"
-        value={visaType}
-        onChange={setVisaType}
-        options={[
-          { value: 'citizen', label: 'Citizen' },
-          { value: 'permanent', label: 'Permanent' },
-          { value: 'student', label: 'Student' },
-          { value: 'temporary', label: 'Temporary' },
-        ]}
-        searchable={false}
-      />
-      <SearchableSelect
-        label="Role"
-        value={role}
-        onChange={setRole}
-        options={(rolesQuery.data ?? []).map((item) => ({
-          value: String(item.id),
-          label: item.name,
-        }))}
-        placeholder="Select"
-        searchable
-      />
-      <FileField label="Profile picture (optional)" accept="image/*,.pdf" onChange={setPicture} />
-      <FileField label="ID card (optional)" accept="image/*,.pdf" onChange={setIdCard} />
-      <FileField label="Payslip (optional)" accept="image/*,.pdf" onChange={setPaySlip} />
-      <FileField
-        label="Study document (optional)"
-        accept="image/*,.pdf"
-        onChange={setStudyDocument}
-      />
-      {createMutation.isError ? (
-        <p className="text-sm text-red-600">Failed to create admin user.</p>
-      ) : null}
-      {createMutation.isSuccess ? (
-        <p className="text-sm text-green-700">
-          Admin user created. They will receive a welcome email.
-        </p>
-      ) : null}
-      <Button type="submit" disabled={createMutation.isPending}>
-        {createMutation.isPending ? 'Creating…' : 'Create admin user'}
-      </Button>
-    </form>
-  );
+function SectionContent({ section }: { section: SettingsSection }) {
+  switch (section) {
+    case 'app':
+      return <AppSettingsPanel />;
+    case 'registration':
+      return <RegistrationSettingsPanel />;
+    case 'create-admin':
+      return <CreateAdminPanel />;
+    case 'account':
+    default:
+      return <ChangePasswordPanel />;
+  }
 }

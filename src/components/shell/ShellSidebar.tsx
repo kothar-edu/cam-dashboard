@@ -32,8 +32,6 @@ const routes = [
   { title: 'Posts', href: '/dashboard/posts', icon: FileText },
   { title: 'Sponsors', href: '/dashboard/sponsors', icon: DollarSign },
   { title: 'Boundary Labels', href: '/dashboard/boundary-labels', icon: Tag },
-  { title: 'Game settings', href: '/dashboard/game-settings', icon: Settings },
-  { title: 'Payment settings', href: '/dashboard/payment-settings', icon: DollarSign },
   { title: 'Voting Polls', href: '/dashboard/voting', icon: VoteIcon },
   { title: 'Player Verification', href: '/dashboard/verification', icon: UserCheck },
   { title: 'Player Transfers', href: '/dashboard/transfers', icon: RefreshCw },

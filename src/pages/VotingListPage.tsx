@@ -60,7 +60,7 @@ export default function VotingListPage() {
       <div className="space-y-6">
         <PageHeader
           title="Voting polls"
-          description="Tournament nominee polls with live standings. Organization-wide Voting open in Game settings is the master switch."
+          description="Tournament nominee polls with live standings. Organization-wide Voting open in Settings → App settings is the master switch."
           action={
             <Link
               to="/dashboard/voting/new"

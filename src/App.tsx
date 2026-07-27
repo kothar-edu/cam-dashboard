@@ -30,8 +30,6 @@ import UsersPage from '@/pages/UsersPage';
 import UserFormPage from '@/pages/UserFormPage';
 import TenantsPage from '@/pages/TenantsPage';
 import SettingsPage from '@/pages/SettingsPage';
-import GameSettingsPage from '@/pages/GameSettingsPage';
-import PaymentSettingsPage from '@/pages/PaymentSettingsPage';
 import VotingListPage from '@/pages/VotingListPage';
 import VotingFormPage from '@/pages/VotingFormPage';
 import BroadcastOverlayPage from '@/pages/broadcast/BroadcastOverlayPage';
@@ -78,8 +76,14 @@ export default function App() {
           <Route path="sponsors/new" element={<SponsorFormPage />} />
           <Route path="sponsors/:id" element={<SponsorFormPage />} />
           <Route path="boundary-labels" element={<BoundaryLabelsPage />} />
-          <Route path="game-settings" element={<GameSettingsPage />} />
-          <Route path="payment-settings" element={<PaymentSettingsPage />} />
+          <Route
+            path="game-settings"
+            element={<Navigate to="/dashboard/settings?section=app" replace />}
+          />
+          <Route
+            path="payment-settings"
+            element={<Navigate to="/dashboard/settings?section=registration" replace />}
+          />
           <Route path="verification" element={<VerificationPage />} />
           <Route path="transfers" element={<TransfersPage />} />
           <Route path="users" element={<UsersPage />} />

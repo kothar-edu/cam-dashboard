@@ -27,7 +27,7 @@ function labelFor(value: AllScoreValue, boundaryLabels?: BoundaryLabels): string
 }
 
 function styleFor(kind: 'SCORE' | 'WICKET' | null): string {
-  return kind === 'WICKET' ? 'bg-red-700' : 'bg-green-800';
+  return kind === 'WICKET' ? 'bg-red-700/55' : 'bg-green-800/55';
 }
 
 type LastEvent = { kind: 'SCORE' | 'WICKET' | null; value: AllScoreValue | null };
@@ -57,7 +57,9 @@ export function CelebrationFlash({ lastEvent, boundaryLabels }: CelebrationFlash
     <div
       className={`absolute inset-0 flex items-center justify-center text-8xl font-bold text-yellow-400 ${styleFor(lastEvent.kind)}`}
     >
-      <span className="animate-pulse">{labelFor(lastEvent.value, boundaryLabels)}</span>
+      <span className="animate-pulse drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)]">
+        {labelFor(lastEvent.value, boundaryLabels)}
+      </span>
     </div>
   );
 }

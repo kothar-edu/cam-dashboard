@@ -114,7 +114,7 @@ describe('CommentaryBar', () => {
         sponsorText={null}
       />
     );
-    const srcs = screen.getAllByRole('img').map((img) => img.getAttribute('src'));
+    const srcs = screen.getAllByRole('img').map((img: HTMLElement) => img.getAttribute('src'));
     expect(srcs).toContain('https://example.com/a.png');
     expect(srcs).toContain('https://example.com/b.png');
   });

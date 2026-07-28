@@ -1,13 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  applyScorecard,
   getFixture,
   listScorecards,
-  updateLineupBatting,
-  updateLineupBowling,
-  updateLineupFielding,
-  type LineupBattingUpdatePayload,
-  type LineupBowlingUpdatePayload,
-  type LineupFieldingUpdatePayload,
+  validateScorecard,
+  type ScorecardEditPatch,
 } from '@/api/scorecards';
 import type { ListParams } from '@/api/pagination';
 import { useTenant } from '@/contexts/TenantContext';
@@ -31,35 +28,20 @@ export function useScorecard(id?: string) {
   });
 }
 
-export function useUpdateLineupBatting(scorecardId?: string) {
-  const qc = useQueryClient();
-  const { activeTenantId } = useTenant();
+export function useValidateScorecard(scorecardId?: string) {
   return useMutation({
-    mutationFn: (payload: LineupBattingUpdatePayload[]) => updateLineupBatting(payload),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['scorecard', activeTenantId, scorecardId] });
-    },
+    mutationFn: (patch: ScorecardEditPatch) => validateScorecard(scorecardId!, patch),
   });
 }
 
-export function useUpdateLineupBowling(scorecardId?: string) {
+export function useApplyScorecard(scorecardId?: string) {
   const qc = useQueryClient();
   const { activeTenantId } = useTenant();
   return useMutation({
-    mutationFn: (payload: LineupBowlingUpdatePayload[]) => updateLineupBowling(payload),
+    mutationFn: (patch: ScorecardEditPatch) => applyScorecard(scorecardId!, patch),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['scorecard', activeTenantId, scorecardId] });
-    },
-  });
-}
-
-export function useUpdateLineupFielding(scorecardId?: string) {
-  const qc = useQueryClient();
-  const { activeTenantId } = useTenant();
-  return useMutation({
-    mutationFn: (payload: LineupFieldingUpdatePayload[]) => updateLineupFielding(payload),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['scorecard', activeTenantId, scorecardId] });
+      qc.invalidateQueries({ queryKey: ['scorecards', activeTenantId] });
     },
   });
 }

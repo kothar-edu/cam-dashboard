@@ -56,6 +56,7 @@ export default function ScorecardDetailPage() {
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewOutcome, setReviewOutcome] = useState<ScorecardEditOutcome | null>(null);
   const [pendingPatch, setPendingPatch] = useState<ScorecardEditPatch | null>(null);
+  const [confirmedTokens, setConfirmedTokens] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!data) return;
@@ -79,6 +80,7 @@ export default function ScorecardDetailPage() {
     setDls(meta.dls);
     setMotm(meta.motm);
     setBaselineMeta(meta);
+    setConfirmedTokens(new Set());
   }, [data]);
 
   const allLineups = useMemo(() => [...lineupsA, ...lineupsB], [lineupsA, lineupsB]);
@@ -108,7 +110,12 @@ export default function ScorecardDetailPage() {
   const anyDirty = lineupDirty || ballsDirty || metaDirty;
   const ballHistoryAvailable = hasBallHistory(resultDraft ?? data?.result);
 
-  const buildPatch = (): ScorecardEditPatch => {
+  const buildPatch = (
+    draftOverride?: ScorecardResultDump | null,
+    tokensOverride?: Set<string>
+  ): ScorecardEditPatch => {
+    const draft = draftOverride !== undefined ? draftOverride : resultDraft;
+    const tokens = tokensOverride ?? confirmedTokens;
     const lineups: ScorecardLineupPatch[] = [];
     for (const lineup of allLineups) {
       const base = allBaseline.find((item) => item.id === lineup.id);
@@ -127,8 +134,8 @@ export default function ScorecardDetailPage() {
     }
 
     const balls: ScorecardBallPatch[] = [];
-    if (resultDraft && baselineResult) {
-      (resultDraft.innings || []).forEach((inning, innings_index) => {
+    if (draft && baselineResult) {
+      (draft.innings || []).forEach((inning, innings_index) => {
         (inning.overs || []).forEach((over, over_index) => {
           (over.scores || []).forEach((ball, ball_index) => {
             const before =
@@ -172,6 +179,7 @@ export default function ScorecardDetailPage() {
       ...(lineups.length ? { lineups } : {}),
       ...(balls.length ? { balls } : {}),
       ...(Object.keys(match).length ? { match } : {}),
+      ...(tokens.size ? { confirmed_batter_slots: Array.from(tokens) } : {}),
     };
   };
 
@@ -185,6 +193,7 @@ export default function ScorecardDetailPage() {
     setTied(baselineMeta.tied);
     setDls(baselineMeta.dls);
     setMotm(baselineMeta.motm);
+    setConfirmedTokens(new Set());
   };
 
   const onValidate = async () => {
@@ -218,6 +227,48 @@ export default function ScorecardDetailPage() {
       setPendingPatch(null);
     } catch (error) {
       toast.error(getApiErrorMessage(error, 'Could not apply scorecard changes'));
+    }
+  };
+
+  // Applies a consistency-issue fix (or confirmation) and immediately re-validates.
+  // Builds the patch from the freshly-computed draft/tokens directly rather than
+  // waiting for setState to flush, since useState updates aren't visible to a
+  // buildPatch() call made in the same tick.
+  const onResolveIssue = async (
+    patches: Array<{
+      innings_index: number;
+      over_index: number;
+      ball_index: number;
+      striker?: string | null;
+      non_striker?: string | null;
+    }>,
+    tokens: string[] = []
+  ) => {
+    if (!id || !resultDraft) return;
+    const nextDraft = structuredClone(resultDraft);
+    patches.forEach((p) => {
+      const ball =
+        nextDraft.innings?.[p.innings_index]?.overs?.[p.over_index]?.scores?.[p.ball_index];
+      if (!ball) return;
+      if ('striker' in p) ball.striker = p.striker;
+      if ('non_striker' in p) ball.non_striker = p.non_striker;
+    });
+    const nextTokens = new Set(confirmedTokens);
+    tokens.forEach((t) => nextTokens.add(t));
+
+    setResultDraft(nextDraft);
+    setConfirmedTokens(nextTokens);
+
+    const patch = buildPatch(nextDraft, nextTokens);
+    try {
+      const outcome = await validateMutation.mutateAsync(patch);
+      setPendingPatch(patch);
+      setReviewOutcome(outcome);
+      if (outcome.errors.length) {
+        toast.error('Scorecard has validation errors');
+      }
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Could not validate scorecard'));
     }
   };
 
@@ -397,6 +448,7 @@ export default function ScorecardDetailPage() {
         outcome={reviewOutcome}
         applying={applyMutation.isPending}
         onApply={() => void onApply()}
+        onResolveIssue={onResolveIssue}
       />
     </TenantRequired>
   );

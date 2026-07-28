@@ -57,6 +57,7 @@ export type ScorecardEditPatch = {
   lineups?: ScorecardLineupPatch[];
   balls?: ScorecardBallPatch[];
   match?: ScorecardMatchPatch;
+  confirmed_batter_slots?: string[];
 };
 
 export type ScorecardChangeItem = {
@@ -66,6 +67,35 @@ export type ScorecardChangeItem = {
   before: unknown;
   after: unknown;
   label: string;
+};
+
+export type RotationShiftFix = {
+  innings_index: number;
+  over_index: number;
+  ball_index: number;
+  striker: string | null;
+  non_striker: string | null;
+};
+
+export type RotationShiftIssue = {
+  kind: 'rotation_shift';
+  innings_index: number;
+  message: string;
+  balls: string[];
+  fix: RotationShiftFix[];
+};
+
+export type BatterSlotIssue = {
+  kind: 'batter_slot';
+  severity: 'confirm' | 'error';
+  innings_index: number;
+  over_index: number;
+  ball_index: number;
+  slot: 'striker' | 'non_striker';
+  message: string;
+  default_player_id: string | null;
+  eligible_players: Array<{ id: string; full_name: string }>;
+  token: string;
 };
 
 export type ScorecardEditOutcome = {
@@ -81,6 +111,8 @@ export type ScorecardEditOutcome = {
     man_of_the_match?: string | null;
     has_ball_history?: boolean;
   };
+  rotation_shift_issues: RotationShiftIssue[];
+  batter_slot_issues: BatterSlotIssue[];
   fixture?: FixtureDetail;
 };
 

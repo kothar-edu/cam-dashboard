@@ -24,6 +24,8 @@ describe('ScorecardValidateModal', () => {
         },
       ],
       preview: {},
+      rotation_shift_issues: [],
+      batter_slot_issues: [],
     };
 
     render(
@@ -33,6 +35,7 @@ describe('ScorecardValidateModal', () => {
         outcome={outcome}
         applying={false}
         onApply={onApply}
+        onResolveIssue={vi.fn()}
       />
     );
 
@@ -67,6 +70,8 @@ describe('ScorecardValidateModal', () => {
         },
       ],
       preview: { winner: 'B' },
+      rotation_shift_issues: [],
+      batter_slot_issues: [],
     };
 
     render(
@@ -76,11 +81,70 @@ describe('ScorecardValidateModal', () => {
         outcome={outcome}
         applying={false}
         onApply={onApply}
+        onResolveIssue={vi.fn()}
       />
     );
 
     await user.click(screen.getByRole('button', { name: 'Apply changes' }));
     expect(onApply).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows consistency issues and fires onResolveIssue from the Fix button', async () => {
+    const user = userEvent.setup();
+    const onResolveIssue = vi.fn();
+    const outcome: ScorecardEditOutcome = {
+      ok: true,
+      errors: [],
+      warnings: [],
+      changes: [],
+      preview: {},
+      rotation_shift_issues: [
+        {
+          kind: 'rotation_shift',
+          innings_index: 0,
+          message: 'Innings 1: strike rotation is off from ball 1.0.3 onward after this edit.',
+          balls: ['0.0.2'],
+          fix: [
+            { innings_index: 0, over_index: 0, ball_index: 2, striker: 'p1', non_striker: 'p2' },
+          ],
+        },
+      ],
+      batter_slot_issues: [
+        {
+          kind: 'batter_slot',
+          severity: 'confirm',
+          innings_index: 0,
+          over_index: 0,
+          ball_index: 3,
+          slot: 'striker',
+          message: 'Ball 1.0.4: p1 is out here - confirm who takes the striker spot next.',
+          default_player_id: 'p1',
+          eligible_players: [{ id: 'p3', full_name: 'Player Three' }],
+          token: '0.0.3.striker',
+        },
+      ],
+    };
+
+    render(
+      <ScorecardValidateModal
+        open
+        onOpenChange={() => undefined}
+        outcome={outcome}
+        applying={false}
+        onApply={vi.fn()}
+        onResolveIssue={onResolveIssue}
+      />
+    );
+
+    expect(screen.getByText('Data consistency')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Fix' }));
+    expect(onResolveIssue).toHaveBeenCalledWith(outcome.rotation_shift_issues[0].fix);
+
+    await user.click(screen.getByRole('button', { name: 'Confirm' }));
+    expect(onResolveIssue).toHaveBeenCalledWith(
+      [{ innings_index: 0, over_index: 0, ball_index: 3, striker: 'p1' }],
+      ['0.0.3.striker']
+    );
   });
 });
 

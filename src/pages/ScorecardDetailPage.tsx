@@ -6,292 +6,398 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { ScorecardOverview } from '@/components/scorecards/ScorecardOverview';
+import { BallByBallEditor } from '@/components/scorecards/BallByBallEditor';
+import { ScorecardValidateModal } from '@/components/scorecards/ScorecardValidateModal';
 import {
+  useApplyScorecard,
   useScorecard,
-  useUpdateLineupBatting,
-  useUpdateLineupBowling,
-  useUpdateLineupFielding,
+  useValidateScorecard,
 } from '@/hooks/useScorecards';
+import {
+  hasBallHistory,
+  parseScorecardResult,
+  type ScoreBall,
+  type ScorecardBallPatch,
+  type ScorecardEditOutcome,
+  type ScorecardEditPatch,
+  type ScorecardLineupPatch,
+  type ScorecardResultDump,
+  type LineupEntry,
+} from '@/api/scorecards';
 import { getApiErrorMessage } from '@/lib/api-errors';
-import type { LineupEntry } from '@/api/scorecards';
+import { matchOutcomeLabel } from '@/lib/scorecard';
 import { cn } from '@/lib/utils';
 
-type EditableLineup = LineupEntry;
-type DetailTab = 'overview' | 'edit';
+type DetailTab = 'overview' | 'stats' | 'balls' | 'officials';
 
 export default function ScorecardDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data, isLoading, isError } = useScorecard(id);
-  const battingMutation = useUpdateLineupBatting(id);
-  const bowlingMutation = useUpdateLineupBowling(id);
-  const fieldingMutation = useUpdateLineupFielding(id);
+  const validateMutation = useValidateScorecard(id);
+  const applyMutation = useApplyScorecard(id);
 
   const [tab, setTab] = useState<DetailTab>('overview');
-  const [lineupsA, setLineupsA] = useState<EditableLineup[]>([]);
-  const [lineupsB, setLineupsB] = useState<EditableLineup[]>([]);
-  const [baselineA, setBaselineA] = useState<EditableLineup[]>([]);
-  const [baselineB, setBaselineB] = useState<EditableLineup[]>([]);
-  const [savingAll, setSavingAll] = useState(false);
+  const [lineupsA, setLineupsA] = useState<LineupEntry[]>([]);
+  const [lineupsB, setLineupsB] = useState<LineupEntry[]>([]);
+  const [baselineA, setBaselineA] = useState<LineupEntry[]>([]);
+  const [baselineB, setBaselineB] = useState<LineupEntry[]>([]);
+  const [resultDraft, setResultDraft] = useState<ScorecardResultDump | null>(null);
+  const [baselineResult, setBaselineResult] = useState<ScorecardResultDump | null>(null);
+  const [abandoned, setAbandoned] = useState(false);
+  const [tied, setTied] = useState(false);
+  const [dls, setDls] = useState(false);
+  const [motm, setMotm] = useState<string | null>(null);
+  const [baselineMeta, setBaselineMeta] = useState({
+    abandoned: false,
+    tied: false,
+    dls: false,
+    motm: null as string | null,
+  });
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewOutcome, setReviewOutcome] = useState<ScorecardEditOutcome | null>(null);
+  const [pendingPatch, setPendingPatch] = useState<ScorecardEditPatch | null>(null);
 
   useEffect(() => {
-    if (data) {
-      const nextA = (data.lineups_a ?? []).map(normalizeLineup);
-      const nextB = (data.lineups_b ?? []).map(normalizeLineup);
-      setLineupsA(nextA);
-      setLineupsB(nextB);
-      setBaselineA(nextA);
-      setBaselineB(nextB);
-    }
+    if (!data) return;
+    const nextA = (data.lineups_a ?? []).map(normalizeLineup);
+    const nextB = (data.lineups_b ?? []).map(normalizeLineup);
+    setLineupsA(nextA);
+    setLineupsB(nextB);
+    setBaselineA(nextA);
+    setBaselineB(nextB);
+    const parsed = parseScorecardResult(data.result);
+    setResultDraft(parsed ? structuredClone(parsed) : null);
+    setBaselineResult(parsed ? structuredClone(parsed) : null);
+    const meta = {
+      abandoned: Boolean(data.abandoned),
+      tied: Boolean(data.tied),
+      dls: Boolean(data.dls),
+      motm: data.man_of_the_match?.id ?? null,
+    };
+    setAbandoned(meta.abandoned);
+    setTied(meta.tied);
+    setDls(meta.dls);
+    setMotm(meta.motm);
+    setBaselineMeta(meta);
   }, [data]);
 
   const allLineups = useMemo(() => [...lineupsA, ...lineupsB], [lineupsA, lineupsB]);
   const allBaseline = useMemo(() => [...baselineA, ...baselineB], [baselineA, baselineB]);
+  const players = useMemo(
+    () =>
+      allLineups.map((lineup) => ({
+        id: String(lineup.player.id),
+        full_name: lineup.player.full_name,
+      })),
+    [allLineups]
+  );
 
-  const battingDirty = useMemo(
-    () => isSectionDirty(allLineups, allBaseline, battingSnapshot),
+  const lineupDirty = useMemo(
+    () => JSON.stringify(allLineups.map(lineupSnapshot)) !== JSON.stringify(allBaseline.map(lineupSnapshot)),
     [allBaseline, allLineups]
   );
-  const bowlingDirty = useMemo(
-    () => isSectionDirty(allLineups, allBaseline, bowlingSnapshot),
-    [allBaseline, allLineups]
+  const ballsDirty = useMemo(
+    () => JSON.stringify(resultDraft) !== JSON.stringify(baselineResult),
+    [baselineResult, resultDraft]
   );
-  const fieldingDirty = useMemo(
-    () => isSectionDirty(allLineups, allBaseline, fieldingSnapshot),
-    [allBaseline, allLineups]
-  );
-  const anyDirty = battingDirty || bowlingDirty || fieldingDirty;
+  const metaDirty =
+    abandoned !== baselineMeta.abandoned ||
+    tied !== baselineMeta.tied ||
+    dls !== baselineMeta.dls ||
+    motm !== baselineMeta.motm;
+  const anyDirty = lineupDirty || ballsDirty || metaDirty;
+  const ballHistoryAvailable = hasBallHistory(resultDraft ?? data?.result);
 
-  const battingPayload = () => allLineups.map(toBattingPayload);
-  const bowlingPayload = () => allLineups.map(toBowlingPayload);
-  const fieldingPayload = () => allLineups.map(toFieldingPayload);
+  const buildPatch = (): ScorecardEditPatch => {
+    const lineups: ScorecardLineupPatch[] = [];
+    for (const lineup of allLineups) {
+      const base = allBaseline.find((item) => item.id === lineup.id);
+      if (!base) continue;
+      const patch: ScorecardLineupPatch = { id: Number(lineup.id) };
+      let dirty = false;
+      (Object.keys(lineupSnapshot(lineup)) as Array<keyof ReturnType<typeof lineupSnapshot>>).forEach(
+        (key) => {
+          if (lineupSnapshot(lineup)[key] !== lineupSnapshot(base)[key]) {
+            (patch as Record<string, unknown>)[key] = lineupSnapshot(lineup)[key];
+            dirty = true;
+          }
+        }
+      );
+      if (dirty) lineups.push(patch);
+    }
 
-  const markSaved = (sections: Array<'batting' | 'bowling' | 'fielding'>) => {
-    const nextBaseline = allLineups.map((lineup) => {
-      const base = allBaseline.find((item) => item.id === lineup.id) ?? lineup;
-      return {
-        ...base,
-        ...(sections.includes('batting') ? battingFields(lineup) : battingFields(base)),
-        ...(sections.includes('bowling') ? bowlingFields(lineup) : bowlingFields(base)),
-        ...(sections.includes('fielding') ? fieldingFields(lineup) : fieldingFields(base)),
-        player: lineup.player,
-        id: lineup.id,
-      };
+    const balls: ScorecardBallPatch[] = [];
+    if (resultDraft && baselineResult) {
+      (resultDraft.innings || []).forEach((inning, innings_index) => {
+        (inning.overs || []).forEach((over, over_index) => {
+          (over.scores || []).forEach((ball, ball_index) => {
+            const before =
+              baselineResult.innings?.[innings_index]?.overs?.[over_index]?.scores?.[ball_index];
+            if (!before) return;
+            const fields: Array<keyof ScoreBall> = [
+              'value',
+              'runs',
+              'extras',
+              'striker',
+              'non_striker',
+              'bowler',
+              'wicket_keeper',
+              'dismissed',
+              'fielder',
+              'commentary',
+              'is_bat_involved',
+              'bye_type',
+            ];
+            const changed = fields.some((field) => before[field] !== ball[field]);
+            if (!changed) return;
+            const patch: ScorecardBallPatch = { innings_index, over_index, ball_index };
+            fields.forEach((field) => {
+              if (before[field] !== ball[field]) {
+                (patch as Record<string, unknown>)[field] = ball[field];
+              }
+            });
+            balls.push(patch);
+          });
+        });
+      });
+    }
+
+    const match: ScorecardEditPatch['match'] = {};
+    if (abandoned !== baselineMeta.abandoned) match.abandoned = abandoned;
+    if (tied !== baselineMeta.tied) match.tied = tied;
+    if (dls !== baselineMeta.dls) match.dls = dls;
+    if (motm !== baselineMeta.motm) match.man_of_the_match = motm;
+
+    return {
+      ...(lineups.length ? { lineups } : {}),
+      ...(balls.length ? { balls } : {}),
+      ...(Object.keys(match).length ? { match } : {}),
+    };
+  };
+
+  const discardDraft = () => {
+    if (!anyDirty) return;
+    if (!window.confirm('Discard all unsaved scorecard changes?')) return;
+    setLineupsA(baselineA.map(normalizeLineup));
+    setLineupsB(baselineB.map(normalizeLineup));
+    setResultDraft(baselineResult ? structuredClone(baselineResult) : null);
+    setAbandoned(baselineMeta.abandoned);
+    setTied(baselineMeta.tied);
+    setDls(baselineMeta.dls);
+    setMotm(baselineMeta.motm);
+  };
+
+  const onValidate = async () => {
+    if (!id || !anyDirty) return;
+    const patch = buildPatch();
+    try {
+      const outcome = await validateMutation.mutateAsync(patch);
+      setPendingPatch(patch);
+      setReviewOutcome(outcome);
+      setReviewOpen(true);
+      if (outcome.errors.length) {
+        toast.error('Scorecard has validation errors');
+      }
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Could not validate scorecard'));
+    }
+  };
+
+  const onApply = async () => {
+    if (!id || !pendingPatch) return;
+    try {
+      const outcome = await applyMutation.mutateAsync(pendingPatch);
+      if (outcome.errors?.length || outcome.ok === false) {
+        setReviewOutcome(outcome);
+        toast.error('Could not apply scorecard changes');
+        return;
+      }
+      toast.success('Scorecard updated');
+      setReviewOpen(false);
+      setReviewOutcome(null);
+      setPendingPatch(null);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Could not apply scorecard changes'));
+    }
+  };
+
+  const updateLineup = (
+    side: 'a' | 'b',
+    lineupId: string,
+    patch: Partial<LineupEntry>
+  ) => {
+    const setter = side === 'a' ? setLineupsA : setLineupsB;
+    setter((current) =>
+      current.map((lineup) => (lineup.id === lineupId ? { ...lineup, ...patch } : lineup))
+    );
+  };
+
+  const onBallChange = (
+    selection: { innings_index: number; over_index: number; ball_index: number },
+    patch: Partial<ScoreBall>
+  ) => {
+    setResultDraft((current) => {
+      if (!current) return current;
+      const next = structuredClone(current);
+      const ball =
+        next.innings?.[selection.innings_index]?.overs?.[selection.over_index]?.scores?.[
+          selection.ball_index
+        ];
+      if (!ball) return current;
+      Object.assign(ball, patch);
+      return next;
     });
-    const idsA = new Set(lineupsA.map((l) => l.id));
-    setBaselineA(nextBaseline.filter((l) => idsA.has(l.id)));
-    setBaselineB(nextBaseline.filter((l) => !idsA.has(l.id)));
   };
-
-  const saveBatting = async () => {
-    if (!allLineups.length) return;
-    try {
-      await battingMutation.mutateAsync(battingPayload());
-      markSaved(['batting']);
-      toast.success('Batting stats saved.');
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, 'Failed to save batting stats.'));
-    }
-  };
-
-  const saveBowling = async () => {
-    if (!allLineups.length) return;
-    try {
-      await bowlingMutation.mutateAsync(bowlingPayload());
-      markSaved(['bowling']);
-      toast.success('Bowling stats saved.');
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, 'Failed to save bowling stats.'));
-    }
-  };
-
-  const saveFielding = async () => {
-    if (!allLineups.length) return;
-    try {
-      await fieldingMutation.mutateAsync(fieldingPayload());
-      markSaved(['fielding']);
-      toast.success('Fielding stats saved.');
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, 'Failed to save fielding stats.'));
-    }
-  };
-
-  const saveAll = async () => {
-    if (!allLineups.length || !anyDirty) return;
-    setSavingAll(true);
-    const saved: Array<'batting' | 'bowling' | 'fielding'> = [];
-    try {
-      const tasks: Array<Promise<unknown>> = [];
-      if (battingDirty) {
-        tasks.push(
-          battingMutation.mutateAsync(battingPayload()).then(() => {
-            saved.push('batting');
-          })
-        );
-      }
-      if (bowlingDirty) {
-        tasks.push(
-          bowlingMutation.mutateAsync(bowlingPayload()).then(() => {
-            saved.push('bowling');
-          })
-        );
-      }
-      if (fieldingDirty) {
-        tasks.push(
-          fieldingMutation.mutateAsync(fieldingPayload()).then(() => {
-            saved.push('fielding');
-          })
-        );
-      }
-      await Promise.all(tasks);
-      markSaved(saved);
-      toast.success('All changed stats saved.');
-    } catch (error) {
-      if (saved.length) markSaved(saved);
-      toast.error(getApiErrorMessage(error, 'Failed to save some lineup stats.'));
-    } finally {
-      setSavingAll(false);
-    }
-  };
-
-  const pending =
-    savingAll ||
-    battingMutation.isPending ||
-    bowlingMutation.isPending ||
-    fieldingMutation.isPending;
-  const hasLineups = allLineups.length > 0;
-
-  const title =
-    data != null
-      ? `${data.opponent_a.team.name} vs ${data.opponent_b.team.name}`
-      : 'Scorecard';
 
   return (
     <TenantRequired>
-      <div className="space-y-6">
-        <PageHeader title={title} backTo="/dashboard/scorecards" backLabel="All scorecards" />
-        {isLoading && !data ? (
-          <div className="flex min-h-[30vh] items-center justify-center">
-            <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
-          </div>
-        ) : isError || !data ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
-            Unable to load scorecard.
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1">
+      <div className="space-y-4 pb-24">
+        <PageHeader
+          title="Scorecard"
+          description={
+            data
+              ? `${data.opponent_a.team.name} vs ${data.opponent_b.team.name}`
+              : 'Ended match scorecard'
+          }
+        />
+
+        {isLoading ? <LoadingSpinner className="h-8 w-8 text-[#12233D]" /> : null}
+        {isError ? (
+          <p className="text-sm text-red-600">Could not load this scorecard.</p>
+        ) : null}
+
+        {data ? (
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3">
+              <div>
+                <p className="text-sm font-semibold text-[#12233D]">
+                  {data.opponent_a.team.name} vs {data.opponent_b.team.name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {matchOutcomeLabel({
+                    winner: data.winner,
+                    abandoned: data.abandoned ?? false,
+                    tied: data.tied ?? false,
+                  })}
+                  {anyDirty ? ' · Unsaved draft' : ''}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant="outline" disabled={!anyDirty} onClick={discardDraft}>
+                  Discard
+                </Button>
+                <Button
+                  type="button"
+                  disabled={!anyDirty || validateMutation.isPending}
+                  onClick={() => void onValidate()}
+                >
+                  {validateMutation.isPending ? 'Validating…' : 'Validate scorecard'}
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-1 rounded-lg bg-slate-100 p-1">
               <TabButton active={tab === 'overview'} onClick={() => setTab('overview')}>
-                Scorecard
+                Overview
               </TabButton>
-              <TabButton active={tab === 'edit'} onClick={() => setTab('edit')}>
-                Edit stats
+              <TabButton active={tab === 'stats'} onClick={() => setTab('stats')}>
+                Batting & bowling
+              </TabButton>
+              <TabButton active={tab === 'balls'} onClick={() => setTab('balls')}>
+                Ball by ball
+              </TabButton>
+              <TabButton active={tab === 'officials'} onClick={() => setTab('officials')}>
+                Officials
               </TabButton>
             </div>
 
-            {tab === 'overview' ? (
-              <ScorecardOverview data={data} />
-            ) : (
-              <div className="space-y-6">
-                <p className="text-sm text-muted-foreground">
-                  Adjust batting, bowling, and fielding figures. Use Save all for every change, or
-                  save one section at a time.
-                </p>
-                <LineupEditor
-                  title={`${data.opponent_a.team.name} — batting`}
+            {tab === 'overview' ? <ScorecardOverview data={data} /> : null}
+
+            {tab === 'stats' ? (
+              <div className="space-y-4">
+                <InningsStatsEditor
+                  title={`${data.opponent_a.team.name} — batting & fielding`}
                   lineups={lineupsA}
-                  onChange={setLineupsA}
+                  onChange={(lineupId, patch) => updateLineup('a', lineupId, patch)}
                   mode="batting"
                 />
-                <LineupEditor
-                  title={`${data.opponent_b.team.name} — batting`}
+                <InningsStatsEditor
+                  title={`${data.opponent_b.team.name} — batting & fielding`}
                   lineups={lineupsB}
-                  onChange={setLineupsB}
+                  onChange={(lineupId, patch) => updateLineup('b', lineupId, patch)}
                   mode="batting"
                 />
-                <LineupEditor
+                <InningsStatsEditor
                   title={`${data.opponent_a.team.name} — bowling`}
                   lineups={lineupsA}
-                  onChange={setLineupsA}
+                  onChange={(lineupId, patch) => updateLineup('a', lineupId, patch)}
                   mode="bowling"
                 />
-                <LineupEditor
+                <InningsStatsEditor
                   title={`${data.opponent_b.team.name} — bowling`}
                   lineups={lineupsB}
-                  onChange={setLineupsB}
+                  onChange={(lineupId, patch) => updateLineup('b', lineupId, patch)}
                   mode="bowling"
                 />
-                <LineupEditor
-                  title={`${data.opponent_a.team.name} — fielding`}
-                  lineups={lineupsA}
-                  onChange={setLineupsA}
-                  mode="fielding"
-                />
-                <LineupEditor
-                  title={`${data.opponent_b.team.name} — fielding`}
-                  lineups={lineupsB}
-                  onChange={setLineupsB}
-                  mode="fielding"
-                />
-
-                <div className="flex flex-wrap gap-3 border-t border-slate-100 pt-4">
-                  <Button
-                    type="button"
-                    onClick={() => void saveAll()}
-                    disabled={pending || !hasLineups || !anyDirty}
-                  >
-                    {savingAll ? 'Saving all…' : 'Save all'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => void saveBatting()}
-                    disabled={pending || !hasLineups || !battingDirty}
-                  >
-                    {battingMutation.isPending && !savingAll
-                      ? 'Saving batting…'
-                      : 'Save batting stats'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => void saveBowling()}
-                    disabled={pending || !hasLineups || !bowlingDirty}
-                  >
-                    {bowlingMutation.isPending && !savingAll
-                      ? 'Saving bowling…'
-                      : 'Save bowling stats'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => void saveFielding()}
-                    disabled={pending || !hasLineups || !fieldingDirty}
-                  >
-                    {fieldingMutation.isPending && !savingAll
-                      ? 'Saving fielding…'
-                      : 'Save fielding stats'}
-                  </Button>
-                </div>
-                {anyDirty ? (
+                {ballHistoryAvailable ? (
                   <p className="text-xs text-muted-foreground">
-                    Unsaved changes:{' '}
-                    {[
-                      battingDirty ? 'batting' : null,
-                      bowlingDirty ? 'bowling' : null,
-                      fieldingDirty ? 'fielding' : null,
-                    ]
-                      .filter(Boolean)
-                      .join(', ')}
-                    .
+                    This match has ball history. Aggregate edits that conflict with balls will be
+                    rejected on validate — prefer editing balls when correcting dismissals or
+                    attribution.
                   </p>
-                ) : (
-                  <p className="text-xs text-muted-foreground">All stats match the saved scorecard.</p>
-                )}
+                ) : null}
               </div>
-            )}
-          </div>
-        )}
+            ) : null}
+
+            {tab === 'balls' ? (
+              resultDraft && ballHistoryAvailable ? (
+                <BallByBallEditor
+                  result={resultDraft}
+                  players={players}
+                  onBallChange={onBallChange}
+                />
+              ) : (
+                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center text-sm text-muted-foreground">
+                  No ball-by-ball history is available for this match.
+                </div>
+              )
+            ) : null}
+
+            {tab === 'officials' ? (
+              <div className="grid gap-4 rounded-xl border bg-white p-4 sm:grid-cols-2">
+                <label className="block text-sm">
+                  <span className="mb-1 block text-xs font-medium text-muted-foreground">
+                    Player of the match
+                  </span>
+                  <select
+                    className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm"
+                    value={motm || ''}
+                    onChange={(e) => setMotm(e.target.value || null)}
+                  >
+                    <option value="">—</option>
+                    {players.map((player) => (
+                      <option key={player.id} value={player.id}>
+                        {player.full_name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <ToggleRow label="Match abandoned" value={abandoned} onChange={setAbandoned} />
+                <ToggleRow label="Match tied" value={tied} onChange={setTied} />
+                <ToggleRow label="D/L applied" value={dls} onChange={setDls} />
+              </div>
+            ) : null}
+          </>
+        ) : null}
       </div>
+
+      <ScorecardValidateModal
+        open={reviewOpen}
+        onOpenChange={setReviewOpen}
+        outcome={reviewOutcome}
+        applying={applyMutation.isPending}
+        onApply={() => void onApply()}
+      />
     </TenantRequired>
   );
 }
@@ -311,9 +417,7 @@ function TabButton({
       onClick={onClick}
       className={cn(
         'rounded-md px-3 py-1.5 text-sm font-medium transition',
-        active
-          ? 'bg-[#12233D] text-white shadow-sm'
-          : 'text-muted-foreground hover:text-[#12233D]'
+        active ? 'bg-[#12233D] text-white shadow-sm' : 'text-muted-foreground hover:text-[#12233D]'
       )}
     >
       {children}
@@ -321,53 +425,63 @@ function TabButton({
   );
 }
 
-function LineupEditor({
+function ToggleRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <label className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm">
+      <span className="font-medium text-[#12233D]">{label}</span>
+      <input type="checkbox" checked={value} onChange={(e) => onChange(e.target.checked)} />
+    </label>
+  );
+}
+
+function InningsStatsEditor({
   title,
   lineups,
   onChange,
   mode,
 }: {
   title: string;
-  lineups: EditableLineup[];
-  onChange: (lineups: EditableLineup[]) => void;
-  mode: 'batting' | 'bowling' | 'fielding';
+  lineups: LineupEntry[];
+  onChange: (lineupId: string, patch: Partial<LineupEntry>) => void;
+  mode: 'batting' | 'bowling';
 }) {
-  const updateLineup = (lineupId: string, patch: Partial<EditableLineup>) => {
-    onChange(lineups.map((lineup) => (lineup.id === lineupId ? { ...lineup, ...patch } : lineup)));
-  };
-
   return (
-    <div className="overflow-hidden rounded-lg border bg-white">
-      <div className="border-b px-4 py-3 font-semibold text-[#12233D]">{title}</div>
+    <div className="overflow-hidden rounded-xl border bg-white">
+      <div className="border-b bg-[#12233D] px-4 py-2.5 text-sm font-semibold text-white">
+        {title}
+      </div>
       {lineups.length ? (
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-left">
+            <thead className="bg-slate-50 text-left text-xs text-muted-foreground">
               <tr>
-                <th className="px-4 py-2">Player</th>
+                <th className="px-4 py-2 font-medium">Player</th>
                 {mode === 'batting' ? (
                   <>
-                    <th className="px-4 py-2">Runs</th>
-                    <th className="px-4 py-2">Balls</th>
-                    <th className="px-4 py-2">4s</th>
-                    <th className="px-4 py-2">6s</th>
-                    <th className="px-4 py-2">Out</th>
-                  </>
-                ) : mode === 'bowling' ? (
-                  <>
-                    <th className="px-4 py-2">Balls</th>
-                    <th className="px-4 py-2">Runs conc.</th>
-                    <th className="px-4 py-2">Wkts</th>
-                    <th className="px-4 py-2">Maidens</th>
-                    <th className="px-4 py-2">Hattricks</th>
+                    <th className="px-3 py-2 font-medium">R</th>
+                    <th className="px-3 py-2 font-medium">B</th>
+                    <th className="px-3 py-2 font-medium">4s</th>
+                    <th className="px-3 py-2 font-medium">6s</th>
+                    <th className="px-3 py-2 font-medium">Out</th>
+                    <th className="px-3 py-2 font-medium">Ct</th>
+                    <th className="px-3 py-2 font-medium">RO</th>
+                    <th className="px-3 py-2 font-medium">St</th>
                   </>
                 ) : (
                   <>
-                    <th className="px-4 py-2">Catches</th>
-                    <th className="px-4 py-2">Run outs</th>
-                    <th className="px-4 py-2">Direct hits</th>
-                    <th className="px-4 py-2">RO support</th>
-                    <th className="px-4 py-2">Stumpings</th>
+                    <th className="px-3 py-2 font-medium">Balls</th>
+                    <th className="px-3 py-2 font-medium">Runs</th>
+                    <th className="px-3 py-2 font-medium">Wkts</th>
+                    <th className="px-3 py-2 font-medium">Mdns</th>
+                    <th className="px-3 py-2 font-medium">HT</th>
                   </>
                 )}
               </tr>
@@ -375,106 +489,91 @@ function LineupEditor({
             <tbody>
               {lineups.map((lineup) => (
                 <tr key={lineup.id} className="border-t">
-                  <td className="px-4 py-2">{lineup.player.full_name}</td>
+                  <td className="px-4 py-2 font-medium text-[#12233D]">
+                    {lineup.player.full_name}
+                  </td>
                   {mode === 'batting' ? (
                     <>
-                      <td className="px-4 py-2">
+                      <td className="px-2 py-1.5">
                         <StatInput
                           value={lineup.runs_scored}
-                          onChange={(value) => updateLineup(lineup.id, { runs_scored: value })}
+                          onChange={(value) => onChange(lineup.id, { runs_scored: value })}
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-2 py-1.5">
                         <StatInput
                           value={lineup.balls_faced}
-                          onChange={(value) => updateLineup(lineup.id, { balls_faced: value })}
+                          onChange={(value) => onChange(lineup.id, { balls_faced: value })}
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-2 py-1.5">
                         <StatInput
                           value={lineup.fours}
-                          onChange={(value) => updateLineup(lineup.id, { fours: value })}
+                          onChange={(value) => onChange(lineup.id, { fours: value })}
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-2 py-1.5">
                         <StatInput
                           value={lineup.sixes}
-                          onChange={(value) => updateLineup(lineup.id, { sixes: value })}
+                          onChange={(value) => onChange(lineup.id, { sixes: value })}
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-2 py-1.5">
                         <input
                           type="checkbox"
                           checked={lineup.dismissed}
-                          onChange={(event) =>
-                            updateLineup(lineup.id, { dismissed: event.target.checked })
-                          }
+                          onChange={(e) => onChange(lineup.id, { dismissed: e.target.checked })}
                         />
                       </td>
-                    </>
-                  ) : mode === 'bowling' ? (
-                    <>
-                      <td className="px-4 py-2">
+                      <td className="px-2 py-1.5">
                         <StatInput
-                          value={lineup.balls_thrown}
-                          onChange={(value) => updateLineup(lineup.id, { balls_thrown: value })}
+                          value={lineup.catches}
+                          onChange={(value) => onChange(lineup.id, { catches: value })}
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-2 py-1.5">
                         <StatInput
-                          value={lineup.runs_conceded}
-                          onChange={(value) => updateLineup(lineup.id, { runs_conceded: value })}
+                          value={lineup.run_outs}
+                          onChange={(value) => onChange(lineup.id, { run_outs: value })}
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-2 py-1.5">
                         <StatInput
-                          value={lineup.wickets_taken}
-                          onChange={(value) => updateLineup(lineup.id, { wickets_taken: value })}
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        <StatInput
-                          value={lineup.maidens}
-                          onChange={(value) => updateLineup(lineup.id, { maidens: value })}
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        <StatInput
-                          value={lineup.hattricks}
-                          onChange={(value) => updateLineup(lineup.id, { hattricks: value })}
+                          value={lineup.stumps}
+                          onChange={(value) => onChange(lineup.id, { stumps: value })}
                         />
                       </td>
                     </>
                   ) : (
                     <>
-                      <td className="px-4 py-2">
+                      <td className="px-2 py-1.5">
                         <StatInput
-                          value={lineup.catches}
-                          onChange={(value) => updateLineup(lineup.id, { catches: value })}
+                          value={lineup.balls_thrown}
+                          onChange={(value) => onChange(lineup.id, { balls_thrown: value })}
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-2 py-1.5">
                         <StatInput
-                          value={lineup.run_outs}
-                          onChange={(value) => updateLineup(lineup.id, { run_outs: value })}
+                          value={lineup.runs_conceded}
+                          onChange={(value) => onChange(lineup.id, { runs_conceded: value })}
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-2 py-1.5">
                         <StatInput
-                          value={lineup.direct_hits}
-                          onChange={(value) => updateLineup(lineup.id, { direct_hits: value })}
+                          value={lineup.wickets_taken}
+                          onChange={(value) => onChange(lineup.id, { wickets_taken: value })}
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-2 py-1.5">
                         <StatInput
-                          value={lineup.run_out_supports}
-                          onChange={(value) => updateLineup(lineup.id, { run_out_supports: value })}
+                          value={lineup.maidens}
+                          onChange={(value) => onChange(lineup.id, { maidens: value })}
                         />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-2 py-1.5">
                         <StatInput
-                          value={lineup.stumps}
-                          onChange={(value) => updateLineup(lineup.id, { stumps: value })}
+                          value={lineup.hattricks}
+                          onChange={(value) => onChange(lineup.id, { hattricks: value })}
                         />
                       </td>
                     </>
@@ -485,7 +584,7 @@ function LineupEditor({
           </table>
         </div>
       ) : (
-        <p className="px-4 py-4 text-sm text-muted-foreground">No lineup data available.</p>
+        <p className="px-4 py-6 text-sm text-muted-foreground">No players in this lineup.</p>
       )}
     </div>
   );
@@ -496,99 +595,55 @@ function StatInput({ value, onChange }: { value: number; onChange: (value: numbe
     <input
       type="number"
       min={0}
-      className="w-16 rounded border border-gray-300 px-2 py-1"
+      className="w-16 rounded-md border border-slate-200 px-2 py-1 text-sm"
       value={value}
-      onChange={(event) => onChange(Number(event.target.value) || 0)}
+      onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
     />
   );
 }
 
-function normalizeLineup(lineup: LineupEntry): EditableLineup {
+function normalizeLineup(lineup: LineupEntry): LineupEntry {
   return {
-    id: lineup.id,
-    player: lineup.player,
-    runs_scored: lineup.runs_scored ?? 0,
-    balls_faced: lineup.balls_faced ?? 0,
-    fours: lineup.fours ?? 0,
-    sixes: lineup.sixes ?? 0,
-    dismissed: lineup.dismissed ?? false,
-    wickets_taken: lineup.wickets_taken ?? 0,
-    balls_thrown: lineup.balls_thrown ?? 0,
-    runs_conceded: lineup.runs_conceded ?? 0,
-    maidens: lineup.maidens ?? 0,
-    hattricks: lineup.hattricks ?? 0,
-    catches: lineup.catches ?? 0,
-    run_outs: lineup.run_outs ?? 0,
-    direct_hits: lineup.direct_hits ?? 0,
-    run_out_supports: lineup.run_out_supports ?? 0,
-    stumps: lineup.stumps ?? 0,
+    ...lineup,
+    id: String(lineup.id),
+    player: {
+      id: String(lineup.player.id),
+      full_name: lineup.player.full_name,
+    },
+    runs_scored: Number(lineup.runs_scored || 0),
+    balls_faced: Number(lineup.balls_faced || 0),
+    fours: Number(lineup.fours || 0),
+    sixes: Number(lineup.sixes || 0),
+    dismissed: Boolean(lineup.dismissed),
+    balls_thrown: Number(lineup.balls_thrown || 0),
+    runs_conceded: Number(lineup.runs_conceded || 0),
+    wickets_taken: Number(lineup.wickets_taken || 0),
+    maidens: Number(lineup.maidens || 0),
+    hattricks: Number(lineup.hattricks || 0),
+    catches: Number(lineup.catches || 0),
+    run_outs: Number(lineup.run_outs || 0),
+    direct_hits: Number(lineup.direct_hits || 0),
+    run_out_supports: Number(lineup.run_out_supports || 0),
+    stumps: Number(lineup.stumps || 0),
   };
 }
 
-function battingFields(lineup: EditableLineup) {
+function lineupSnapshot(lineup: LineupEntry) {
   return {
     runs_scored: lineup.runs_scored,
     balls_faced: lineup.balls_faced,
     fours: lineup.fours,
     sixes: lineup.sixes,
     dismissed: lineup.dismissed,
-  };
-}
-
-function bowlingFields(lineup: EditableLineup) {
-  return {
     balls_thrown: lineup.balls_thrown,
     runs_conceded: lineup.runs_conceded,
     wickets_taken: lineup.wickets_taken,
     maidens: lineup.maidens,
     hattricks: lineup.hattricks,
-  };
-}
-
-function fieldingFields(lineup: EditableLineup) {
-  return {
     catches: lineup.catches,
     run_outs: lineup.run_outs,
     direct_hits: lineup.direct_hits,
     run_out_supports: lineup.run_out_supports,
     stumps: lineup.stumps,
   };
-}
-
-function toBattingPayload(lineup: EditableLineup) {
-  return { id: lineup.id, ...battingFields(lineup) };
-}
-
-function toBowlingPayload(lineup: EditableLineup) {
-  return { id: lineup.id, ...bowlingFields(lineup) };
-}
-
-function toFieldingPayload(lineup: EditableLineup) {
-  return { id: lineup.id, ...fieldingFields(lineup) };
-}
-
-function battingSnapshot(lineup: EditableLineup) {
-  return JSON.stringify(battingFields(lineup));
-}
-
-function bowlingSnapshot(lineup: EditableLineup) {
-  return JSON.stringify(bowlingFields(lineup));
-}
-
-function fieldingSnapshot(lineup: EditableLineup) {
-  return JSON.stringify(fieldingFields(lineup));
-}
-
-function isSectionDirty(
-  current: EditableLineup[],
-  baseline: EditableLineup[],
-  snapshot: (lineup: EditableLineup) => string
-) {
-  if (current.length !== baseline.length) return true;
-  const baselineById = new Map(baseline.map((lineup) => [lineup.id, lineup]));
-  return current.some((lineup) => {
-    const base = baselineById.get(lineup.id);
-    if (!base) return true;
-    return snapshot(lineup) !== snapshot(base);
-  });
 }

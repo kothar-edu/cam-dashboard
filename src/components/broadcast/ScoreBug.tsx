@@ -86,22 +86,24 @@ export function ScoreBug({
   }
 
   return (
-    <div className="flex h-[6.5rem] w-[460px] flex-col rounded-full bg-gradient-to-br from-blue-800 to-blue-950 leading-none text-white shadow-lg">
-      <div className="flex h-[58%] items-center justify-center gap-5 px-7 pt-2">
-        <span className="text-lg font-bold uppercase tracking-wide text-blue-100/80">
+    <div className="flex h-[6.5rem] w-[460px] flex-col overflow-hidden rounded-full bg-gradient-to-br from-blue-800 to-blue-950 leading-none text-white shadow-lg">
+      <div className="flex h-[60%] min-h-0 items-center justify-center gap-4 px-7">
+        <span className="shrink-0 text-lg font-bold uppercase tracking-wide text-blue-100/80">
           {battingTeam?.code ?? bowlingTeam?.code ?? '—'}
         </span>
-        <span className="text-5xl font-extrabold tabular-nums tracking-tight text-yellow-400">
+        <span className="max-w-full shrink-0 truncate text-[3.4rem] font-extrabold tabular-nums tracking-tight text-yellow-400">
           {current.runs}-{current.wickets}
         </span>
-        <span className="text-xl font-bold tabular-nums text-white">
+        <span className="shrink-0 text-xl font-bold tabular-nums text-white">
           {current.over}.{current.ball}
         </span>
       </div>
-      <div className="flex h-[42%] items-center justify-between px-8 text-sm font-semibold text-blue-200/75">
-        <span>CRR: {current.crr}</span>
-        <span>Balls Left: {current.balls_remaining}</span>
-        <span>{current.target ? `Target: ${current.target}` : `Inning ${current.inning}`}</span>
+      <div className="flex h-[40%] min-h-0 items-center justify-between px-8 text-sm font-semibold text-blue-200/75">
+        <span className="truncate">CRR: {current.crr}</span>
+        <span className="truncate">Balls Left: {current.balls_remaining}</span>
+        <span className="truncate">
+          {current.target ? `Target: ${current.target}` : `Inning ${current.inning}`}
+        </span>
       </div>
     </div>
   );

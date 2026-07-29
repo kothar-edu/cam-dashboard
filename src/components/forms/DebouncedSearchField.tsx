@@ -34,7 +34,7 @@ export function DebouncedSearchField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={ariaLabel}
-        className="h-full w-full min-w-0 border-0 bg-transparent p-0 text-sm text-[#12233D] outline-none placeholder:text-muted-foreground"
+        className="h-full w-full min-w-0 border-0 bg-transparent p-0 text-sm text-[#12233D] outline-none ring-0 focus:ring-0 placeholder:text-muted-foreground"
       />
     </div>
   );

@@ -276,6 +276,7 @@ export const SelectContent = React.forwardRef(function SelectContent(
     <div
       ref={ref}
       role="listbox"
+      data-select-portal="true"
       className={cn(
         'flex flex-col overflow-hidden rounded-md border border-border bg-white text-[#12233D] shadow-lg animate-in fade-in-80',
         className
@@ -289,6 +290,7 @@ export const SelectContent = React.forwardRef(function SelectContent(
         maxWidth: 'calc(100vw - 1rem)',
         maxHeight: panelMaxHeight,
         zIndex: DROPDOWN_Z_INDEX,
+        pointerEvents: 'auto',
       }}
       onClick={(e) => e.stopPropagation()}
       onKeyDown={handleListKeyDown}
@@ -316,7 +318,7 @@ export const SelectContent = React.forwardRef(function SelectContent(
                 }
               }}
               placeholder="Search..."
-              className="w-full border-none bg-transparent text-base outline-none placeholder:text-muted-foreground"
+              className="w-full border-none bg-transparent text-base outline-none ring-0 focus:ring-0 placeholder:text-muted-foreground"
               onClick={(e) => e.stopPropagation()}
             />
           </div>

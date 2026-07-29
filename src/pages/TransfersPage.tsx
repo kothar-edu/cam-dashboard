@@ -184,7 +184,12 @@ export default function TransfersPage() {
         />
       )}
 
-      <Modal open={dialogOpen} onOpenChange={setDialogOpen} title="Transfer player">
+      <Modal
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        title="Transfer player"
+        disableFocusTrap
+      >
         <div className="mt-4 space-y-4">
           <SearchableSelect
             id="transfer-player"

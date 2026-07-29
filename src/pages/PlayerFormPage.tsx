@@ -26,7 +26,8 @@ export default function PlayerFormPage() {
   useEffect(() => {
     if (playerQuery.data) {
       setUserId(playerQuery.data.user?.id ?? '');
-      setTeamId(playerQuery.data.current_team ?? '');
+      const team = playerQuery.data.current_team;
+      setTeamId(typeof team === 'object' && team ? team.id : (team ?? ''));
       setJerseyNo(playerQuery.data.jersey_no?.toString() ?? '');
       setDob(playerQuery.data.dob ?? '');
     }

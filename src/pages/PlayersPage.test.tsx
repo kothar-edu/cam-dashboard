@@ -56,7 +56,8 @@ describe('PlayersPage', () => {
     expect(screen.getByText('Jersey')).toBeInTheDocument();
     expect(screen.getByText('Team')).toBeInTheDocument();
     expect(screen.getByText('Status')).toBeInTheDocument();
-    expect(screen.getByText('Anish Shrestha')).toBeInTheDocument();
+    const nameLink = screen.getByRole('link', { name: 'Anish Shrestha' });
+    expect(nameLink).toHaveAttribute('href', '/dashboard/players/1/stats');
     expect(screen.getByText('Royal Strikers')).toBeInTheDocument();
   });
 });

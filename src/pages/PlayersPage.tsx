@@ -6,7 +6,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { useTenant } from '@/contexts/TenantContext';
 import { usePlayers, useUpdatePlayer } from '@/hooks/usePlayers';
-import type { Player, UpdatePlayerPayload } from '@/api/players';
+import type { Player } from '@/api/players';
 
 const PAGE_SIZE = 20;
 
@@ -67,7 +67,18 @@ export default function PlayersPage() {
 
       <DataTable
         columns={[
-          { id: 'name', header: 'Name', cell: (row) => row.full_name },
+          {
+            id: 'name',
+            header: 'Name',
+            cell: (row) => (
+              <Link
+                to={`/dashboard/players/${row.id}/stats`}
+                className="font-medium text-[#12233D] underline-offset-2 hover:text-[#E8A93B] hover:underline"
+              >
+                {row.full_name}
+              </Link>
+            ),
+          },
           { id: 'jersey', header: 'Jersey', cell: (row) => row.jersey_no ?? '—' },
           { id: 'team', header: 'Team', cell: (row) => row.team_name ?? '—' },
           {
@@ -123,7 +134,7 @@ export default function PlayersPage() {
           updatePlayerMutation.mutate(
             {
               id: targetRow.id,
-              payload: { is_active: !targetRow.is_active } as UpdatePlayerPayload,
+              payload: { is_active: !targetRow.is_active },
             },
             { onSuccess: () => setConfirmOpen(false) }
           );

@@ -50,7 +50,7 @@ function isRowComplete(row: BulkRow): boolean {
   return Boolean(row.name && row.teamA && row.teamB);
 }
 
-function toPayloadRow(row: BulkRow): BulkFixtureRowPayload {
+function toPayloadRow(row: BulkRow, isPublic: boolean): BulkFixtureRowPayload {
   const time = new Date(row.time).toISOString();
   if (row.tournamentId) {
     return {
@@ -60,6 +60,7 @@ function toPayloadRow(row: BulkRow): BulkFixtureRowPayload {
       ...(row.round ? { round: row.round } : {}),
       time,
       ground: row.ground,
+      is_public: isPublic,
     };
   }
   return {
@@ -68,6 +69,7 @@ function toPayloadRow(row: BulkRow): BulkFixtureRowPayload {
     team_b: row.teamB,
     time,
     ground: row.ground,
+    is_public: isPublic,
   };
 }
 
@@ -227,6 +229,7 @@ export default function BulkFixtureFormPage() {
     emptyRow(lockedTournamentId),
     emptyRow(lockedTournamentId),
   ]);
+  const [isPublic, setIsPublic] = useState(true);
 
   const updateRow = (key: string, patch: Partial<BulkRow>) => {
     setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch } : row)));
@@ -245,7 +248,7 @@ export default function BulkFixtureFormPage() {
       toast.error('Fill in at least one complete row before creating fixtures.');
       return;
     }
-    const payload = completeRows.map(toPayloadRow);
+    const payload = completeRows.map((row) => toPayloadRow(row, isPublic));
     bulkMutation.mutate(payload, {
       onSuccess: (created) => {
         toast.success(`${created.length} fixture${created.length === 1 ? '' : 's'} created.`);
@@ -307,6 +310,14 @@ export default function BulkFixtureFormPage() {
             : 'Pick a tournament per row to schedule it there using that tournament\'s registered teams, or leave it as "None" for a standalone custom match. Mix both freely in the same batch.'}
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-[#12233D]">
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+            />
+            Public matches (visible to guests and non-members)
+          </label>
           {rows.map((row, index) => (
             <BulkFixtureRowFields
               key={row.key}

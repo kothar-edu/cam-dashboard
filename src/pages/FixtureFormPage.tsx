@@ -170,6 +170,7 @@ export default function FixtureFormPage() {
             round: round || undefined,
             time: new Date(time).toISOString(),
             ground: ground.trim(),
+            is_public: isPublic,
           },
         },
         {
@@ -190,6 +191,7 @@ export default function FixtureFormPage() {
         team_b: teamB,
         time: new Date(time).toISOString(),
         ground: ground.trim(),
+        is_public: isPublic,
       },
       {
         onSuccess: () => {
@@ -373,16 +375,14 @@ export default function FixtureFormPage() {
                 error={fieldErrors.round}
               />
             ) : null}
-            {isEdit ? (
-              <label className="flex items-center gap-2 text-sm text-[#12233D]">
-                <input
-                  type="checkbox"
-                  checked={isPublic}
-                  onChange={(e) => setIsPublic(e.target.checked)}
-                />
-                Public match (visible to guests and non-members)
-              </label>
-            ) : null}
+            <label className="flex items-center gap-2 text-sm text-[#12233D]">
+              <input
+                type="checkbox"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+              />
+              Public match (visible to guests and non-members)
+            </label>
             {isEdit ? (
               <Input
                 label="YouTube live stream URL (optional)"

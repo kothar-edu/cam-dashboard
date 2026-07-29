@@ -243,6 +243,8 @@ export default function TenantsPage({ embedded = false }: TenantsPageProps) {
                   Lookup a registered user by email. Unregistered users cannot be invited here.
                 </p>
                 <UserEmailLookupField
+                  label="Admin email"
+                  placeholder="admin@example.com"
                   onResolved={(user) => {
                     setAdminUserId(user.id);
                     setResolvedAdminLabel(`${user.full_name} (${user.email})`);

@@ -7,6 +7,8 @@ import { useLookupUserByEmailMutation } from '@/hooks/useUserLookup';
 type UserEmailLookupFieldProps = {
   onResolved: (user: { id: string; email: string; full_name: string }) => void;
   onClear?: () => void;
+  label?: string;
+  placeholder?: string;
 };
 
 function lookupErrorMessage(error: unknown): string {
@@ -25,7 +27,12 @@ function lookupErrorMessage(error: unknown): string {
   return 'Lookup failed. Please try again.';
 }
 
-export function UserEmailLookupField({ onResolved, onClear }: UserEmailLookupFieldProps) {
+export function UserEmailLookupField({
+  onResolved,
+  onClear,
+  label = 'Email',
+  placeholder = 'user@example.com',
+}: UserEmailLookupFieldProps) {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const lookupMutation = useLookupUserByEmailMutation();
@@ -49,11 +56,11 @@ export function UserEmailLookupField({ onResolved, onClear }: UserEmailLookupFie
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-[240px] flex-1">
           <Input
-            label="Admin email"
+            label={label}
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="admin@example.com"
+            placeholder={placeholder}
           />
         </div>
         <Button

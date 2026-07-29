@@ -17,10 +17,15 @@ export function DebouncedSearchField({
   'aria-label': ariaLabel = 'Search',
 }: Props) {
   return (
-    <div className={cn('relative max-w-xl', className)}>
+    <div
+      className={cn(
+        'flex h-10 max-w-xl items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 shadow-sm focus-within:border-[#E8A93B] focus-within:ring-1 focus-within:ring-[#E8A93B]',
+        className
+      )}
+    >
       <Search
         data-testid="search-field-icon"
-        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+        className="h-4 w-4 shrink-0 text-muted-foreground"
         aria-hidden
       />
       <input
@@ -29,7 +34,7 @@ export function DebouncedSearchField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={ariaLabel}
-        className="h-10 w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-[#12233D] shadow-sm outline-none focus:border-[#E8A93B] focus:ring-1 focus:ring-[#E8A93B]"
+        className="h-full w-full min-w-0 border-0 bg-transparent p-0 text-sm text-[#12233D] outline-none placeholder:text-muted-foreground"
       />
     </div>
   );

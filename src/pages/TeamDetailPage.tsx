@@ -27,7 +27,7 @@ export default function TeamDetailPage() {
   const [bankName, setBankName] = useState('');
   const [bankBranch, setBankBranch] = useState('');
   const [verificationFeeAmount, setVerificationFeeAmount] = useState('');
-  const [requirePaymentVerification, setRequirePaymentVerification] = useState(true);
+  const [requirePaymentVerification, setRequirePaymentVerification] = useState(false);
   const [requireIdVerification, setRequireIdVerification] = useState(false);
   const [studentFeeEnabled, setStudentFeeEnabled] = useState(false);
   const [studentFeeAmount, setStudentFeeAmount] = useState('');
@@ -175,6 +175,8 @@ export default function TeamDetailPage() {
                 <p className="text-sm text-muted-foreground">No maintainer assigned yet.</p>
               )}
               <UserEmailLookupField
+                label="Admin email"
+                placeholder="admin@example.com"
                 onResolved={(user) => {
                   setMaintainerId(user.id);
                   setMaintainerLabel(`${user.full_name} (${user.email})`);

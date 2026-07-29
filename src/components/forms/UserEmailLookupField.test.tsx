@@ -20,7 +20,7 @@ describe('UserEmailLookupField', () => {
 
     render(<UserEmailLookupField onResolved={onResolved} />);
 
-    await user.type(screen.getByPlaceholderText('admin@example.com'), 'admin@example.com');
+    await user.type(screen.getByPlaceholderText('user@example.com'), 'admin@example.com');
     await user.click(screen.getByRole('button', { name: 'Look up' }));
 
     expect(mutate).toHaveBeenCalled();
@@ -41,7 +41,7 @@ describe('UserEmailLookupField', () => {
     const user = userEvent.setup();
 
     render(<UserEmailLookupField onResolved={vi.fn()} />);
-    await user.type(screen.getByPlaceholderText('admin@example.com'), 'admin@example.com');
+    await user.type(screen.getByPlaceholderText('user@example.com'), 'admin@example.com');
     await user.click(screen.getByRole('button', { name: 'Look up' }));
 
     expect(screen.getByText('You do not have permission to look up users.')).toBeInTheDocument();

@@ -2,15 +2,20 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
+import { DebouncedSearchField } from '@/components/forms/DebouncedSearchField';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useTenant } from '@/contexts/TenantContext';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useTournaments, useUpdateTournament } from '@/hooks/useTournaments';
 import type { Tournament } from '@/api/tournaments';
 
 const PAGE_SIZE = 20;
 
-function formatDate(value: string) {
-  return new Date(value).toLocaleDateString(undefined, {
+function formatDate(value: string | null | undefined) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -20,11 +25,14 @@ function formatDate(value: string) {
 export default function TournamentsPage() {
   const { activeTenant } = useTenant();
   const [pageIndex, setPageIndex] = useState(0);
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search.trim(), 300);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [targetRow, setTargetRow] = useState<Tournament | null>(null);
   const { data, isLoading, isError } = useTournaments({
     limit: PAGE_SIZE,
     offset: pageIndex * PAGE_SIZE,
+    ...(debouncedSearch ? { search: debouncedSearch } : {}),
   });
   const updateTournament = useUpdateTournament();
 
@@ -65,13 +73,23 @@ export default function TournamentsPage() {
         }
       />
 
+      <DebouncedSearchField
+        value={search}
+        onChange={(value) => {
+          setSearch(value);
+          setPageIndex(0);
+        }}
+        placeholder="Search tournaments by name…"
+        aria-label="Search tournaments"
+      />
+
       {isLoading && !data ? (
         <div className="flex min-h-[40vh] items-center justify-center">
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         </div>
       ) : tournaments.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center text-sm text-muted-foreground">
-          No tournaments found.
+          {debouncedSearch ? 'No tournaments match your search.' : 'No tournaments found.'}
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -92,7 +110,7 @@ export default function TournamentsPage() {
                     {formatDate(tournament.start)} – {formatDate(tournament.end)}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {tournament.total_teams} teams
+                    {tournament.total_teams ?? 0} teams
                   </p>
                 </div>
                 <span

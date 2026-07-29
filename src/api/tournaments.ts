@@ -6,6 +6,7 @@ export type Tournament = {
   name: string;
   logo: string | null;
   start: string;
+  end?: string;
   total_teams: number;
   is_active: boolean;
   is_public?: boolean;
@@ -76,6 +77,7 @@ export type CreateTournamentFixturePayload = {
   round?: string;
   time: string;
   ground: string;
+  is_public?: boolean;
 };
 
 export async function createTournamentFixture(

@@ -70,6 +70,7 @@ export type CreateFixturePayload = {
   time: string;
   ground: string;
   logo?: string;
+  is_public?: boolean;
 };
 
 export type BulkFixtureRowPayload =
@@ -80,6 +81,7 @@ export type BulkFixtureRowPayload =
       round?: string;
       time: string;
       ground: string;
+      is_public?: boolean;
     }
   | {
       name: string;
@@ -87,6 +89,7 @@ export type BulkFixtureRowPayload =
       team_b: string;
       time: string;
       ground: string;
+      is_public?: boolean;
     };
 
 export type FixtureDetailOpponent = {

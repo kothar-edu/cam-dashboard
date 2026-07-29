@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { SearchableSelect } from '@/components/forms/SearchableSelect';
+import { UserEmailLookupField } from '@/components/forms/UserEmailLookupField';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { useCreatePlayer, usePlayer, useUpdatePlayer } from '@/hooks/usePlayers';
@@ -19,13 +20,16 @@ export default function PlayerFormPage() {
   const updateMutation = useUpdatePlayer();
 
   const [userId, setUserId] = useState('');
+  const [userLabel, setUserLabel] = useState<string | null>(null);
   const [teamId, setTeamId] = useState('');
   const [jerseyNo, setJerseyNo] = useState('');
   const [dob, setDob] = useState('');
 
   useEffect(() => {
     if (playerQuery.data) {
-      setUserId(playerQuery.data.user?.id ?? '');
+      const user = playerQuery.data.user;
+      setUserId(user?.id ?? '');
+      setUserLabel(user ? `${user.full_name} (${user.email})` : null);
       const team = playerQuery.data.current_team;
       setTeamId(typeof team === 'object' && team ? team.id : (team ?? ''));
       setJerseyNo(playerQuery.data.jersey_no?.toString() ?? '');
@@ -61,13 +65,37 @@ export default function PlayerFormPage() {
             onSubmit={handleSubmit}
             className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
           >
-            <Input
-              label="User ID"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              disabled={isEdit}
-              required
-            />
+            {isEdit ? (
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-gray-700">User</p>
+                <p className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-[#12233D]">
+                  {userLabel || userId || '—'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <UserEmailLookupField
+                  label="User email"
+                  placeholder="Search registered user by email…"
+                  onResolved={(user) => {
+                    setUserId(user.id);
+                    setUserLabel(`${user.full_name} (${user.email})`);
+                  }}
+                  onClear={() => {
+                    setUserId('');
+                    setUserLabel(null);
+                  }}
+                />
+                {userLabel ? (
+                  <p className="text-sm text-emerald-700">Selected: {userLabel}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Look up a registered user by email before creating the player profile.
+                  </p>
+                )}
+                <input type="hidden" value={userId} required readOnly />
+              </div>
+            )}
             <SearchableSelect
               id="team-select"
               label="Team"
@@ -93,7 +121,7 @@ export default function PlayerFormPage() {
               value={dob}
               onChange={(e) => setDob(e.target.value)}
             />
-            <Button type="submit" disabled={pending}>
+            <Button type="submit" disabled={pending || (!isEdit && !userId)}>
               {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Create player'}
             </Button>
           </form>

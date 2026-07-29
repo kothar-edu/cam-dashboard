@@ -6,9 +6,11 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
 import { PageHeader } from '@/components/forms/PageHeader';
+import { DebouncedSearchField } from '@/components/forms/DebouncedSearchField';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { mediaUrl, type TeamJoinApplication, type TenantRegistration } from '@/api/verification';
 import { useTenant } from '@/contexts/TenantContext';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import {
   useReviewTeamJoinApplication,
   useReviewTenantRegistration,
@@ -130,6 +132,10 @@ export default function VerificationPage() {
   const [joinStatus, setJoinStatus] = useState<StatusFilter>('pending');
   const [regPage, setRegPage] = useState(0);
   const [joinPage, setJoinPage] = useState(0);
+  const [regSearch, setRegSearch] = useState('');
+  const [joinSearch, setJoinSearch] = useState('');
+  const debouncedRegSearch = useDebouncedValue(regSearch.trim(), 300);
+  const debouncedJoinSearch = useDebouncedValue(joinSearch.trim(), 300);
   const [rejectTarget, setRejectTarget] = useState<TenantRegistration | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [approveRegTarget, setApproveRegTarget] = useState<TenantRegistration | null>(null);
@@ -145,11 +151,13 @@ export default function VerificationPage() {
     limit: PAGE_SIZE,
     offset: regPage * PAGE_SIZE,
     ...(regStatus === 'all' ? {} : { status: regStatus }),
+    ...(debouncedRegSearch ? { search: debouncedRegSearch } : {}),
   });
   const teamJoins = useTeamJoinApplications({
     limit: PAGE_SIZE,
     offset: joinPage * PAGE_SIZE,
     ...(joinStatus === 'all' ? {} : { status: joinStatus }),
+    ...(debouncedJoinSearch ? { search: debouncedJoinSearch } : {}),
   });
   const reviewRegistration = useReviewTenantRegistration();
   const reviewTeamJoin = useReviewTeamJoinApplication();
@@ -223,9 +231,33 @@ export default function VerificationPage() {
       </div>
 
       {tab === 'registrations' ? (
-        <StatusFilterTabs value={regStatus} onChange={handleRegStatusChange} />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <StatusFilterTabs value={regStatus} onChange={handleRegStatusChange} />
+          <DebouncedSearchField
+            value={regSearch}
+            onChange={(value) => {
+              setRegSearch(value);
+              setRegPage(0);
+            }}
+            placeholder="Search by name or email…"
+            aria-label="Search tenant registrations"
+            className="w-full sm:max-w-sm"
+          />
+        </div>
       ) : activeTenant ? (
-        <StatusFilterTabs value={joinStatus} onChange={handleJoinStatusChange} />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <StatusFilterTabs value={joinStatus} onChange={handleJoinStatusChange} />
+          <DebouncedSearchField
+            value={joinSearch}
+            onChange={(value) => {
+              setJoinSearch(value);
+              setJoinPage(0);
+            }}
+            placeholder="Search by name, email, or team…"
+            aria-label="Search team join requests"
+            className="w-full sm:max-w-sm"
+          />
+        </div>
       ) : null}
 
       {tab === 'registrations' ? (

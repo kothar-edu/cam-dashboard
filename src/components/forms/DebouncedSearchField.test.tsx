@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { DebouncedSearchField } from './DebouncedSearchField';
 
 describe('DebouncedSearchField', () => {
-  it('centers the search icon and keeps the typed value', () => {
+  it('keeps the search icon inside the field and preserves typed value', () => {
     const onChange = vi.fn();
     render(
       <DebouncedSearchField
@@ -17,8 +17,9 @@ describe('DebouncedSearchField', () => {
     expect(input).toHaveValue('Warri');
     const icon = screen.getByTestId('search-field-icon');
     const iconClass = icon.getAttribute('class') ?? '';
-    expect(iconClass).toMatch(/absolute/);
-    expect(iconClass).toMatch(/top-1\/2/);
-    expect(iconClass).toMatch(/-translate-y-1\/2/);
+    expect(iconClass).not.toMatch(/absolute/);
+    expect(iconClass).toMatch(/h-4/);
+    expect(iconClass).toMatch(/w-4/);
+    expect(icon.parentElement?.className ?? '').toMatch(/items-center/);
   });
 });

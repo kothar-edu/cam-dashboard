@@ -24,6 +24,9 @@ import { cn } from '@/lib/utils';
 const MATCHES_PAGE_SIZE = 20;
 const STATS_LIMIT = 50;
 
+const MATCH_STATUS_TABS = ['All', 'Live', 'Upcoming', 'Ended'] as const;
+type MatchStatusTab = (typeof MATCH_STATUS_TABS)[number];
+
 type DetailTab = 'stats' | 'matches' | 'table';
 type StatsCategoryId =
   | 'most-runs'
@@ -52,8 +55,11 @@ type StatsCategory = {
   columns: StatsColumn[];
 };
 
-function formatDate(value: string) {
-  return new Date(value).toLocaleDateString(undefined, {
+function formatDate(value: string | null | undefined) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -423,6 +429,7 @@ export default function TournamentDetailPage() {
   const [tab, setTab] = useState<DetailTab>(initialTab);
   const [statsCategoryId, setStatsCategoryId] = useState<StatsCategoryId>('most-runs');
   const [pageIndex, setPageIndex] = useState(0);
+  const [matchStatus, setMatchStatus] = useState<MatchStatusTab>('All');
 
   const setDetailTab = (next: DetailTab) => {
     setTab(next);
@@ -445,6 +452,7 @@ export default function TournamentDetailPage() {
       tournament: id,
       limit: MATCHES_PAGE_SIZE,
       offset: pageIndex * MATCHES_PAGE_SIZE,
+      ...(matchStatus === 'All' ? {} : { status: matchStatus }),
     },
     { enabled: !!id && tab === 'matches' }
   );
@@ -483,7 +491,7 @@ export default function TournamentDetailPage() {
           <>
             <PageHeader
               title={tournamentQuery.data.name}
-              description={`${tournamentQuery.data.total_teams} teams · ${formatDate(
+              description={`${tournamentQuery.data.total_teams ?? 0} teams · ${formatDate(
                 tournamentQuery.data.start
               )} – ${formatDate(tournamentQuery.data.end)} · ${status}`}
               backTo="/dashboard/tournaments"
@@ -520,6 +528,26 @@ export default function TournamentDetailPage() {
                   Unable to load matches for this tournament.
                 </div>
               ) : (
+                <div className="space-y-4">
+                <div className="flex w-full flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm sm:w-fit">
+                  {MATCH_STATUS_TABS.map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => {
+                        setMatchStatus(option);
+                        setPageIndex(0);
+                      }}
+                      className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                        matchStatus === option
+                          ? 'bg-[#12233D] text-white'
+                          : 'text-[#12233D] hover:bg-slate-50'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
                 <DataTable
                   columns={[
                     {
@@ -549,7 +577,7 @@ export default function TournamentDetailPage() {
                   ]}
                   data={fixturesQuery.data?.results ?? []}
                   loading={fixturesQuery.isLoading}
-                  emptyMessage="No matches found for this tournament."
+                  emptyMessage={matchStatus === 'All' ? 'No matches found for this tournament.' : `No ${matchStatus.toLowerCase()} matches found.`}
                   pagination={
                     fixturesQuery.data
                       ? {
@@ -561,6 +589,7 @@ export default function TournamentDetailPage() {
                   }
                   onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
                 />
+                </div>
               )
             ) : null}
 

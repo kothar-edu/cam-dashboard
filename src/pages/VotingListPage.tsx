@@ -1,8 +1,9 @@
-import { useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
+import { DebouncedSearchField } from '@/components/forms/DebouncedSearchField';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { VotingPollCard } from '@/components/voting/VotingPollCard';
@@ -24,6 +25,19 @@ export default function VotingListPage() {
   const isError = nominationsQuery.isError || pollsQuery.isError;
 
   const [confirmClose, setConfirmClose] = useState<NomineeVotingPlayer | null>(null);
+  const [search, setSearch] = useState('');
+
+  const filteredNominations = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return nominationsQuery.data?.results ?? [];
+    return (nominationsQuery.data?.results ?? []).filter((row) => {
+      const tournament = row.tournament?.name?.toLowerCase() ?? '';
+      const nominees = (row.player ?? [])
+        .map((p) => `${p.full_name ?? ''} ${p.team_name ?? ''}`.toLowerCase())
+        .join(' ');
+      return tournament.includes(q) || nominees.includes(q);
+    });
+  }, [nominationsQuery.data?.results, search]);
 
   const nominations = nominationsQuery.data?.results ?? [];
   const polls = pollsQuery.data?.results ?? [];
@@ -117,8 +131,20 @@ export default function VotingListPage() {
               />
             </div>
 
+            <DebouncedSearchField
+              value={search}
+              onChange={setSearch}
+              placeholder="Search polls by tournament or nominee…"
+              aria-label="Search voting polls"
+            />
+
+            {filteredNominations.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center text-sm text-muted-foreground">
+                No polls match your search.
+              </div>
+            ) : (
             <div className="grid gap-4 lg:grid-cols-2">
-              {nominations.map((nomination) => (
+              {filteredNominations.map((nomination) => (
                 <VotingPollCard
                   key={nomination.id}
                   nomination={nomination}
@@ -128,6 +154,7 @@ export default function VotingListPage() {
                 />
               ))}
             </div>
+            )}
           </div>
         )}
 

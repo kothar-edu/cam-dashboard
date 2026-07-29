@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   applyScorecard,
   getFixture,
@@ -16,6 +16,7 @@ export function useScorecards(params?: ListParams) {
     queryKey: ['scorecards', activeTenantId, params],
     queryFn: () => listScorecards(params),
     enabled: !!activeTenantId,
+    placeholderData: keepPreviousData,
   });
 }
 

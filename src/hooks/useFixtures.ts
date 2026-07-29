@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createFixture,
   createFixturesBulk,
@@ -24,6 +24,7 @@ export function useFixtures(params?: ListParams, options?: { enabled?: boolean }
     queryKey: ['fixtures', activeTenantId, params],
     queryFn: () => listFixtures(params),
     enabled: !!activeTenantId && (options?.enabled ?? true),
+    placeholderData: keepPreviousData,
   });
 }
 

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createTeam,
   getTeam,
@@ -18,6 +18,7 @@ export function useTeams(params?: ListParams) {
     queryKey: ['teams', activeTenantId, params],
     queryFn: () => listTeams(params),
     enabled: !!activeTenantId,
+    placeholderData: keepPreviousData,
   });
 }
 

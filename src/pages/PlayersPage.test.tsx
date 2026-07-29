@@ -29,6 +29,17 @@ vi.mock('@/hooks/usePlayers', () => ({
   }),
 }));
 
+vi.mock('@/hooks/useTeams', () => ({
+  useTeams: () => ({
+    data: {
+      count: 1,
+      results: [{ id: 'team-1', name: 'Royal Strikers', code: 'RS', is_active: true }],
+    },
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
 vi.mock('@/contexts/TenantContext', () => ({
   useTenant: () => ({
     activeTenant: {
@@ -42,7 +53,7 @@ vi.mock('@/contexts/TenantContext', () => ({
 }));
 
 describe('PlayersPage', () => {
-  it('renders player table headers and row data', () => {
+  it('renders search and linked player/team names', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
@@ -52,12 +63,14 @@ describe('PlayersPage', () => {
       </QueryClientProvider>
     );
 
-    expect(screen.getByText('Name')).toBeInTheDocument();
-    expect(screen.getByText('Jersey')).toBeInTheDocument();
-    expect(screen.getByText('Team')).toBeInTheDocument();
-    expect(screen.getByText('Status')).toBeInTheDocument();
-    const nameLink = screen.getByRole('link', { name: 'Anish Shrestha' });
-    expect(nameLink).toHaveAttribute('href', '/dashboard/players/1/stats');
-    expect(screen.getByText('Royal Strikers')).toBeInTheDocument();
+    expect(screen.getByLabelText('Search players')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Anish Shrestha' })).toHaveAttribute(
+      'href',
+      '/dashboard/players/1/stats'
+    );
+    expect(screen.getByRole('link', { name: 'Royal Strikers' })).toHaveAttribute(
+      'href',
+      '/dashboard/teams/team-1/roster'
+    );
   });
 });

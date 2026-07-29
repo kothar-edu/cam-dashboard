@@ -2,14 +2,13 @@ import { Link, useParams } from 'react-router-dom';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
+import { PlayerCareerCharts } from '@/components/charts/PlayerCareerCharts';
 import {
   playerDisplayName,
   playerTeamName,
   type PlayerDetail,
 } from '@/api/players';
 import { usePlayer } from '@/hooks/usePlayers';
-
-type StatBar = { label: string; value: number; accent: string };
 
 export default function PlayerStatsPage() {
   const { id } = useParams<{ id: string }>();
@@ -53,17 +52,6 @@ function PlayerStatsContent({ player, playerId }: { player: PlayerDetail; player
     { label: 'Sixes', value: player.sixes ?? 0 },
     { label: 'Fours', value: player.fours ?? 0 },
     { label: 'Maidens', value: player.maidens ?? 0 },
-  ];
-
-  const battingBars: StatBar[] = [
-    { label: 'Runs', value: player.runs_scored ?? 0, accent: '#E8A93B' },
-    { label: 'Fours', value: player.fours ?? 0, accent: '#12233D' },
-    { label: 'Sixes', value: player.sixes ?? 0, accent: '#C47A1A' },
-  ];
-  const bowlingBars: StatBar[] = [
-    { label: 'Wickets', value: player.wickets_taken ?? 0, accent: '#12233D' },
-    { label: 'Maidens', value: player.maidens ?? 0, accent: '#E8A93B' },
-    { label: 'Hattricks', value: player.hattricks ?? 0, accent: '#8B4513' },
   ];
 
   const roles = [
@@ -130,10 +118,18 @@ function PlayerStatsContent({ player, playerId }: { player: PlayerDetail; player
         </div>
       </section>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <StatBarCard title="Batting overview" bars={battingBars} />
-        <StatBarCard title="Bowling overview" bars={bowlingBars} />
-      </div>
+      <PlayerCareerCharts
+        batting={{
+          runs: player.runs_scored ?? 0,
+          fours: player.fours ?? 0,
+          sixes: player.sixes ?? 0,
+        }}
+        bowling={{
+          wickets: player.wickets_taken ?? 0,
+          maidens: player.maidens ?? 0,
+          hattricks: player.hattricks ?? 0,
+        }}
+      />
 
       {history.length > 0 ? (
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -163,34 +159,6 @@ function PlayerStatsContent({ player, playerId }: { player: PlayerDetail; player
         </section>
       ) : null}
     </>
-  );
-}
-
-function StatBarCard({ title, bars }: { title: string; bars: StatBar[] }) {
-  const max = Math.max(...bars.map((b) => b.value), 1);
-  return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h3 className="text-sm font-semibold uppercase tracking-wide text-[#12233D]">{title}</h3>
-      <div className="mt-5 space-y-4">
-        {bars.map((bar) => (
-          <div key={bar.label}>
-            <div className="mb-1.5 flex items-baseline justify-between gap-3">
-              <span className="text-sm text-slate-600">{bar.label}</span>
-              <span className="text-sm font-semibold tabular-nums text-[#12233D]">{bar.value}</span>
-            </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
-              <div
-                className="h-full rounded-full transition-[width] duration-500"
-                style={{
-                  width: `${Math.max((bar.value / max) * 100, bar.value > 0 ? 4 : 0)}%`,
-                  backgroundColor: bar.accent,
-                }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
   );
 }
 

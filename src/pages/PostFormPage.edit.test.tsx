@@ -17,6 +17,10 @@ const POST_DATA = {
   images: [{ id: 1, image: 'https://example.com/media/images/cover.png', is_cover: true }],
 };
 
+vi.mock('react-hot-toast', () => ({
+  default: { success: vi.fn(), error: vi.fn() },
+}));
+
 vi.mock('@/hooks/usePosts', () => ({
   usePost: () => ({
     data: POST_DATA,

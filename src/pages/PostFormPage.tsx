@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import MDEditor from '@uiw/react-md-editor';
+import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -9,6 +10,7 @@ import { PageHeader } from '@/components/forms/PageHeader';
 import { FileField } from '@/components/forms/FileField';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { useCreatePost, usePost, useUpdatePost } from '@/hooks/usePosts';
+import { getApiErrorMessage } from '@/lib/api-errors';
 
 export default function PostFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -66,12 +68,26 @@ export default function PostFormPage() {
     if (isEdit && id) {
       updateMutation.mutate(
         { id, payload },
-        { onSuccess: () => navigate('/dashboard/posts') }
+        {
+          onSuccess: () => {
+            toast.success('Post updated');
+            navigate('/dashboard/posts');
+          },
+          onError: (error) => {
+            toast.error(getApiErrorMessage(error, 'Failed to update post.'));
+          },
+        }
       );
       return;
     }
     createMutation.mutate(payload, {
-      onSuccess: () => navigate('/dashboard/posts'),
+      onSuccess: () => {
+        toast.success('Post created');
+        navigate('/dashboard/posts');
+      },
+      onError: (error) => {
+        toast.error(getApiErrorMessage(error, 'Failed to create post.'));
+      },
     });
   };
 

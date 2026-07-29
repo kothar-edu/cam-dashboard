@@ -31,9 +31,6 @@ export type PostPayload = {
   post_type: string;
   title: string;
   description: string;
-  // Left undefined when the admin doesn't set a date/time - the backend
-  // defaults both to the server clock at creation time rather than have
-  // the dashboard guess using the browser's own timezone.
   post_date?: string;
   post_time?: string;
   status: string;
@@ -76,9 +73,7 @@ export async function createPost(payload: PostPayload): Promise<PostDetail> {
   if (payload.cover_image) {
     const form = new FormData();
     appendPostFields(form, payload);
-    const { data } = await newsfeedClient.post<PostDetail>('/post/', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await newsfeedClient.post<PostDetail>('/post/', form);
     return data;
   }
   const { data } = await newsfeedClient.post<PostDetail>('/post/', jsonPostFields(payload));
@@ -89,9 +84,7 @@ export async function updatePost(id: string, payload: PostPayload): Promise<Post
   if (payload.cover_image) {
     const form = new FormData();
     appendPostFields(form, payload);
-    const { data } = await newsfeedClient.patch<PostDetail>(`/post/${id}/`, form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await newsfeedClient.patch<PostDetail>(`/post/${id}/`, form);
     return data;
   }
   const { data } = await newsfeedClient.patch<PostDetail>(`/post/${id}/`, jsonPostFields(payload));

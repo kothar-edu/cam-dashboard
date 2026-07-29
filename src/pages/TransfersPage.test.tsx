@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import TransfersPage from './TransfersPage';
 
 vi.mock('@/hooks/usePlayers', () => ({
@@ -58,14 +59,23 @@ describe('TransfersPage', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
-        <TransfersPage />
+        <MemoryRouter>
+          <TransfersPage />
+        </MemoryRouter>
       </QueryClientProvider>
     );
 
     expect(screen.getByText('Player Transfers')).toBeInTheDocument();
-    expect(screen.getByText('Virat Kohli')).toBeInTheDocument();
-    expect(screen.getByText('Royal Challengers')).toBeInTheDocument();
-    expect(screen.getByText('Transfer player')).toBeInTheDocument();
+    expect(screen.getByLabelText('Search players')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Virat Kohli' })).toHaveAttribute(
+      'href',
+      '/dashboard/players/p1/stats'
+    );
+    expect(screen.getByRole('link', { name: 'Royal Challengers' })).toHaveAttribute(
+      'href',
+      '/dashboard/teams/t1/roster'
+    );
+    expect(screen.getByRole('button', { name: 'Transfer player' })).toBeInTheDocument();
   });
 
   it('opens the transfer dialog with scroll-safe sizing so the Transfer button stays reachable on short viewports', async () => {
@@ -73,7 +83,9 @@ describe('TransfersPage', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
-        <TransfersPage />
+        <MemoryRouter>
+          <TransfersPage />
+        </MemoryRouter>
       </QueryClientProvider>
     );
 

@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import VerificationPage from './VerificationPage';
 
 vi.mock('@/hooks/useVerification', () => ({
@@ -54,13 +55,18 @@ describe('VerificationPage', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
-        <VerificationPage />
+        <MemoryRouter>
+          <VerificationPage />
+        </MemoryRouter>
       </QueryClientProvider>
     );
 
     expect(screen.getByText('Verification')).toBeInTheDocument();
     expect(screen.getByText('Tenant registrations')).toBeInTheDocument();
-    expect(screen.getByText('Test Player')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Test Player' })).toHaveAttribute(
+      'href',
+      '/dashboard/users/u1'
+    );
     expect(screen.getByText('player@example.com')).toBeInTheDocument();
     expect(screen.getByText('Approve')).toBeInTheDocument();
   });
@@ -70,7 +76,9 @@ describe('VerificationPage', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
-        <VerificationPage />
+        <MemoryRouter>
+          <VerificationPage />
+        </MemoryRouter>
       </QueryClientProvider>
     );
 
@@ -88,7 +96,9 @@ describe('VerificationPage', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
-        <VerificationPage />
+        <MemoryRouter>
+          <VerificationPage />
+        </MemoryRouter>
       </QueryClientProvider>
     );
 

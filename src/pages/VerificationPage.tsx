@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { DataTable } from '@/components/data-table/DataTable';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -103,18 +104,20 @@ function StatusFilterTabs({
   onChange: (value: StatusFilter) => void;
 }) {
   return (
-    <div className="flex w-full flex-wrap gap-1 rounded-lg border bg-gray-50 p-1 sm:w-fit">
+    <div className="flex w-full flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm sm:w-fit">
       {STATUS_TABS.map((option) => (
-        <Button
+        <button
           key={option.value}
           type="button"
-          size="sm"
-          variant={value === option.value ? 'default' : 'outline'}
           onClick={() => onChange(option.value)}
-          className={value === option.value ? undefined : 'border-transparent'}
+          className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+            value === option.value
+              ? 'bg-[#12233D] text-white'
+              : 'text-[#12233D] hover:bg-slate-50'
+          }`}
         >
           {option.label}
-        </Button>
+        </button>
       ))}
     </div>
   );
@@ -198,21 +201,25 @@ export default function VerificationPage() {
         }`}
       />
 
-      <div className="flex gap-2">
-        <Button
+      <div className="inline-flex gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+        <button
           type="button"
-          variant={tab === 'registrations' ? 'default' : 'outline'}
           onClick={() => setTab('registrations')}
+          className={`rounded-lg px-4 py-2 text-sm font-medium ${
+            tab === 'registrations' ? 'bg-[#12233D] text-white' : 'text-[#12233D] hover:bg-slate-50'
+          }`}
         >
           Tenant registrations
-        </Button>
-        <Button
+        </button>
+        <button
           type="button"
-          variant={tab === 'team-joins' ? 'default' : 'outline'}
           onClick={() => setTab('team-joins')}
+          className={`rounded-lg px-4 py-2 text-sm font-medium ${
+            tab === 'team-joins' ? 'bg-[#12233D] text-white' : 'text-[#12233D] hover:bg-slate-50'
+          }`}
         >
           Team join requests
-        </Button>
+        </button>
       </div>
 
       {tab === 'registrations' ? (
@@ -233,7 +240,21 @@ export default function VerificationPage() {
         ) : (
           <DataTable
             columns={[
-              { id: 'player', header: 'Player', cell: (row) => row.user_name },
+              {
+                id: 'player',
+                header: 'Player',
+                cell: (row) =>
+                  row.user_id ? (
+                    <Link
+                      to={`/dashboard/users/${row.user_id}`}
+                      className="font-medium text-[#12233D] underline-offset-2 hover:text-[#E8A93B] hover:underline"
+                    >
+                      {row.user_name}
+                    </Link>
+                  ) : (
+                    row.user_name
+                  ),
+              },
               { id: 'email', header: 'Email', cell: (row) => row.user_email },
               { id: 'tenant', header: 'Organization', cell: (row) => row.tenant_name },
               { id: 'paid', header: 'Paid', cell: (row) => (row.is_paid ? 'Yes' : 'No') },
@@ -378,9 +399,37 @@ export default function VerificationPage() {
       ) : (
         <DataTable
           columns={[
-            { id: 'player', header: 'Player', cell: (row: TeamJoinApplication) => row.user_name },
+            {
+              id: 'player',
+              header: 'Player',
+              cell: (row: TeamJoinApplication) =>
+                row.user_id ? (
+                  <Link
+                    to={`/dashboard/users/${row.user_id}`}
+                    className="font-medium text-[#12233D] underline-offset-2 hover:text-[#E8A93B] hover:underline"
+                  >
+                    {row.user_name}
+                  </Link>
+                ) : (
+                  row.user_name
+                ),
+            },
             { id: 'email', header: 'Email', cell: (row) => row.user_email },
-            { id: 'team', header: 'Team', cell: (row) => row.team_name },
+            {
+              id: 'team',
+              header: 'Team',
+              cell: (row) =>
+                row.team ? (
+                  <Link
+                    to={`/dashboard/teams/${row.team}/roster`}
+                    className="text-[#12233D] underline-offset-2 hover:underline"
+                  >
+                    {row.team_name}
+                  </Link>
+                ) : (
+                  row.team_name
+                ),
+            },
             { id: 'paid', header: 'Paid', cell: (row) => (row.is_paid ? 'Yes' : 'No') },
             {
               id: 'status',

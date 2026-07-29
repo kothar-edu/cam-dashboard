@@ -10,7 +10,10 @@ import {
   XCircle,
 } from 'lucide-react';
 import { DataTable } from '@/components/data-table/DataTable';
-import { SearchableSelect } from '@/components/forms/SearchableSelect';
+import {
+  MatchTeamPairFilter,
+  type MatchTeamPairValue,
+} from '@/components/filters/MatchTeamPairFilter';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
@@ -36,11 +39,7 @@ import type { Fixture } from '@/api/fixtures';
 const PAGE_SIZE = 20;
 const STATUS_TABS = ['Live', 'Upcoming', 'Ended'] as const;
 type StatusTab = (typeof STATUS_TABS)[number];
-const ANY_TEAM_VALUE = '__any__';
 
-// The legacy standalone livescore-admin app's overlay is being kept around
-// temporarily alongside the new in-dashboard broadcast route while the two
-// are compared - see cam-dashboard/.env's VITE_LIVESCORE_ADMIN_URL.
 const LIVESCORE_ADMIN_URL = import.meta.env.VITE_LIVESCORE_ADMIN_URL || 'http://localhost:3000';
 
 function formatDateTime(value: string) {
@@ -60,12 +59,17 @@ function matchLabel(fixture: {
   return `${fixture.opponent_a.team_name} vs ${fixture.opponent_b.team_name}`;
 }
 
+function matchHref(fixture: Fixture) {
+  return fixture.status === 'Ended'
+    ? `/dashboard/scorecards/${fixture.id}`
+    : `/dashboard/fixtures/${fixture.id}`;
+}
+
 export default function FixturesPage() {
   const { activeTenant } = useTenant();
   const [status, setStatus] = useState<StatusTab>('Upcoming');
   const [pageIndex, setPageIndex] = useState(0);
-  const [teamAId, setTeamAId] = useState('');
-  const [teamBId, setTeamBId] = useState('');
+  const [pair, setPair] = useState<MatchTeamPairValue>({ teamId: '', opponentTeamId: '' });
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [targetRow, setTargetRow] = useState<Fixture | null>(null);
   const [forfeitOpen, setForfeitOpen] = useState(false);
@@ -75,7 +79,7 @@ export default function FixturesPage() {
   const [abandonOpen, setAbandonOpen] = useState(false);
   const [abandonRow, setAbandonRow] = useState<Fixture | null>(null);
 
-  const teamsQuery = useTeams();
+  const teamsQuery = useTeams({ limit: 200 });
   const teamOptions = (teamsQuery.data?.results ?? []).map((team) => ({
     value: team.id,
     label: team.name,
@@ -85,8 +89,8 @@ export default function FixturesPage() {
     limit: PAGE_SIZE,
     offset: pageIndex * PAGE_SIZE,
     status,
-    ...(teamAId ? { team: teamAId } : {}),
-    ...(teamBId ? { opponent_team: teamBId } : {}),
+    ...(pair.teamId ? { team: pair.teamId } : {}),
+    ...(pair.opponentTeamId ? { opponent_team: pair.opponentTeamId } : {}),
   });
   const updateFixture = useUpdateFixture();
   const forfeitFixture = useForfeitFixture();
@@ -97,19 +101,8 @@ export default function FixturesPage() {
     setPageIndex(0);
   };
 
-  const changeTeamA = (value: string) => {
-    setTeamAId(value === ANY_TEAM_VALUE ? '' : value);
-    setPageIndex(0);
-  };
-
-  const changeTeamB = (value: string) => {
-    setTeamBId(value === ANY_TEAM_VALUE ? '' : value);
-    setPageIndex(0);
-  };
-
-  const clearTeamFilters = () => {
-    setTeamAId('');
-    setTeamBId('');
+  const changePair = (next: MatchTeamPairValue) => {
+    setPair(next);
     setPageIndex(0);
   };
 
@@ -141,7 +134,6 @@ export default function FixturesPage() {
   }
 
   const fixtures = data?.results ?? [];
-  const hasTeamFilter = Boolean(teamAId || teamBId);
 
   return (
     <div className="space-y-6">
@@ -172,37 +164,36 @@ export default function FixturesPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 rounded-lg border bg-white p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-        <SearchableSelect
-          label="Team A"
-          value={teamAId || ANY_TEAM_VALUE}
-          onChange={changeTeamA}
-          options={[{ value: ANY_TEAM_VALUE, label: 'Any team' }, ...teamOptions]}
-          placeholder="Any team"
-          searchable
-        />
-        <SearchableSelect
-          label="Team B"
-          value={teamBId || ANY_TEAM_VALUE}
-          onChange={changeTeamB}
-          options={[{ value: ANY_TEAM_VALUE, label: 'Any team' }, ...teamOptions]}
-          placeholder="Any team"
-          searchable
-        />
-        {hasTeamFilter ? (
-          <Button type="button" variant="outline" onClick={clearTeamFilters}>
-            Clear team filter
-          </Button>
-        ) : null}
-      </div>
+      <MatchTeamPairFilter value={pair} onChange={changePair} teamOptions={teamOptions} />
 
       <DataTable
         columns={[
-          { id: 'match', header: 'Match', cell: (row) => matchLabel(row) },
+          {
+            id: 'match',
+            header: 'Match',
+            cell: (row) => (
+              <Link
+                to={matchHref(row)}
+                className="font-medium text-[#12233D] underline-offset-2 hover:text-[#E8A93B] hover:underline"
+              >
+                {matchLabel(row)}
+              </Link>
+            ),
+          },
           {
             id: 'tournament',
             header: 'Tournament',
-            cell: (row) => row.tournament?.name ?? '—',
+            cell: (row) =>
+              row.tournament?.id ? (
+                <Link
+                  to={`/dashboard/tournaments/${row.tournament.id}/stats`}
+                  className="text-[#12233D] underline-offset-2 hover:underline"
+                >
+                  {row.tournament.name}
+                </Link>
+              ) : (
+                (row.tournament?.name ?? '—')
+              ),
           },
           { id: 'status', header: 'Status', cell: (row) => row.status },
           {
@@ -312,7 +303,7 @@ export default function FixturesPage() {
         data={fixtures}
         loading={isLoading}
         emptyMessage={
-          hasTeamFilter
+          pair.teamId || pair.opponentTeamId
             ? `No ${status.toLowerCase()} fixtures found for the selected team(s).`
             : `No ${status.toLowerCase()} fixtures found.`
         }

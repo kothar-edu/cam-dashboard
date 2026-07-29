@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import PointsPage from './PointsPage';
 
 vi.mock('@/hooks/useTournaments', () => ({
@@ -116,13 +117,17 @@ describe('PointsPage', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
-        <PointsPage />
+        <MemoryRouter>
+          <PointsPage />
+        </MemoryRouter>
       </QueryClientProvider>
     );
 
     expect(screen.getByText('Points Table')).toBeInTheDocument();
-    expect(screen.getByText('Standings')).toBeInTheDocument();
-    expect(screen.getAllByText('Royal Strikers').length).toBeGreaterThan(0);
+    expect(screen.getByRole('link', { name: /Royal Strikers/i })).toHaveAttribute(
+      'href',
+      '/dashboard/teams/1/roster'
+    );
     expect(screen.getAllByText('City Knights').length).toBeGreaterThan(0);
     expect(screen.getByText('Pts')).toBeInTheDocument();
     expect(screen.getByText('NRR')).toBeInTheDocument();

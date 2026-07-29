@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { PointsTableRow } from '@/api/points';
 import {
   Table,
@@ -35,7 +36,10 @@ function TeamCell({
     .join('');
 
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <Link
+      to={`/dashboard/teams/${row.team.id}/roster`}
+      className="flex min-w-0 items-center gap-3 rounded-md outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#E8A93B]"
+    >
       <span
         className={cn(
           'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold',
@@ -62,7 +66,7 @@ function TeamCell({
           {showGroupLabel && row.group ? ` · Group ${row.group}` : ''}
         </p>
       </div>
-    </div>
+    </Link>
   );
 }
 

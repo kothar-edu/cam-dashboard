@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import logo from '/assets/cam-youth (1).png';
+const APP_LOGO = '/assets/cricket_app_logo.png';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -45,7 +45,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md rounded-xl border border-white/10 bg-white p-5 shadow-xl sm:p-8">
         <div className="mb-6 text-center">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#12233D]/10">
-            <img src={logo} alt="CAM Youth" className="h-14 w-14 object-contain" />
+            <img src={APP_LOGO} alt="CAM Cricket" className="h-14 w-14 object-contain" />
           </div>
           <h1 className="text-2xl font-bold text-[#12233D]">CAM Cricket</h1>
           <p className="mt-1 text-sm text-muted-foreground">

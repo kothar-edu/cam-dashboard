@@ -13,12 +13,13 @@ import {
   Users,
   VoteIcon,
   LogOut,
-  BirdIcon as CricketBall,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+const APP_LOGO = '/assets/cricket_app_logo.png';
 
 const routes = [
   { title: 'Dashboard', href: '/dashboard', icon: BarChart2 },
@@ -63,7 +64,11 @@ export function ShellSidebar({ className, onNavigate }: ShellSidebarProps) {
     >
       <div className="border-b border-white/10 px-4 py-5 pr-12">
         <div className="flex items-center gap-2">
-          <CricketBall className="h-6 w-6 shrink-0 text-[#E8A93B]" />
+          <img
+            src={APP_LOGO}
+            alt=""
+            className="h-8 w-8 shrink-0 rounded-md object-contain"
+          />
           <div className="min-w-0">
             <p className="font-bold">CAM Cricket</p>
             {activeTenant ? (

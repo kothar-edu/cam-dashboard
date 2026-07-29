@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { DataTable } from '@/components/data-table/DataTable';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
@@ -416,9 +416,22 @@ const BOWLING_CATEGORIES = STAT_CATEGORIES.filter((c) => c.group === 'bowling');
 
 export default function TournamentDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [tab, setTab] = useState<DetailTab>('stats');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const initialTab: DetailTab =
+    tabParam === 'matches' || tabParam === 'table' || tabParam === 'stats' ? tabParam : 'stats';
+  const [tab, setTab] = useState<DetailTab>(initialTab);
   const [statsCategoryId, setStatsCategoryId] = useState<StatsCategoryId>('most-runs');
   const [pageIndex, setPageIndex] = useState(0);
+
+  const setDetailTab = (next: DetailTab) => {
+    setTab(next);
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.set('tab', next);
+      return params;
+    });
+  };
 
   const category = useMemo(
     () => STAT_CATEGORIES.find((item) => item.id === statsCategoryId) ?? STAT_CATEGORIES[0],
@@ -490,13 +503,13 @@ export default function TournamentDetailPage() {
               aria-label="Tournament sections"
               className="inline-flex rounded-lg border border-slate-200 bg-white p-1"
             >
-              <TabButton active={tab === 'stats'} onClick={() => setTab('stats')}>
+              <TabButton active={tab === 'stats'} onClick={() => setDetailTab('stats')}>
                 Stats
               </TabButton>
-              <TabButton active={tab === 'matches'} onClick={() => setTab('matches')}>
+              <TabButton active={tab === 'matches'} onClick={() => setDetailTab('matches')}>
                 Matches
               </TabButton>
-              <TabButton active={tab === 'table'} onClick={() => setTab('table')}>
+              <TabButton active={tab === 'table'} onClick={() => setDetailTab('table')}>
                 Table
               </TabButton>
             </div>

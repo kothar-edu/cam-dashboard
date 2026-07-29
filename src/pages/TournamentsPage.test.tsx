@@ -14,6 +14,7 @@ vi.mock('@/hooks/useTournaments', () => ({
           name: 'Summer League',
           logo: null,
           start: '2026-06-01T00:00:00Z',
+          end: '2026-08-01T00:00:00Z',
           total_teams: 8,
           is_active: true,
         },
@@ -41,7 +42,7 @@ vi.mock('@/contexts/TenantContext', () => ({
 }));
 
 describe('TournamentsPage', () => {
-  it('renders tournament table headers and row data', () => {
+  it('renders tournament cards with view matches link', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
@@ -51,12 +52,14 @@ describe('TournamentsPage', () => {
       </QueryClientProvider>
     );
 
-    expect(screen.getByText('Name')).toBeInTheDocument();
-    expect(screen.getByText('Teams')).toBeInTheDocument();
-    expect(screen.getByText('Start date')).toBeInTheDocument();
-    const nameLink = screen.getByRole('link', { name: 'Summer League' });
-    expect(nameLink).toBeInTheDocument();
-    expect(nameLink).toHaveAttribute('href', '/dashboard/tournaments/1/stats');
-    expect(screen.getByText('8')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Summer League' })).toHaveAttribute(
+      'href',
+      '/dashboard/tournaments/1/stats'
+    );
+    expect(screen.getByRole('link', { name: 'View matches' })).toHaveAttribute(
+      'href',
+      '/dashboard/tournaments/1/stats?tab=matches'
+    );
+    expect(screen.getByText(/8 teams/)).toBeInTheDocument();
   });
 });

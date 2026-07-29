@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DataTable } from '@/components/data-table/DataTable';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -40,15 +39,7 @@ export default function TournamentsPage() {
     );
   }
 
-  if (isLoading && !data) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
-      </div>
-    );
-  }
-
-  if (isError) {
+  if (isError && !data) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
         Unable to load tournaments. Check your API connection and tenant access.
@@ -57,6 +48,7 @@ export default function TournamentsPage() {
   }
 
   const tournaments = data?.results ?? [];
+  const pageCount = Math.max(1, Math.ceil((data?.count ?? 0) / PAGE_SIZE));
 
   return (
     <div className="space-y-6">
@@ -73,68 +65,106 @@ export default function TournamentsPage() {
         }
       />
 
-      <DataTable
-        columns={[
-          {
-            id: 'name',
-            header: 'Name',
-            cell: (row) => (
-              <Link
-                to={`/dashboard/tournaments/${row.id}/stats`}
-                className="font-medium text-[#12233D] underline-offset-2 hover:underline"
-              >
-                {row.name}
-              </Link>
-            ),
-          },
-          { id: 'teams', header: 'Teams', cell: (row) => row.total_teams },
-          {
-            id: 'start',
-            header: 'Start date',
-            cell: (row) => formatDate(row.start),
-          },
-          {
-            id: 'status',
-            header: 'Status',
-            cell: (row) => (row.is_active ? 'Active' : 'Inactive'),
-          },
-          {
-            id: 'actions',
-            header: 'Actions',
-            cell: (row) => (
-              <>
-                <Link
-                  to={`/dashboard/tournaments/${row.id}`}
-                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D]"
+      {isLoading && !data ? (
+        <div className="flex min-h-[40vh] items-center justify-center">
+          <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
+        </div>
+      ) : tournaments.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center text-sm text-muted-foreground">
+          No tournaments found.
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {tournaments.map((tournament) => (
+            <article
+              key={tournament.id}
+              className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <Link
+                    to={`/dashboard/tournaments/${tournament.id}/stats`}
+                    className="block truncate text-lg font-semibold text-[#12233D] hover:text-[#E8A93B]"
+                  >
+                    {tournament.name}
+                  </Link>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {formatDate(tournament.start)} – {formatDate(tournament.end)}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {tournament.total_teams} teams
+                  </p>
+                </div>
+                <span
+                  className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                    tournament.is_active
+                      ? 'bg-emerald-50 text-emerald-700'
+                      : 'bg-slate-100 text-slate-600'
+                  }`}
                 >
-                  Edit
+                  {tournament.is_active ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+              <div className="mt-5 flex flex-wrap gap-2">
+                <Link
+                  to={`/dashboard/tournaments/${tournament.id}/stats?tab=matches`}
+                  className="rounded-md bg-[#12233D] px-3 py-1.5 text-sm font-medium text-white"
+                >
+                  View matches
                 </Link>
                 <Link
-                  to={`/dashboard/fixtures/new/bulk?tournamentId=${row.id}`}
-                  className="ml-2 inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D]"
+                  to={`/dashboard/fixtures/new/bulk?tournamentId=${tournament.id}`}
+                  className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-[#12233D]"
                 >
                   Add matches
+                </Link>
+                <Link
+                  to={`/dashboard/tournaments/${tournament.id}`}
+                  className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-[#12233D]"
+                >
+                  Edit
                 </Link>
                 <button
                   type="button"
                   onClick={() => {
-                    setTargetRow(row);
+                    setTargetRow(tournament);
                     setConfirmOpen(true);
                   }}
-                  className="ml-2 inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-red-600"
+                  className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-red-600"
                 >
-                  {row.is_active ? 'Deactivate' : 'Reactivate'}
+                  {tournament.is_active ? 'Deactivate' : 'Reactivate'}
                 </button>
-              </>
-            ),
-          },
-        ]}
-        data={tournaments}
-        loading={isLoading}
-        emptyMessage="No tournaments found."
-        pagination={data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined}
-        onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
-      />
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {(data?.count ?? 0) > PAGE_SIZE ? (
+        <div className="flex justify-between text-sm text-muted-foreground">
+          <span>
+            Page {pageIndex + 1} of {pageCount}
+          </span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={pageIndex === 0}
+              className="rounded-md border px-3 py-1 disabled:opacity-40"
+              onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              disabled={pageIndex >= pageCount - 1}
+              className="rounded-md border px-3 py-1 disabled:opacity-40"
+              onClick={() => setPageIndex((p) => p + 1)}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <ConfirmDialog
         open={confirmOpen}

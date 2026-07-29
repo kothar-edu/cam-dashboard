@@ -41,7 +41,7 @@ vi.mock('@/contexts/TenantContext', () => ({
 }));
 
 describe('TeamsPage', () => {
-  it('renders team table headers and row data', () => {
+  it('renders searchable team cards with roster link', () => {
     const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
@@ -51,14 +51,10 @@ describe('TeamsPage', () => {
       </QueryClientProvider>
     );
 
-    expect(screen.getByText('Name')).toBeInTheDocument();
-    expect(screen.getByText('Abbreviation')).toBeInTheDocument();
-    expect(screen.getByText('Players')).toBeInTheDocument();
-    expect(screen.getByText('Actions')).toBeInTheDocument();
-    const nameLink = screen.getByRole('link', { name: 'Royal Strikers' });
-    expect(nameLink).toBeInTheDocument();
+    expect(screen.getByLabelText('Search teams')).toBeInTheDocument();
+    const nameLink = screen.getByRole('link', { name: /Royal Strikers/i });
     expect(nameLink).toHaveAttribute('href', '/dashboard/teams/1/roster');
-    expect(screen.getByText('RST')).toBeInTheDocument();
+    expect(screen.getByText(/RST/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Edit' })).toBeInTheDocument();
   });
 });

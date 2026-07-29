@@ -74,7 +74,7 @@ export default function BoundaryLabelsPage({ embedded = false }: BoundaryLabelsP
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 bg-white p-2">
       {embedded ? (
         <p className="text-sm text-muted-foreground">
           Custom four and six commentary text for live scoring in {activeTenant.name}.
@@ -86,8 +86,8 @@ export default function BoundaryLabelsPage({ embedded = false }: BoundaryLabelsP
         />
       )}
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)]">
-        <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="grid gap-5 lg:grid-cols-5">
+        <form onSubmit={handleSubmit} className="space-y-5 col-span-3">
           <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-4">
             <label htmlFor="four-boundary-label" className="text-sm font-semibold text-[#12233D]">
               Four boundary label
@@ -128,7 +128,7 @@ export default function BoundaryLabelsPage({ embedded = false }: BoundaryLabelsP
           </div>
         </form>
 
-        <aside className="overflow-hidden rounded-xl border border-slate-200 bg-[#12233D] text-white shadow-sm">
+        <aside className="overflow-hidden rounded-xl border border-slate-200 bg-[#12233D] text-white shadow-sm col-span-2">
           <div className="border-b border-white/10 px-4 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-[#E8A93B]">
               Live preview
@@ -140,13 +140,13 @@ export default function BoundaryLabelsPage({ embedded = false }: BoundaryLabelsP
             <PreviewRow label="Six" value={sixDisplay} accent="six" />
             {/*<div className="rounded-lg bg-white/5 px-3 py-2.5">*/}
             {/*  <p className="text-[11px] text-white/50">Sample ball strip</p>*/}
-              <div className="mt-2 flex flex-wrap gap-1.5">
-            {/*    <MiniChip>.</MiniChip>*/}
-            {/*    <MiniChip>1</MiniChip>*/}
-                <MiniChip accent="four">{fourDisplay}</MiniChip>
-            {/*    <MiniChip>W</MiniChip>*/}
-                <MiniChip accent="six">{sixDisplay}</MiniChip>
-              </div>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {/*    <MiniChip>.</MiniChip>*/}
+              {/*    <MiniChip>1</MiniChip>*/}
+              <MiniChip accent="four">{fourDisplay}</MiniChip>
+              {/*    <MiniChip>W</MiniChip>*/}
+              <MiniChip accent="six">{sixDisplay}</MiniChip>
+            </div>
             {/*</div>*/}
           </div>
         </aside>
@@ -180,13 +180,7 @@ function PreviewRow({
   );
 }
 
-function MiniChip({
-  children,
-  accent,
-}: {
-  children: string;
-  accent?: 'four' | 'six';
-}) {
+function MiniChip({ children, accent }: { children: string; accent?: 'four' | 'six' }) {
   if (accent === 'four') {
     return (
       <span className="max-w-[6rem] truncate rounded-full bg-sky-400 px-2 py-0.5 text-[10px] font-bold text-[#12233D]">

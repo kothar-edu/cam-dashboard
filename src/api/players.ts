@@ -5,6 +5,12 @@ export type PlayerUser = {
   id: string;
   full_name: string;
   email?: string;
+  picture?: string | null;
+  is_verified?: boolean;
+  is_email_verified?: boolean;
+  is_phone_verified?: boolean;
+  is_payment_verified?: boolean;
+  payment_status?: string;
 };
 
 export type Player = {
@@ -15,6 +21,8 @@ export type Player = {
   is_active: boolean;
   team_name: string | null;
   user: PlayerUser | null;
+  picture?: string | null;
+  role?: string | null;
 };
 
 export async function listPlayers(params?: ListParams): Promise<Paginated<Player>> {

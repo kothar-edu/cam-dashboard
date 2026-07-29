@@ -1,92 +1,21 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import {
-  Award,
-  FileText,
-  Settings2,
-  Tag,
-  type LucideIcon,
-} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useTenant } from '@/contexts/TenantContext';
 import { useGameConfig, useUpdateGameConfig } from '@/hooks/useGameConfig';
-import PostsPage from '@/pages/PostsPage';
-import SponsorsPage from '@/pages/SponsorsPage';
-import BoundaryLabelsPage from '@/pages/BoundaryLabelsPage';
 import { cn } from '@/lib/utils';
 
-export type AppSettingsTab = 'features' | 'posts' | 'sponsors' | 'boundary-labels';
-
-const APP_TABS: Array<{ id: AppSettingsTab; label: string; icon: LucideIcon }> = [
-  { id: 'features', label: 'Features', icon: Settings2 },
-  { id: 'posts', label: 'Posts', icon: FileText },
-  { id: 'sponsors', label: 'Sponsors', icon: Award },
-  { id: 'boundary-labels', label: 'Boundary labels', icon: Tag },
-];
-
-const TAB_ALIASES: Record<string, AppSettingsTab> = {
-  features: 'features',
-  toggles: 'features',
-  posts: 'posts',
-  sponsors: 'sponsors',
-  'boundary-labels': 'boundary-labels',
-  boundary: 'boundary-labels',
-  labels: 'boundary-labels',
-};
-
 export function AppSettingsPanel() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const rawTab = searchParams.get('tab') ?? 'features';
-  const activeTab = TAB_ALIASES[rawTab] ?? 'features';
-
-  const setTab = (tab: AppSettingsTab) => {
-    setSearchParams({ section: 'app', tab }, { replace: true });
-  };
-
   return (
     <div className="space-y-5">
       <div>
         <h2 className="text-lg font-semibold text-[#12233D]">App settings</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Feature toggles, posts, sponsors, and live scoring labels for the mobile app.
+          Feature toggles for the mobile app.
         </p>
       </div>
-
-      <div
-        role="tablist"
-        aria-label="App settings sections"
-        className="flex gap-1 overflow-x-auto rounded-xl bg-slate-100 p-1"
-      >
-        {APP_TABS.map((tab) => {
-          const Icon = tab.icon;
-          const active = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => setTab(tab.id)}
-              className={cn(
-                'inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition sm:text-sm',
-                active
-                  ? 'bg-[#12233D] text-white shadow-sm'
-                  : 'text-muted-foreground hover:bg-white/70 hover:text-[#12233D]'
-              )}
-            >
-              <Icon className={cn('h-3.5 w-3.5', active ? 'text-[#E8A93B]' : '')} />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {activeTab === 'features' ? <FeatureTogglesPanel /> : null}
-      {activeTab === 'posts' ? <PostsPage embedded /> : null}
-      {activeTab === 'sponsors' ? <SponsorsPage embedded /> : null}
-      {activeTab === 'boundary-labels' ? <BoundaryLabelsPage embedded /> : null}
+      <FeatureTogglesPanel />
     </div>
   );
 }

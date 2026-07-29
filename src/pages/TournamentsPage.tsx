@@ -75,7 +75,18 @@ export default function TournamentsPage() {
 
       <DataTable
         columns={[
-          { id: 'name', header: 'Name', cell: (row) => row.name },
+          {
+            id: 'name',
+            header: 'Name',
+            cell: (row) => (
+              <Link
+                to={`/dashboard/tournaments/${row.id}/stats`}
+                className="font-medium text-[#12233D] underline-offset-2 hover:underline"
+              >
+                {row.name}
+              </Link>
+            ),
+          },
           { id: 'teams', header: 'Teams', cell: (row) => row.total_teams },
           {
             id: 'start',

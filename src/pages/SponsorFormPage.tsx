@@ -10,7 +10,7 @@ import { TenantRequired } from '@/components/forms/TenantRequired';
 import { useCreateSponsor, useSponsor, useUpdateSponsor } from '@/hooks/useSponsors';
 
 const SPONSOR_TYPES = ['Title', 'Gold', 'Silver', 'Bronze', 'General'];
-const SPONSORS_LIST_PATH = '/dashboard/settings?section=app&tab=sponsors';
+const SPONSORS_LIST_PATH = '/dashboard/sponsors';
 
 export default function SponsorFormPage() {
   const { id } = useParams<{ id: string }>();

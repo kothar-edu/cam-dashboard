@@ -61,7 +61,18 @@ export default function TeamsPage() {
 
       <DataTable
         columns={[
-          { id: 'name', header: 'Name', cell: (row) => row.name },
+          {
+            id: 'name',
+            header: 'Name',
+            cell: (row) => (
+              <Link
+                to={`/dashboard/teams/${row.id}/roster`}
+                className="font-medium text-[#12233D] underline-offset-2 hover:underline"
+              >
+                {row.name}
+              </Link>
+            ),
+          },
           { id: 'code', header: 'Abbreviation', cell: (row) => row.code },
           { id: 'players', header: 'Players', cell: (row) => row.total_players },
           {

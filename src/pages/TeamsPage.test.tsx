@@ -55,7 +55,9 @@ describe('TeamsPage', () => {
     expect(screen.getByText('Abbreviation')).toBeInTheDocument();
     expect(screen.getByText('Players')).toBeInTheDocument();
     expect(screen.getByText('Actions')).toBeInTheDocument();
-    expect(screen.getByText('Royal Strikers')).toBeInTheDocument();
+    const nameLink = screen.getByRole('link', { name: 'Royal Strikers' });
+    expect(nameLink).toBeInTheDocument();
+    expect(nameLink).toHaveAttribute('href', '/dashboard/teams/1/roster');
     expect(screen.getByText('RST')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Edit' })).toBeInTheDocument();
   });

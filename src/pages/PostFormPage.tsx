@@ -66,12 +66,12 @@ export default function PostFormPage() {
     if (isEdit && id) {
       updateMutation.mutate(
         { id, payload },
-        { onSuccess: () => navigate('/dashboard/settings?section=app&tab=posts') }
+        { onSuccess: () => navigate('/dashboard/posts') }
       );
       return;
     }
     createMutation.mutate(payload, {
-      onSuccess: () => navigate('/dashboard/settings?section=app&tab=posts'),
+      onSuccess: () => navigate('/dashboard/posts'),
     });
   };
 
@@ -82,7 +82,7 @@ export default function PostFormPage() {
       <div className="space-y-6">
         <PageHeader
           title={isEdit ? 'Edit post' : 'Create post'}
-          backTo="/dashboard/settings?section=app&tab=posts"
+          backTo="/dashboard/posts"
           backLabel="Posts"
         />
         {isEdit && postQuery.isLoading ? (

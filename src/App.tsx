@@ -5,10 +5,12 @@ import DashboardLayout from '@/layouts/DashboardLayout';
 import LoginPage from '@/pages/LoginPage';
 import DashboardHomePage from '@/pages/DashboardHomePage';
 import TournamentsPage from '@/pages/TournamentsPage';
+import TournamentDetailPage from '@/pages/TournamentDetailPage';
 import TournamentFormPage from '@/pages/TournamentFormPage';
 import TeamsPage from '@/pages/TeamsPage';
 import TeamFormPage from '@/pages/TeamFormPage';
 import TeamDetailPage from '@/pages/TeamDetailPage';
+import TeamRosterPage from '@/pages/TeamRosterPage';
 import PlayersPage from '@/pages/PlayersPage';
 import PlayerFormPage from '@/pages/PlayerFormPage';
 import PlayerStatsPage from '@/pages/PlayerStatsPage';
@@ -19,7 +21,9 @@ import BulkFixtureFormPage from '@/pages/BulkFixtureFormPage';
 import ScorecardsPage from '@/pages/ScorecardsPage';
 import ScorecardDetailPage from '@/pages/ScorecardDetailPage';
 import PointsPage from '@/pages/PointsPage';
+import PostsPage from '@/pages/PostsPage';
 import PostFormPage from '@/pages/PostFormPage';
+import SponsorsPage from '@/pages/SponsorsPage';
 import SponsorFormPage from '@/pages/SponsorFormPage';
 import VerificationPage from '@/pages/VerificationPage';
 import TransfersPage from '@/pages/TransfersPage';
@@ -49,9 +53,11 @@ export default function App() {
           <Route index element={<DashboardHomePage />} />
           <Route path="tournaments" element={<TournamentsPage />} />
           <Route path="tournaments/new" element={<TournamentFormPage />} />
+          <Route path="tournaments/:id/stats" element={<TournamentDetailPage />} />
           <Route path="tournaments/:id" element={<TournamentFormPage />} />
           <Route path="teams" element={<TeamsPage />} />
           <Route path="teams/new" element={<TeamFormPage />} />
+          <Route path="teams/:id/roster" element={<TeamRosterPage />} />
           <Route path="teams/:id" element={<TeamDetailPage />} />
           <Route path="players" element={<PlayersPage />} />
           <Route path="players/new" element={<PlayerFormPage />} />
@@ -65,23 +71,15 @@ export default function App() {
           <Route path="scorecards" element={<ScorecardsPage />} />
           <Route path="scorecards/:id" element={<ScorecardDetailPage />} />
           <Route path="points" element={<PointsPage />} />
-          <Route
-            path="posts"
-            element={<Navigate to="/dashboard/settings?section=app&tab=posts" replace />}
-          />
+          <Route path="posts" element={<PostsPage />} />
           <Route path="posts/new" element={<PostFormPage />} />
           <Route path="posts/:id" element={<PostFormPage />} />
-          <Route
-            path="sponsors"
-            element={<Navigate to="/dashboard/settings?section=app&tab=sponsors" replace />}
-          />
+          <Route path="sponsors" element={<SponsorsPage />} />
           <Route path="sponsors/new" element={<SponsorFormPage />} />
           <Route path="sponsors/:id" element={<SponsorFormPage />} />
           <Route
             path="boundary-labels"
-            element={
-              <Navigate to="/dashboard/settings?section=app&tab=boundary-labels" replace />
-            }
+            element={<Navigate to="/dashboard/sponsors?tab=boundary-labels" replace />}
           />
           <Route
             path="game-settings"

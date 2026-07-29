@@ -1,9 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
+  Award,
   BarChart2,
   BarChart,
   Calendar,
   Clipboard,
+  Newspaper,
   RefreshCw,
   Settings,
   Trophy,
@@ -30,6 +32,8 @@ const routes = [
   { title: 'Player Transfers', href: '/dashboard/transfers', icon: RefreshCw },
   { title: 'Scorecards', href: '/dashboard/scorecards', icon: Clipboard },
   { title: 'Points Table', href: '/dashboard/points', icon: BarChart },
+  { title: 'Posts', href: '/dashboard/posts', icon: Newspaper },
+  { title: 'Sponsors', href: '/dashboard/sponsors', icon: Award },
   { title: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 

@@ -1,9 +1,4 @@
-export type SettingsSection =
-  | 'account'
-  | 'app'
-  | 'registration'
-  | 'tenants'
-  | 'create-admin';
+export type SettingsSection = 'account' | 'app' | 'registration' | 'tenants' | 'create-admin';
 
 export type SettingsSectionDef = {
   id: SettingsSection;
@@ -15,7 +10,7 @@ const ALL_SECTIONS: Array<SettingsSectionDef & { requiresTenantManager?: boolean
   {
     id: 'app',
     label: 'App settings',
-    description: 'Features, posts, sponsors & labels',
+    description: 'Feature toggles for the mobile app',
   },
   {
     id: 'registration',
@@ -24,7 +19,7 @@ const ALL_SECTIONS: Array<SettingsSectionDef & { requiresTenantManager?: boolean
   },
   {
     id: 'tenants',
-    label: 'Tenants',
+    label: 'Orgs',
     description: 'Organizations & admins',
     requiresTenantManager: true,
   },
@@ -53,9 +48,9 @@ export const LEGACY_SECTION_ALIASES: Record<string, SettingsSection> = {
 };
 
 export function buildSettingsSections(canManageTenants: boolean): SettingsSectionDef[] {
-  return ALL_SECTIONS.filter(
-    (section) => !section.requiresTenantManager || canManageTenants
-  ).map(({ id, label, description }) => ({ id, label, description }));
+  return ALL_SECTIONS.filter((section) => !section.requiresTenantManager || canManageTenants).map(
+    ({ id, label, description }) => ({ id, label, description })
+  );
 }
 
 export function resolveSettingsSection(

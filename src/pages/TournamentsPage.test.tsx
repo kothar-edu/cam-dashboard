@@ -54,7 +54,9 @@ describe('TournamentsPage', () => {
     expect(screen.getByText('Name')).toBeInTheDocument();
     expect(screen.getByText('Teams')).toBeInTheDocument();
     expect(screen.getByText('Start date')).toBeInTheDocument();
-    expect(screen.getByText('Summer League')).toBeInTheDocument();
+    const nameLink = screen.getByRole('link', { name: 'Summer League' });
+    expect(nameLink).toBeInTheDocument();
+    expect(nameLink).toHaveAttribute('href', '/dashboard/tournaments/1/stats');
     expect(screen.getByText('8')).toBeInTheDocument();
   });
 });

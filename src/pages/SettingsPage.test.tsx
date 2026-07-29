@@ -81,24 +81,6 @@ vi.mock('@/hooks/useGameConfig', () => ({
   useUpdateGameConfig: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
-vi.mock('@/hooks/usePosts', () => ({
-  usePosts: () => ({
-    data: { count: 0, results: [] },
-    isLoading: false,
-    isError: false,
-  }),
-  useDeletePost: () => ({ mutate: vi.fn(), isPending: false }),
-}));
-
-vi.mock('@/hooks/useSponsors', () => ({
-  useSponsors: () => ({
-    data: { count: 0, results: [] },
-    isLoading: false,
-    isError: false,
-  }),
-  useDeleteSponsor: () => ({ mutate: vi.fn(), isPending: false }),
-}));
-
 vi.mock('@/hooks/useTenantAdmin', () => ({
   useTenantMemberships: () => ({
     data: { count: 0, results: [] },
@@ -155,24 +137,14 @@ describe('SettingsPage', () => {
     expect(nav).toHaveTextContent('Tenants');
     expect(nav).toHaveTextContent('Account');
     expect(nav).toHaveTextContent('Create admin');
-    expect(screen.getByRole('tab', { name: 'Features' })).toBeInTheDocument();
     expect(screen.getByText('Registration open')).toBeInTheDocument();
   });
 
   it('shows app settings toggles when selected', () => {
     renderSettings('/dashboard/settings?section=app');
-    expect(screen.getByRole('tab', { name: 'Features' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Posts' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Sponsors' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Boundary labels' })).toBeInTheDocument();
     expect(screen.getByText('Registration open')).toBeInTheDocument();
     expect(screen.getByText('Voting open')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save app settings' })).toBeInTheDocument();
-  });
-
-  it('opens posts tab from app settings query', () => {
-    renderSettings('/dashboard/settings?section=app&tab=posts');
-    expect(screen.getAllByRole('link', { name: /New post/i }).length).toBeGreaterThan(0);
   });
 
   it('opens tenants section for tenant managers', () => {

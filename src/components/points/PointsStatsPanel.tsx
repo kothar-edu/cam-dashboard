@@ -178,7 +178,7 @@ export function PointsStatsPanel({ rows, topBatters = [], topBowlers = [] }: Poi
   );
 }
 
-function PlayerLeadersCard({
+export function PlayerLeadersCard({
   title,
   subtitle,
   players,

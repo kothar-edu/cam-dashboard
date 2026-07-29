@@ -19,7 +19,7 @@ import { useTenant } from '@/contexts/TenantContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-const APP_LOGO = '/assets/cricket_app_logo.png';
+const APP_LOGO = '/assets/cricket_app_icon.png';
 
 const routes = [
   { title: 'Dashboard', href: '/dashboard', icon: BarChart2 },
@@ -62,15 +62,15 @@ export function ShellSidebar({ className, onNavigate }: ShellSidebarProps) {
         className
       )}
     >
-      <div className="border-b border-white/10 px-4 py-5 pr-12">
-        <div className="flex items-center gap-2">
+      <div className="border-b border-white/10 px-4 py-4 pr-12">
+        <div className="flex items-center gap-3">
           <img
             src={APP_LOGO}
             alt=""
-            className="h-8 w-8 shrink-0 rounded-md object-contain"
+            className="h-12 w-12 shrink-0 rounded-lg object-contain"
           />
           <div className="min-w-0">
-            <p className="font-bold">CAM Cricket</p>
+            <p className="text-base font-bold leading-tight">CAM Cricket</p>
             {activeTenant ? (
               <p className="truncate text-xs text-white/70">{activeTenant.name}</p>
             ) : null}

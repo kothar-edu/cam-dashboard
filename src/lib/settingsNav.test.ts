@@ -2,18 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { buildSettingsSections } from '@/lib/settingsNav';
 
 describe('buildSettingsSections', () => {
-  it('includes create admin only for tenant managers', () => {
+  it('hides account and create-admin while those flags are off', () => {
     expect(buildSettingsSections(true).map((s) => s.id)).toEqual([
       'app',
       'registration',
       'tenants',
-      'account',
-      'create-admin',
     ]);
-    expect(buildSettingsSections(false).map((s) => s.id)).toEqual([
-      'app',
-      'registration',
-      'account',
-    ]);
+    expect(buildSettingsSections(false).map((s) => s.id)).toEqual(['app', 'registration']);
   });
 });

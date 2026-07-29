@@ -6,7 +6,16 @@ export type SettingsSectionDef = {
   description: string;
 };
 
-const ALL_SECTIONS: Array<SettingsSectionDef & { requiresTenantManager?: boolean }> = [
+/** Flip to true to restore Account / Create admin in the settings nav. */
+export const SHOW_ACCOUNT_SETTINGS = false;
+export const SHOW_CREATE_ADMIN_SETTINGS = false;
+
+const ALL_SECTIONS: Array<
+  SettingsSectionDef & {
+    requiresTenantManager?: boolean;
+    visible?: boolean;
+  }
+> = [
   {
     id: 'app',
     label: 'App settings',
@@ -27,12 +36,14 @@ const ALL_SECTIONS: Array<SettingsSectionDef & { requiresTenantManager?: boolean
     id: 'account',
     label: 'Account',
     description: 'Password & login',
+    visible: SHOW_ACCOUNT_SETTINGS,
   },
   {
     id: 'create-admin',
     label: 'Create admin',
     description: 'Invite staff users',
     requiresTenantManager: true,
+    visible: SHOW_CREATE_ADMIN_SETTINGS,
   },
 ];
 
@@ -48,9 +59,10 @@ export const LEGACY_SECTION_ALIASES: Record<string, SettingsSection> = {
 };
 
 export function buildSettingsSections(canManageTenants: boolean): SettingsSectionDef[] {
-  return ALL_SECTIONS.filter((section) => !section.requiresTenantManager || canManageTenants).map(
-    ({ id, label, description }) => ({ id, label, description })
-  );
+  return ALL_SECTIONS.filter(
+    (section) =>
+      (section.visible ?? true) && (!section.requiresTenantManager || canManageTenants)
+  ).map(({ id, label, description }) => ({ id, label, description }));
 }
 
 export function resolveSettingsSection(

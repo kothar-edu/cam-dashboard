@@ -134,9 +134,9 @@ describe('SettingsPage', () => {
     const nav = screen.getByRole('navigation', { name: 'Settings sections' });
     expect(nav).toHaveTextContent('App settings');
     expect(nav).toHaveTextContent('Registration settings');
-    expect(nav).toHaveTextContent('Tenants');
-    expect(nav).toHaveTextContent('Account');
-    expect(nav).toHaveTextContent('Create admin');
+    expect(nav).toHaveTextContent('Orgs');
+    expect(nav).not.toHaveTextContent('Account');
+    expect(nav).not.toHaveTextContent('Create admin');
     expect(screen.getByText('Registration open')).toBeInTheDocument();
   });
 
@@ -159,9 +159,9 @@ describe('SettingsPage', () => {
     expect(screen.getByRole('button', { name: 'Save registration settings' })).toBeInTheDocument();
   });
 
-  it('shows create-admin document fields', () => {
+  it('falls back when create-admin section is hidden', () => {
     renderSettings('/dashboard/settings?section=create-admin');
-    expect(screen.getByText('ID card (optional)')).toBeInTheDocument();
-    expect(screen.getByText('Payslip (optional)')).toBeInTheDocument();
+    expect(screen.getByText('Registration open')).toBeInTheDocument();
+    expect(screen.queryByText('ID card (optional)')).not.toBeInTheDocument();
   });
 });

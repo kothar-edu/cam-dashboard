@@ -25,18 +25,22 @@ export function OverHistoryStrip({ thisOver }: OverHistoryStripProps) {
           <div
             key={index}
             data-testid="ball-badge"
-            className={`flex h-8 w-8 shrink-0 flex-col items-center justify-center rounded border border-white/10 text-[10px] font-bold leading-tight ${badgeColor(kind)}`}
+            className={`flex h-8 w-8 shrink-0 flex-col items-center justify-center overflow-hidden rounded border border-white/10 leading-none ${badgeColor(kind)}`}
           >
             {isDot ? (
               <span
                 data-testid="dot-ball"
-                className="block h-3 w-3 rounded-full bg-white"
+                className="block h-3.5 w-3.5 rounded-full bg-white"
                 aria-label="0"
               />
             ) : (
-              <span>{code}</span>
+              <span className="text-[14px] font-extrabold tabular-nums tracking-tight">{code}</span>
             )}
-            {detail ? <span className="text-[8px] font-semibold opacity-90">{detail}</span> : null}
+            {detail ? (
+              <span className="mt-px text-[9px] font-bold uppercase leading-none opacity-95">
+                {detail}
+              </span>
+            ) : null}
           </div>
         );
       })}

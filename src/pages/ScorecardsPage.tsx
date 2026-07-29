@@ -1,35 +1,39 @@
 import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
+import {
+  MatchTeamPairFilter,
+  type MatchTeamPairValue,
+} from '@/components/filters/MatchTeamPairFilter';
 import { ScorecardMatchCard } from '@/components/scorecards/ScorecardMatchCard';
 import { useTenant } from '@/contexts/TenantContext';
 import { useScorecards } from '@/hooks/useScorecards';
+import { useTeams } from '@/hooks/useTeams';
 
 const PAGE_SIZE = 12;
 
 export default function ScorecardsPage() {
   const { activeTenant } = useTenant();
   const [pageIndex, setPageIndex] = useState(0);
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
-  const { data, isLoading, isError } = useScorecards({
-    limit: PAGE_SIZE,
-    offset: pageIndex * PAGE_SIZE,
-    ...(search ? { search } : {}),
-  });
-
-  useEffect(() => {
-    const handle = window.setTimeout(() => {
-      setSearch(searchInput.trim());
-    }, 300);
-    return () => window.clearTimeout(handle);
-  }, [searchInput]);
+  const [pair, setPair] = useState<MatchTeamPairValue>({ teamId: '', opponentTeamId: '' });
+  const teamsQuery = useTeams({ limit: 200 });
+  const teamOptions = (teamsQuery.data?.results ?? []).map((team) => ({
+    value: team.id,
+    label: team.name,
+  }));
 
   useEffect(() => {
     setPageIndex(0);
-  }, [search]);
+  }, [pair.teamId, pair.opponentTeamId]);
+
+  const { data, isLoading, isError } = useScorecards({
+    limit: PAGE_SIZE,
+    offset: pageIndex * PAGE_SIZE,
+    ...(pair.teamId ? { team: pair.teamId } : {}),
+    ...(pair.opponentTeamId ? { opponent_team: pair.opponentTeamId } : {}),
+  });
 
   if (!activeTenant) {
     return (
@@ -42,15 +46,7 @@ export default function ScorecardsPage() {
     );
   }
 
-  if (isLoading && !data) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
-      </div>
-    );
-  }
-
-  if (isError) {
+  if (isError && !data) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
         Unable to load scorecards. Check your API connection and tenant access.
@@ -63,6 +59,7 @@ export default function ScorecardsPage() {
   const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const canPrevious = pageIndex > 0;
   const canNext = pageIndex < pageCount - 1;
+  const hasPair = Boolean(pair.teamId || pair.opponentTeamId);
 
   return (
     <div className="space-y-6">
@@ -71,29 +68,20 @@ export default function ScorecardsPage() {
         description={`${activeTenant.name} · ${totalCount} completed match${totalCount === 1 ? '' : 'es'}`}
       />
 
-      <div className="relative max-w-xl">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          type="search"
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          placeholder='Search teams, e.g. "Warriors vs GNR"'
-          className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-[#12233D] shadow-sm outline-none focus:border-[#E8A93B] focus:ring-1 focus:ring-[#E8A93B]"
-          aria-label="Search scorecards"
-        />
-        <p className="mt-1.5 text-xs text-muted-foreground">
-          Use &quot;Team A vs Team B&quot; to find that fixture either way around.
-        </p>
-      </div>
+      <MatchTeamPairFilter value={pair} onChange={setPair} teamOptions={teamOptions} />
 
-      {scorecards.length === 0 ? (
+      {isLoading && !data ? (
+        <div className="flex min-h-[40vh] items-center justify-center">
+          <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
+        </div>
+      ) : scorecards.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center">
           <p className="text-sm font-medium text-[#12233D]">
-            {search ? 'No matches for that search' : 'No completed matches found'}
+            {hasPair ? 'No matches for that team filter' : 'No completed matches found'}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            {search
-              ? 'Try another team name or a different “A vs B” pairing.'
+            {hasPair
+              ? 'Try another team pairing, or clear the filter.'
               : 'Ended fixtures with score data will appear here as scorecards.'}
           </p>
         </div>

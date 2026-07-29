@@ -34,6 +34,9 @@ type DetailTab = 'overview' | 'stats' | 'balls' | 'officials';
 /** Flip to true to restore the aggregate batting & bowling editor tab. */
 const SHOW_BATTING_BOWLING_TAB = false;
 
+/** Flip to true to restore the Match tied toggle on the Officials tab. */
+const SHOW_MATCH_TIED_TOGGLE = false;
+
 export default function ScorecardDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data, isLoading, isError } = useScorecard(id);
@@ -486,7 +489,24 @@ export default function ScorecardDetailPage() {
                   </select>
                 </label>
                 <ToggleRow label="Match abandoned" value={abandoned} onChange={setAbandoned} />
-                <ToggleRow label="Match tied" value={tied} onChange={setTied} />
+                {/* Kept wired but visually/interaction-disabled for a future re-enable. */}
+                <div
+                  className={
+                    SHOW_MATCH_TIED_TOGGLE
+                      ? undefined
+                      : 'pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0'
+                  }
+                  aria-hidden={!SHOW_MATCH_TIED_TOGGLE}
+                >
+                  <ToggleRow
+                    label="Match tied"
+                    value={tied}
+                    onChange={(value) => {
+                      if (!SHOW_MATCH_TIED_TOGGLE) return;
+                      setTied(value);
+                    }}
+                  />
+                </div>
                 <ToggleRow label="D/L applied" value={dls} onChange={setDls} />
               </div>
             ) : null}

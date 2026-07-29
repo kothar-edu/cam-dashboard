@@ -83,6 +83,7 @@ export type RotationShiftIssue = {
   message: string;
   balls: string[];
   fix: RotationShiftFix[];
+  caused_by_edit: boolean;
 };
 
 export type BatterSlotIssue = {
@@ -96,6 +97,7 @@ export type BatterSlotIssue = {
   default_player_id: string | null;
   eligible_players: Array<{ id: string; full_name: string }>;
   token: string;
+  caused_by_edit: boolean;
 };
 
 export type ScorecardEditOutcome = {

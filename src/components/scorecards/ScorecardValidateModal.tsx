@@ -118,6 +118,9 @@ export function ScorecardValidateModal({
   onApply,
   onResolveIssue,
 }: ScorecardValidateModalProps) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [showPreExisting, setShowPreExisting] = useState(false);
+
   if (!outcome) return null;
 
   const hasErrors = outcome.errors.length > 0;
@@ -126,7 +129,13 @@ export function ScorecardValidateModal({
   const groups = groupChanges(outcome.changes);
   const rotationShiftIssues = outcome.rotation_shift_issues ?? [];
   const batterSlotIssues = outcome.batter_slot_issues ?? [];
-  const hasConsistencyIssues = rotationShiftIssues.length > 0 || batterSlotIssues.length > 0;
+  const editRotation = rotationShiftIssues.filter((i) => i.caused_by_edit);
+  const editBatter = batterSlotIssues.filter((i) => i.caused_by_edit);
+  const preRotation = rotationShiftIssues.filter((i) => !i.caused_by_edit);
+  const preBatter = batterSlotIssues.filter((i) => !i.caused_by_edit);
+  const hasEditIssues = editRotation.length > 0 || editBatter.length > 0;
+  const hasPreExistingIssues = preRotation.length > 0 || preBatter.length > 0;
+  const preExistingCount = preRotation.length + preBatter.length;
 
   return (
     <Modal
@@ -167,24 +176,61 @@ export function ScorecardValidateModal({
           </section>
         ) : null}
 
-        {hasConsistencyIssues ? (
+        {hasEditIssues ? (
           <section className="rounded-lg border border-amber-200 bg-amber-50/70 p-3">
-            <h3 className="text-sm font-semibold text-amber-900">Data consistency</h3>
+            <h3 className="text-sm font-semibold text-amber-900">Data consistency — from this edit</h3>
             <p className="mt-1 text-xs text-amber-800/80">
               These never block Apply — fix what you want, skip the rest.
             </p>
             <ul className="mt-2 divide-y rounded-md border bg-white">
-              {rotationShiftIssues.map((issue) => (
+              {editRotation.map((issue) => (
                 <RotationShiftRow
                   key={`rotation-${issue.innings_index}-${issue.balls[0]}`}
                   issue={issue}
                   onResolveIssue={onResolveIssue}
                 />
               ))}
-              {batterSlotIssues.map((issue) => (
+              {editBatter.map((issue) => (
                 <BatterSlotRow key={issue.token} issue={issue} onResolveIssue={onResolveIssue} />
               ))}
             </ul>
+          </section>
+        ) : null}
+
+        {hasPreExistingIssues ? (
+          <section className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <button
+              type="button"
+              className="flex w-full items-center justify-between text-left"
+              onClick={() => setShowPreExisting((v) => !v)}
+            >
+              <span>
+                <h3 className="text-sm font-semibold text-slate-700">
+                  Pre-existing in this innings ({preExistingCount})
+                </h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  Not caused by this edit — already in the stored data, surfaced because every save
+                  rechecks the whole innings. Never blocks Apply.
+                </p>
+              </span>
+              <span className="ml-3 shrink-0 text-xs font-medium text-slate-500">
+                {showPreExisting ? 'Hide' : 'Show'}
+              </span>
+            </button>
+            {showPreExisting ? (
+              <ul className="mt-2 divide-y rounded-md border bg-white">
+                {preRotation.map((issue) => (
+                  <RotationShiftRow
+                    key={`rotation-${issue.innings_index}-${issue.balls[0]}`}
+                    issue={issue}
+                    onResolveIssue={onResolveIssue}
+                  />
+                ))}
+                {preBatter.map((issue) => (
+                  <BatterSlotRow key={issue.token} issue={issue} onResolveIssue={onResolveIssue} />
+                ))}
+              </ul>
+            ) : null}
           </section>
         ) : null}
 
@@ -237,11 +283,40 @@ export function ScorecardValidateModal({
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button type="button" onClick={onApply} disabled={hasErrors || applying}>
+          <Button type="button" onClick={() => setConfirmOpen(true)} disabled={hasErrors || applying}>
             {applying ? 'Applying…' : 'Apply changes'}
           </Button>
         </div>
       </div>
+
+      <Modal
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Apply these changes?"
+        className="max-w-sm"
+      >
+        <div className="mt-3 space-y-4">
+          <p className="text-sm text-muted-foreground">
+            This writes the changes above to the live scorecard, player stats, and points table now.
+            It can&apos;t be undone from here.
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setConfirmOpen(false);
+                onApply();
+              }}
+              disabled={applying}
+            >
+              {applying ? 'Applying…' : 'Yes, apply changes'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </Modal>
   );
 }

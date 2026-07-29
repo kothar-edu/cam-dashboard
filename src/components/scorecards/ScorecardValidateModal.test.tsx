@@ -52,7 +52,7 @@ describe('ScorecardValidateModal', () => {
     expect(onApply).not.toHaveBeenCalled();
   });
 
-  it('allows apply when validation succeeds with warnings only', async () => {
+  it('requires confirming a second dialog before apply actually fires', async () => {
     const user = userEvent.setup();
     const onApply = vi.fn();
     const outcome: ScorecardEditOutcome = {
@@ -86,10 +86,22 @@ describe('ScorecardValidateModal', () => {
     );
 
     await user.click(screen.getByRole('button', { name: 'Apply changes' }));
+    expect(onApply).not.toHaveBeenCalled();
+    expect(screen.getByText('Apply these changes?')).toBeInTheDocument();
+
+    // Cancel on the confirm dialog must not apply, and the review modal
+    // (with its own field-by-field diff) stays exactly as it was.
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(onApply).not.toHaveBeenCalled();
+    expect(screen.queryByText('Apply these changes?')).not.toBeInTheDocument();
+    expect(screen.getByText('Ball 1.0.1 value')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Apply changes' }));
+    await user.click(screen.getByRole('button', { name: 'Yes, apply changes' }));
     expect(onApply).toHaveBeenCalledTimes(1);
   });
 
-  it('shows consistency issues and fires onResolveIssue from the Fix button', async () => {
+  it('shows edit-caused consistency issues and fires onResolveIssue from the Fix button', async () => {
     const user = userEvent.setup();
     const onResolveIssue = vi.fn();
     const outcome: ScorecardEditOutcome = {
@@ -102,11 +114,12 @@ describe('ScorecardValidateModal', () => {
         {
           kind: 'rotation_shift',
           innings_index: 0,
-          message: 'Innings 1: strike rotation is off from ball 1.0.3 onward after this edit.',
+          message: 'Innings 1: strike rotation is off from ball 1.0.3 onward.',
           balls: ['0.0.2'],
           fix: [
             { innings_index: 0, over_index: 0, ball_index: 2, striker: 'p1', non_striker: 'p2' },
           ],
+          caused_by_edit: true,
         },
       ],
       batter_slot_issues: [
@@ -121,6 +134,7 @@ describe('ScorecardValidateModal', () => {
           default_player_id: 'p1',
           eligible_players: [{ id: 'p3', full_name: 'Player Three' }],
           token: '0.0.3.striker',
+          caused_by_edit: true,
         },
       ],
     };
@@ -136,7 +150,8 @@ describe('ScorecardValidateModal', () => {
       />
     );
 
-    expect(screen.getByText('Data consistency')).toBeInTheDocument();
+    expect(screen.getByText('Data consistency — from this edit')).toBeInTheDocument();
+    expect(screen.queryByText(/Pre-existing in this innings/)).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Fix' }));
     expect(onResolveIssue).toHaveBeenCalledWith(outcome.rotation_shift_issues[0].fix);
 
@@ -145,6 +160,46 @@ describe('ScorecardValidateModal', () => {
       [{ innings_index: 0, over_index: 0, ball_index: 3, striker: 'p1' }],
       ['0.0.3.striker']
     );
+  });
+
+  it('collapses pre-existing (not caused by this edit) issues behind a toggle', async () => {
+    const user = userEvent.setup();
+    const outcome: ScorecardEditOutcome = {
+      ok: true,
+      errors: [],
+      warnings: [],
+      changes: [],
+      preview: {},
+      rotation_shift_issues: [
+        {
+          kind: 'rotation_shift',
+          innings_index: 1,
+          message: 'Innings 2: strike rotation is off from ball 2.0.2 onward.',
+          balls: ['1.0.1'],
+          fix: [{ innings_index: 1, over_index: 0, ball_index: 1, striker: 'p1', non_striker: 'p2' }],
+          caused_by_edit: false,
+        },
+      ],
+      batter_slot_issues: [],
+    };
+
+    render(
+      <ScorecardValidateModal
+        open
+        onOpenChange={() => undefined}
+        outcome={outcome}
+        applying={false}
+        onApply={vi.fn()}
+        onResolveIssue={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByText('Data consistency — from this edit')).not.toBeInTheDocument();
+    expect(screen.getByText('Pre-existing in this innings (1)')).toBeInTheDocument();
+    expect(screen.queryByText(/strike rotation is off from ball 2\.0\.2/)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /Pre-existing in this innings/ }));
+    expect(screen.getByText(/strike rotation is off from ball 2\.0\.2/)).toBeInTheDocument();
   });
 });
 

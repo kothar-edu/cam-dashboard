@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Modal } from '@/components/ui/modal';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { ScorecardOverview } from '@/components/scorecards/ScorecardOverview';
@@ -57,6 +58,7 @@ export default function ScorecardDetailPage() {
   const [reviewOutcome, setReviewOutcome] = useState<ScorecardEditOutcome | null>(null);
   const [pendingPatch, setPendingPatch] = useState<ScorecardEditPatch | null>(null);
   const [confirmedTokens, setConfirmedTokens] = useState<Set<string>>(new Set());
+  const [discardConfirmOpen, setDiscardConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (!data) return;
@@ -185,7 +187,6 @@ export default function ScorecardDetailPage() {
 
   const discardDraft = () => {
     if (!anyDirty) return;
-    if (!window.confirm('Discard all unsaved scorecard changes?')) return;
     setLineupsA(baselineA.map(normalizeLineup));
     setLineupsB(baselineB.map(normalizeLineup));
     setResultDraft(baselineResult ? structuredClone(baselineResult) : null);
@@ -334,7 +335,12 @@ export default function ScorecardDetailPage() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button type="button" variant="outline" disabled={!anyDirty} onClick={discardDraft}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!anyDirty}
+                  onClick={() => setDiscardConfirmOpen(true)}
+                >
                   Discard
                 </Button>
                 <Button
@@ -346,6 +352,34 @@ export default function ScorecardDetailPage() {
                 </Button>
               </div>
             </div>
+
+            <Modal
+              open={discardConfirmOpen}
+              onOpenChange={setDiscardConfirmOpen}
+              title="Discard unsaved changes?"
+              className="max-w-sm"
+            >
+              <div className="mt-3 space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  This throws away every edit made in this draft. Nothing has been saved yet, so
+                  this only affects what&apos;s on this screen.
+                </p>
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => setDiscardConfirmOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setDiscardConfirmOpen(false);
+                      discardDraft();
+                    }}
+                  >
+                    Yes, discard
+                  </Button>
+                </div>
+              </div>
+            </Modal>
 
             <div className="flex flex-wrap gap-1 rounded-lg bg-slate-100 p-1">
               <TabButton active={tab === 'overview'} onClick={() => setTab('overview')}>

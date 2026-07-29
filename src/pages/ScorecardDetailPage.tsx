@@ -31,6 +31,9 @@ import { cn } from '@/lib/utils';
 
 type DetailTab = 'overview' | 'stats' | 'balls' | 'officials';
 
+/** Flip to true to restore the aggregate batting & bowling editor tab. */
+const SHOW_BATTING_BOWLING_TAB = false;
+
 export default function ScorecardDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data, isLoading, isError } = useScorecard(id);
@@ -381,18 +384,33 @@ export default function ScorecardDetailPage() {
               </div>
             </Modal>
 
-            <div className="flex flex-wrap gap-1 rounded-lg bg-slate-100 p-1">
+            <div className="relative flex flex-wrap gap-1 rounded-lg bg-slate-100 p-1">
               <TabButton active={tab === 'overview'} onClick={() => setTab('overview')}>
                 Overview
-              </TabButton>
-              <TabButton active={tab === 'stats'} onClick={() => setTab('stats')}>
-                Batting & bowling
               </TabButton>
               <TabButton active={tab === 'balls'} onClick={() => setTab('balls')}>
                 Ball by ball
               </TabButton>
               <TabButton active={tab === 'officials'} onClick={() => setTab('officials')}>
                 Officials
+              </TabButton>
+              {/* Kept last and visually/interaction-disabled so the stats editor
+                  code path stays wired for a future re-enable. */}
+              <TabButton
+                active={tab === 'stats'}
+                onClick={() => {
+                  if (!SHOW_BATTING_BOWLING_TAB) return;
+                  setTab('stats');
+                }}
+                className={
+                  SHOW_BATTING_BOWLING_TAB
+                    ? undefined
+                    : 'pointer-events-none absolute h-0 w-0 overflow-hidden border-0 p-0 opacity-0'
+                }
+                tabIndex={SHOW_BATTING_BOWLING_TAB ? 0 : -1}
+                aria-hidden={!SHOW_BATTING_BOWLING_TAB}
+              >
+                Batting & bowling
               </TabButton>
             </div>
 
@@ -492,18 +510,27 @@ function TabButton({
   active,
   onClick,
   children,
+  className,
+  tabIndex,
+  'aria-hidden': ariaHidden,
 }: {
   active: boolean;
   onClick: () => void;
   children: ReactNode;
+  className?: string;
+  tabIndex?: number;
+  'aria-hidden'?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      tabIndex={tabIndex}
+      aria-hidden={ariaHidden}
       className={cn(
         'rounded-md px-3 py-1.5 text-sm font-medium transition',
-        active ? 'bg-[#12233D] text-white shadow-sm' : 'text-muted-foreground hover:text-[#12233D]'
+        active ? 'bg-[#12233D] text-white shadow-sm' : 'text-muted-foreground hover:text-[#12233D]',
+        className
       )}
     >
       {children}

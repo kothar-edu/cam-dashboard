@@ -315,7 +315,7 @@ export default function FixturesPage() {
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title="Cancel this fixture?"
-        description="This marks the match as Cancelled. It will no longer appear as scheduled, but no data is deleted — you can reverse this later by editing the fixture's status back."
+        description="This marks the match as Cancelled. It will no longer appear as scheduled."
         confirmLabel="Cancel match"
         isLoading={updateFixture.isPending}
         onConfirm={() => {

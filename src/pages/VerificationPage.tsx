@@ -134,8 +134,8 @@ export default function VerificationPage() {
   const [joinPage, setJoinPage] = useState(0);
   const [regSearch, setRegSearch] = useState('');
   const [joinSearch, setJoinSearch] = useState('');
-  const debouncedRegSearch = useDebouncedValue(regSearch.trim(), 300);
-  const debouncedJoinSearch = useDebouncedValue(joinSearch.trim(), 300);
+  const debouncedRegSearch = useDebouncedValue(regSearch.trim());
+  const debouncedJoinSearch = useDebouncedValue(joinSearch.trim());
   const [rejectTarget, setRejectTarget] = useState<TenantRegistration | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [approveRegTarget, setApproveRegTarget] = useState<TenantRegistration | null>(null);

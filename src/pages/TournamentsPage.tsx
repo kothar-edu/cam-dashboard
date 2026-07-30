@@ -26,7 +26,7 @@ export default function TournamentsPage() {
   const { activeTenant } = useTenant();
   const [pageIndex, setPageIndex] = useState(0);
   const [search, setSearch] = useState('');
-  const debouncedSearch = useDebouncedValue(search.trim(), 300);
+  const debouncedSearch = useDebouncedValue(search.trim());
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [targetRow, setTargetRow] = useState<Tournament | null>(null);
   const { data, isLoading, isError } = useTournaments({

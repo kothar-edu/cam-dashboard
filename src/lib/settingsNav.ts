@@ -60,8 +60,7 @@ export const LEGACY_SECTION_ALIASES: Record<string, SettingsSection> = {
 
 export function buildSettingsSections(canManageTenants: boolean): SettingsSectionDef[] {
   return ALL_SECTIONS.filter(
-    (section) =>
-      (section.visible ?? true) && (!section.requiresTenantManager || canManageTenants)
+    (section) => (section.visible ?? true) && (!section.requiresTenantManager || canManageTenants)
   ).map(({ id, label, description }) => ({ id, label, description }));
 }
 

@@ -50,9 +50,7 @@ export function MatchTeamPairFilter({ value, onChange, teamOptions, className }:
         size="sm"
         className="mb-0.5 h-10 w-10 justify-self-center px-0"
         aria-label="Swap teams"
-        onClick={() =>
-          onChange({ teamId: value.opponentTeamId, opponentTeamId: value.teamId })
-        }
+        onClick={() => onChange({ teamId: value.opponentTeamId, opponentTeamId: value.teamId })}
       >
         <ArrowLeftRight className="h-4 w-4" />
       </Button>

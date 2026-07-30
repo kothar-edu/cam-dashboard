@@ -28,7 +28,14 @@ vi.mock('@/hooks/usePointsTable', () => ({
     data: [
       {
         id: 'r1',
-        team: { id: 'team1', name: 'Eagles', code: 'EAG', logo: null, total_players: 11, is_active: true },
+        team: {
+          id: 'team1',
+          name: 'Eagles',
+          code: 'EAG',
+          logo: null,
+          total_players: 11,
+          is_active: true,
+        },
         group: null,
         matches_played: 4,
         matches_won: 3,

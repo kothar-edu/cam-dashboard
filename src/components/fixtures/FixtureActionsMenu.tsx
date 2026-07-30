@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ExternalLink, Flag, MoreVertical, Pencil, Radio, XCircle } from 'lucide-react';
+import {
+  AlertTriangle,
+  ExternalLink,
+  Flag,
+  MoreVertical,
+  Pencil,
+  Radio,
+  XCircle,
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -108,10 +116,7 @@ export function FixtureActionsMenu({ fixture }: FixtureActionsMenuProps) {
                 <Flag className="h-4 w-4" />
                 Forfeit
               </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-yellow-700"
-                onSelect={() => setAbandonOpen(true)}
-              >
+              <DropdownMenuItem className="text-yellow-700" onSelect={() => setAbandonOpen(true)}>
                 <AlertTriangle className="h-4 w-4" />
                 Abandon
               </DropdownMenuItem>

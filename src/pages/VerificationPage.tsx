@@ -113,9 +113,7 @@ function StatusFilterTabs({
           type="button"
           onClick={() => onChange(option.value)}
           className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-            value === option.value
-              ? 'bg-[#12233D] text-white'
-              : 'text-[#12233D] hover:bg-slate-50'
+            value === option.value ? 'bg-[#12233D] text-white' : 'text-[#12233D] hover:bg-slate-50'
           }`}
         >
           {option.label}

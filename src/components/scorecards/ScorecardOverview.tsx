@@ -88,7 +88,9 @@ function InningsTable({
                       </span>
                     ) : null}
                   </td>
-                  <td className="px-3 py-2 text-right font-semibold tabular-nums">{row.runs_scored}</td>
+                  <td className="px-3 py-2 text-right font-semibold tabular-nums">
+                    {row.runs_scored}
+                  </td>
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">
                     {row.balls_faced}
                   </td>
@@ -181,7 +183,9 @@ export function ScorecardOverview({ data }: ScorecardOverviewProps) {
               <span className="rounded-full bg-sky-400/20 px-2.5 py-0.5 text-sky-200">DLS</span>
             ) : null}
             {data.over_limit ? (
-              <span className="rounded-full bg-white/10 px-2.5 py-0.5">{data.over_limit} overs</span>
+              <span className="rounded-full bg-white/10 px-2.5 py-0.5">
+                {data.over_limit} overs
+              </span>
             ) : null}
           </div>
 
@@ -192,7 +196,9 @@ export function ScorecardOverview({ data }: ScorecardOverviewProps) {
                 {formatInningsScoreWithOvers(scoreA)}
               </p>
             </div>
-            <span className="text-xs font-semibold uppercase tracking-widest text-white/35">vs</span>
+            <span className="text-xs font-semibold uppercase tracking-widest text-white/35">
+              vs
+            </span>
             <div>
               <TeamName name={teamB} highlight={winnerId === data.opponent_b.id} align="right" />
               <p className="mt-1 text-right text-2xl font-bold tabular-nums tracking-tight sm:text-3xl">
@@ -262,7 +268,9 @@ export function ScorecardOverview({ data }: ScorecardOverviewProps) {
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
           <h3 className="mb-1 text-sm font-semibold text-[#12233D]">Bowling impact</h3>
-          <p className="mb-4 text-xs text-muted-foreground">Wickets (navy) · runs conceded (gold)</p>
+          <p className="mb-4 text-xs text-muted-foreground">
+            Wickets (navy) · runs conceded (gold)
+          </p>
           <DualMetricBars
             items={bowlers.map((b) => ({
               id: b.id,

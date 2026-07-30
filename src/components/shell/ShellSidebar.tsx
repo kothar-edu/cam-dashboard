@@ -66,11 +66,7 @@ export function ShellSidebar({ className, onNavigate }: ShellSidebarProps) {
     >
       <div className="border-b border-white/10 px-4 py-4 pr-12">
         <div className="flex items-center gap-3">
-          <img
-            src={APP_LOGO}
-            alt=""
-            className="h-12 w-12 shrink-0 rounded-lg object-contain"
-          />
+          <img src={APP_LOGO} alt="" className="h-12 w-12 shrink-0 rounded-lg object-contain" />
           <div className="min-w-0">
             <p className="text-base font-bold leading-tight">CAM Cricket</p>
             {activeTenant ? (

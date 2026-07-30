@@ -3,11 +3,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { TenantRequired } from '@/components/forms/TenantRequired';
 import { PlayerCareerCharts } from '@/components/charts/PlayerCareerCharts';
-import {
-  playerDisplayName,
-  playerTeamName,
-  type PlayerDetail,
-} from '@/api/players';
+import { playerDisplayName, playerTeamName, type PlayerDetail } from '@/api/players';
 import { usePlayer } from '@/hooks/usePlayers';
 
 export default function PlayerStatsPage() {
@@ -93,13 +89,20 @@ function PlayerStatsContent({ player, playerId }: { player: PlayerDetail; player
                 <StatusPill active={player.is_active} />
               </div>
               <p className="text-sm text-white/70">
-                {[teamName ? `Team · ${teamName}` : null, player.jersey_no != null ? `#${player.jersey_no}` : null]
+                {[
+                  teamName ? `Team · ${teamName}` : null,
+                  player.jersey_no != null ? `#${player.jersey_no}` : null,
+                ]
                   .filter(Boolean)
                   .join('  ·  ') || 'No team assigned'}
               </p>
               <div className="flex flex-wrap gap-2 pt-1">
-                {player.batting_style ? <MetaChip label={formatStyle(player.batting_style)} /> : null}
-                {player.bowling_style ? <MetaChip label={formatStyle(player.bowling_style)} /> : null}
+                {player.batting_style ? (
+                  <MetaChip label={formatStyle(player.batting_style)} />
+                ) : null}
+                {player.bowling_style ? (
+                  <MetaChip label={formatStyle(player.bowling_style)} />
+                ) : null}
                 {player.dob ? <MetaChip label={`DOB ${player.dob}`} /> : null}
               </div>
             </div>
@@ -112,7 +115,9 @@ function PlayerStatsContent({ player, playerId }: { player: PlayerDetail; player
               <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                 {stat.label}
               </p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums text-[#12233D]">{stat.value}</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums text-[#12233D]">
+                {stat.value}
+              </p>
             </div>
           ))}
         </div>
@@ -145,7 +150,8 @@ function PlayerStatsContent({ player, playerId }: { player: PlayerDetail; player
                 <div>
                   <p className="font-medium text-[#12233D]">{entry.team?.name ?? 'Unknown team'}</p>
                   <p className="text-xs text-muted-foreground">
-                    {formatDate(entry.joined_at)} – {entry.left_at ? formatDate(entry.left_at) : 'Present'}
+                    {formatDate(entry.joined_at)} –{' '}
+                    {entry.left_at ? formatDate(entry.left_at) : 'Present'}
                   </p>
                 </div>
                 {entry.matches_played != null ? (

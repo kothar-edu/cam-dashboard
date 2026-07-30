@@ -11,9 +11,7 @@ export function AppSettingsPanel() {
     <div className="space-y-5">
       <div>
         <h2 className="text-lg font-semibold text-[#12233D]">App settings</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Feature toggles for the mobile app.
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">Feature toggles for the mobile app.</p>
       </div>
       <FeatureTogglesPanel />
     </div>
@@ -216,7 +214,9 @@ export function TenantNeededMessage({ topic }: { topic: string }) {
 
 export function SettingsCard({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">{children}</div>
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+      {children}
+    </div>
   );
 }
 

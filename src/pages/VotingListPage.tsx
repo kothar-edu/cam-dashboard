@@ -143,17 +143,17 @@ export default function VotingListPage() {
                 No polls match your search.
               </div>
             ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
-              {filteredNominations.map((nomination) => (
-                <VotingPollCard
-                  key={nomination.id}
-                  nomination={nomination}
-                  poll={findPollForNomination(nomination, polls)}
-                  onToggleVoting={() => requestToggle(nomination)}
-                  togglePending={updateMutation.isPending}
-                />
-              ))}
-            </div>
+              <div className="grid gap-4 lg:grid-cols-2">
+                {filteredNominations.map((nomination) => (
+                  <VotingPollCard
+                    key={nomination.id}
+                    nomination={nomination}
+                    poll={findPollForNomination(nomination, polls)}
+                    onToggleVoting={() => requestToggle(nomination)}
+                    togglePending={updateMutation.isPending}
+                  />
+                ))}
+              </div>
             )}
           </div>
         )}
@@ -180,15 +180,7 @@ export default function VotingListPage() {
   );
 }
 
-function SummaryChip({
-  icon,
-  label,
-  value,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-}) {
+function SummaryChip({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">

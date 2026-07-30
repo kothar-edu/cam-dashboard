@@ -50,7 +50,11 @@ function ChartCard({
           <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid stroke={CHART.grid} vertical={false} />
             <XAxis dataKey="label" tick={{ fill: CHART.muted, fontSize: 12 }} axisLine={false} />
-            <YAxis allowDecimals={false} tick={{ fill: CHART.muted, fontSize: 12 }} axisLine={false} />
+            <YAxis
+              allowDecimals={false}
+              tick={{ fill: CHART.muted, fontSize: 12 }}
+              axisLine={false}
+            />
             <Tooltip
               cursor={{ fill: 'rgba(18, 35, 61, 0.04)' }}
               contentStyle={{

@@ -292,7 +292,12 @@ export function BallByBallEditor({ result, players, onBallChange }: BallByBallEd
               />
             </label>
 
-            <Button type="button" variant="outline" className="w-full" onClick={() => setSelection(null)}>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => setSelection(null)}
+            >
               Close editor
             </Button>
           </div>

@@ -154,7 +154,13 @@ export function VerticalBarChart({
             contentStyle={tooltipStyle}
             formatter={(value) => [`${Number(value ?? 0)}${unit}`, 'Value']}
           />
-          <Bar dataKey="value" fill={color} radius={[6, 6, 0, 0]} maxBarSize={40} isAnimationActive={false}>
+          <Bar
+            dataKey="value"
+            fill={color}
+            radius={[6, 6, 0, 0]}
+            maxBarSize={40}
+            isAnimationActive={false}
+          >
             <LabelList
               dataKey="value"
               position="top"
@@ -411,7 +417,13 @@ export function RankedBarChart({
             tickLine={false}
           />
           <Tooltip cursor={{ fill: 'rgba(18, 35, 61, 0.04)' }} contentStyle={tooltipStyle} />
-          <Bar dataKey="value" fill={color} radius={[0, 6, 6, 0]} maxBarSize={14} isAnimationActive={false}>
+          <Bar
+            dataKey="value"
+            fill={color}
+            radius={[0, 6, 6, 0]}
+            maxBarSize={14}
+            isAnimationActive={false}
+          >
             <LabelList
               dataKey="valueLabel"
               position="right"

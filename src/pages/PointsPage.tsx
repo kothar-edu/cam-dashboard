@@ -36,10 +36,7 @@ export default function PointsPage() {
   const tournaments = tournamentsData?.results ?? [];
   const allRows = pointsData ?? [];
   const groups = useMemo(() => uniqueGroups(allRows), [allRows]);
-  const filteredRows = useMemo(
-    () => filterByGroup(allRows, groupFilter),
-    [allRows, groupFilter]
-  );
+  const filteredRows = useMemo(() => filterByGroup(allRows, groupFilter), [allRows, groupFilter]);
 
   useEffect(() => {
     if (!selectedTournamentId && tournaments.length > 0) {

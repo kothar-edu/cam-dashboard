@@ -60,54 +60,54 @@ export default function UsersPage() {
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         </div>
       ) : (
-      <DataTable
-        columns={[
-          { id: 'name', header: 'Name', cell: (row) => row.full_name },
-          { id: 'email', header: 'Email', cell: (row) => row.email },
-          {
-            id: 'roles',
-            header: 'Roles',
-            cell: (row) => (row.roles.length ? row.roles.join(', ') : '—'),
-          },
-          {
-            id: 'emailVerified',
-            header: 'Email verified',
-            cell: (row) => <VerifiedCell verified={row.is_email_verified} />,
-          },
-          {
-            id: 'paymentVerified',
-            header: 'Payment verified',
-            cell: (row) => <VerifiedCell verified={row.is_payment_verified} />,
-          },
-          {
-            id: 'paymentStatus',
-            header: 'Payment status',
-            cell: (row) => row.payment_status ?? '—',
-          },
-          {
-            id: 'subscription',
-            header: 'Subscription ends',
-            cell: (row) => row.subscription_end_date ?? '—',
-          },
-          {
-            id: 'edit',
-            header: '',
-            cell: (row) => (
-              <Link
-                to={`/dashboard/users/${row.id}`}
-                className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D]"
-              >
-                Edit
-              </Link>
-            ),
-          },
-        ]}
-        data={users}
-        loading={isLoading}
-        emptyMessage="No users found."
-        pagination={data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined}
-        onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
-      />
+        <DataTable
+          columns={[
+            { id: 'name', header: 'Name', cell: (row) => row.full_name },
+            { id: 'email', header: 'Email', cell: (row) => row.email },
+            {
+              id: 'roles',
+              header: 'Roles',
+              cell: (row) => (row.roles.length ? row.roles.join(', ') : '—'),
+            },
+            {
+              id: 'emailVerified',
+              header: 'Email verified',
+              cell: (row) => <VerifiedCell verified={row.is_email_verified} />,
+            },
+            {
+              id: 'paymentVerified',
+              header: 'Payment verified',
+              cell: (row) => <VerifiedCell verified={row.is_payment_verified} />,
+            },
+            {
+              id: 'paymentStatus',
+              header: 'Payment status',
+              cell: (row) => row.payment_status ?? '—',
+            },
+            {
+              id: 'subscription',
+              header: 'Subscription ends',
+              cell: (row) => row.subscription_end_date ?? '—',
+            },
+            {
+              id: 'edit',
+              header: '',
+              cell: (row) => (
+                <Link
+                  to={`/dashboard/users/${row.id}`}
+                  className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-[#12233D]"
+                >
+                  Edit
+                </Link>
+              ),
+            },
+          ]}
+          data={users}
+          loading={isLoading}
+          emptyMessage="No users found."
+          pagination={data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined}
+          onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
+        />
       )}
     </div>
   );

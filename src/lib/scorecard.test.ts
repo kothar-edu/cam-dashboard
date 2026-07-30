@@ -40,9 +40,9 @@ describe('scorecard helpers', () => {
   });
 
   it('builds outcome labels', () => {
-    expect(matchOutcomeLabel({ winner: { id: '1', team: 'Alpha' }, abandoned: false, tied: false })).toBe(
-      'Alpha won'
-    );
+    expect(
+      matchOutcomeLabel({ winner: { id: '1', team: 'Alpha' }, abandoned: false, tied: false })
+    ).toBe('Alpha won');
     expect(matchOutcomeLabel({ abandoned: true, tied: false })).toBe('Match abandoned');
     expect(matchOutcomeLabel({ abandoned: false, tied: true })).toBe('Match tied');
   });

@@ -5,10 +5,7 @@ import type { Post } from '@/api/posts';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PageHeader } from '@/components/forms/PageHeader';
-import {
-  SettingsEmptyState,
-  SettingsSummaryChip,
-} from '@/components/settings/AppSettingsPanel';
+import { SettingsEmptyState, SettingsSummaryChip } from '@/components/settings/AppSettingsPanel';
 import { useTenant } from '@/contexts/TenantContext';
 import { usePosts, useDeletePost } from '@/hooks/usePosts';
 import { cn } from '@/lib/utils';

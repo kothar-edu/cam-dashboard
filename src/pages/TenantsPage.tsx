@@ -1,13 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent, type ChangeEvent } from 'react';
 import toast from 'react-hot-toast';
-import {
-  Building2,
-  CheckCircle2,
-  Plus,
-  Shield,
-  UserMinus,
-  Users,
-} from 'lucide-react';
+import { Building2, CheckCircle2, Plus, Shield, UserMinus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -15,10 +8,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
 import { PageHeader } from '@/components/forms/PageHeader';
-import {
-  SettingsEmptyState,
-  SettingsSummaryChip,
-} from '@/components/settings/AppSettingsPanel';
+import { SettingsEmptyState, SettingsSummaryChip } from '@/components/settings/AppSettingsPanel';
 import {
   useAssignTenantAdmin,
   useCreateTenant,

@@ -24,10 +24,7 @@ export default function TeamsPage() {
       if (status === 'active' && !team.is_active) return false;
       if (status === 'inactive' && team.is_active) return false;
       if (!search) return true;
-      return (
-        team.name.toLowerCase().includes(search) ||
-        team.code.toLowerCase().includes(search)
-      );
+      return team.name.toLowerCase().includes(search) || team.code.toLowerCase().includes(search);
     });
   }, [data?.results, search, status]);
 

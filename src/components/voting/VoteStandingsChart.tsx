@@ -115,9 +115,7 @@ export function VoteStandingsChart({
                 <span
                   className={cn(
                     'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold',
-                    isLeader
-                      ? 'bg-[#E8A93B] text-[#12233D]'
-                      : 'bg-slate-100 text-muted-foreground'
+                    isLeader ? 'bg-[#E8A93B] text-[#12233D]' : 'bg-slate-100 text-muted-foreground'
                   )}
                 >
                   {index + 1}

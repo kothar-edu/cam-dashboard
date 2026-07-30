@@ -9,10 +9,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { PageHeader } from '@/components/forms/PageHeader';
-import {
-  ChangePasswordPanel,
-  CreateAdminPanel,
-} from '@/components/settings/AccountSettingsPanels';
+import { ChangePasswordPanel, CreateAdminPanel } from '@/components/settings/AccountSettingsPanels';
 import { AppSettingsPanel, SettingsCard } from '@/components/settings/AppSettingsPanel';
 import { RegistrationSettingsPanel } from '@/components/settings/RegistrationSettingsPanel';
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,10 +35,7 @@ export default function SettingsPage() {
   const { canManageTenants } = useAuth();
   const { activeTenant } = useTenant();
 
-  const sections = useMemo(
-    () => buildSettingsSections(canManageTenants),
-    [canManageTenants]
-  );
+  const sections = useMemo(() => buildSettingsSections(canManageTenants), [canManageTenants]);
 
   const activeSection = resolveSettingsSection(searchParams.get('section'), sections);
 

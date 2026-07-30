@@ -38,9 +38,9 @@ describe('pointsTable helpers', () => {
     expect(formatNrr(1.2)).toBe('+1.200');
     expect(formatNrr(-0.45)).toBe('-0.450');
     expect(formatNrr(0)).toBe('0.000');
-    expect(
-      formatWinPct(row({ id: '1', name: 'A', matches_played: 4, matches_won: 3 }))
-    ).toBe('75%');
+    expect(formatWinPct(row({ id: '1', name: 'A', matches_played: 4, matches_won: 3 }))).toBe(
+      '75%'
+    );
   });
 
   it('sorts by points then NRR', () => {

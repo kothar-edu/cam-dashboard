@@ -138,7 +138,11 @@ export default function FixturesPage() {
                 (row.tournament?.name ?? '—')
               ),
           },
-          { id: 'status', header: 'Status', cell: (row) => <FixtureStatusBadge status={row.status} /> },
+          {
+            id: 'status',
+            header: 'Status',
+            cell: (row) => <FixtureStatusBadge status={row.status} />,
+          },
           {
             id: 'scheduled',
             header: 'Scheduled',

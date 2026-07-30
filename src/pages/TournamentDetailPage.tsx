@@ -529,66 +529,70 @@ export default function TournamentDetailPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                <div className="flex w-full flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm sm:w-fit">
-                  {MATCH_STATUS_TABS.map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => {
-                        setMatchStatus(option);
-                        setPageIndex(0);
-                      }}
-                      className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                        matchStatus === option
-                          ? 'bg-[#12233D] text-white'
-                          : 'text-[#12233D] hover:bg-slate-50'
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-                <DataTable
-                  columns={[
-                    {
-                      id: 'match',
-                      header: 'Match',
-                      cell: (row) => (
-                        <Link
-                          to={
-                            row.status === 'Ended'
-                              ? `/dashboard/scorecards/${row.id}`
-                              : `/dashboard/fixtures/${row.id}`
+                  <div className="flex w-full flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm sm:w-fit">
+                    {MATCH_STATUS_TABS.map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => {
+                          setMatchStatus(option);
+                          setPageIndex(0);
+                        }}
+                        className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                          matchStatus === option
+                            ? 'bg-[#12233D] text-white'
+                            : 'text-[#12233D] hover:bg-slate-50'
+                        }`}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                  <DataTable
+                    columns={[
+                      {
+                        id: 'match',
+                        header: 'Match',
+                        cell: (row) => (
+                          <Link
+                            to={
+                              row.status === 'Ended'
+                                ? `/dashboard/scorecards/${row.id}`
+                                : `/dashboard/fixtures/${row.id}`
+                            }
+                            className="font-medium text-[#12233D] underline-offset-2 hover:underline"
+                          >
+                            {matchLabel(row)}
+                          </Link>
+                        ),
+                      },
+                      { id: 'round', header: 'Round', cell: (row) => row.round ?? '—' },
+                      { id: 'status', header: 'Status', cell: (row) => row.status },
+                      {
+                        id: 'scheduled',
+                        header: 'Scheduled',
+                        cell: (row) => formatDateTime(row.time),
+                      },
+                      { id: 'ground', header: 'Ground', cell: (row) => row.ground ?? '—' },
+                    ]}
+                    data={fixturesQuery.data?.results ?? []}
+                    loading={fixturesQuery.isLoading}
+                    emptyMessage={
+                      matchStatus === 'All'
+                        ? 'No matches found for this tournament.'
+                        : `No ${matchStatus.toLowerCase()} matches found.`
+                    }
+                    pagination={
+                      fixturesQuery.data
+                        ? {
+                            pageIndex,
+                            pageSize: MATCHES_PAGE_SIZE,
+                            totalCount: fixturesQuery.data.count,
                           }
-                          className="font-medium text-[#12233D] underline-offset-2 hover:underline"
-                        >
-                          {matchLabel(row)}
-                        </Link>
-                      ),
-                    },
-                    { id: 'round', header: 'Round', cell: (row) => row.round ?? '—' },
-                    { id: 'status', header: 'Status', cell: (row) => row.status },
-                    {
-                      id: 'scheduled',
-                      header: 'Scheduled',
-                      cell: (row) => formatDateTime(row.time),
-                    },
-                    { id: 'ground', header: 'Ground', cell: (row) => row.ground ?? '—' },
-                  ]}
-                  data={fixturesQuery.data?.results ?? []}
-                  loading={fixturesQuery.isLoading}
-                  emptyMessage={matchStatus === 'All' ? 'No matches found for this tournament.' : `No ${matchStatus.toLowerCase()} matches found.`}
-                  pagination={
-                    fixturesQuery.data
-                      ? {
-                          pageIndex,
-                          pageSize: MATCHES_PAGE_SIZE,
-                          totalCount: fixturesQuery.data.count,
-                        }
-                      : undefined
-                  }
-                  onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
-                />
+                        : undefined
+                    }
+                    onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}
+                  />
                 </div>
               )
             ) : null}
@@ -749,9 +753,7 @@ function TabButton({
       onClick={onClick}
       className={cn(
         'rounded-md px-3 py-1.5 text-sm font-medium transition',
-        active
-          ? 'bg-[#12233D] text-white shadow-sm'
-          : 'text-muted-foreground hover:text-[#12233D]'
+        active ? 'bg-[#12233D] text-white shadow-sm' : 'text-muted-foreground hover:text-[#12233D]'
       )}
     >
       {children}

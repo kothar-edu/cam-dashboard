@@ -143,12 +143,7 @@ export function ScorecardValidateModal({
   const preExistingCount = preRotation.length + preBatter.length;
 
   return (
-    <Modal
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Validate scorecard"
-      className="max-w-2xl"
-    >
+    <Modal open={open} onOpenChange={onOpenChange} title="Validate scorecard" className="max-w-2xl">
       <div className="mt-4 space-y-4">
         {hasErrors ? (
           <section className="rounded-lg border border-red-200 bg-red-50 p-3">
@@ -183,7 +178,9 @@ export function ScorecardValidateModal({
 
         {SHOW_CONSISTENCY_ISSUES && hasEditIssues ? (
           <section className="rounded-lg border border-amber-200 bg-amber-50/70 p-3">
-            <h3 className="text-sm font-semibold text-amber-900">Data consistency — from this edit</h3>
+            <h3 className="text-sm font-semibold text-amber-900">
+              Data consistency — from this edit
+            </h3>
             <p className="mt-1 text-xs text-amber-800/80">
               These never block Apply — fix what you want, skip the rest.
             </p>
@@ -288,7 +285,11 @@ export function ScorecardValidateModal({
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button type="button" onClick={() => setConfirmOpen(true)} disabled={hasErrors || applying}>
+          <Button
+            type="button"
+            onClick={() => setConfirmOpen(true)}
+            disabled={hasErrors || applying}
+          >
             {applying ? 'Applying…' : 'Apply changes'}
           </Button>
         </div>

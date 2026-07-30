@@ -9,11 +9,7 @@ import { TenantRequired } from '@/components/forms/TenantRequired';
 import { ScorecardOverview } from '@/components/scorecards/ScorecardOverview';
 import { BallByBallEditor } from '@/components/scorecards/BallByBallEditor';
 import { ScorecardValidateModal } from '@/components/scorecards/ScorecardValidateModal';
-import {
-  useApplyScorecard,
-  useScorecard,
-  useValidateScorecard,
-} from '@/hooks/useScorecards';
+import { useApplyScorecard, useScorecard, useValidateScorecard } from '@/hooks/useScorecards';
 import {
   hasBallHistory,
   parseScorecardResult,
@@ -103,7 +99,9 @@ export default function ScorecardDetailPage() {
   );
 
   const lineupDirty = useMemo(
-    () => JSON.stringify(allLineups.map(lineupSnapshot)) !== JSON.stringify(allBaseline.map(lineupSnapshot)),
+    () =>
+      JSON.stringify(allLineups.map(lineupSnapshot)) !==
+      JSON.stringify(allBaseline.map(lineupSnapshot)),
     [allBaseline, allLineups]
   );
   const ballsDirty = useMemo(
@@ -130,14 +128,14 @@ export default function ScorecardDetailPage() {
       if (!base) continue;
       const patch: ScorecardLineupPatch = { id: Number(lineup.id) };
       let dirty = false;
-      (Object.keys(lineupSnapshot(lineup)) as Array<keyof ReturnType<typeof lineupSnapshot>>).forEach(
-        (key) => {
-          if (lineupSnapshot(lineup)[key] !== lineupSnapshot(base)[key]) {
-            (patch as Record<string, unknown>)[key] = lineupSnapshot(lineup)[key];
-            dirty = true;
-          }
+      (
+        Object.keys(lineupSnapshot(lineup)) as Array<keyof ReturnType<typeof lineupSnapshot>>
+      ).forEach((key) => {
+        if (lineupSnapshot(lineup)[key] !== lineupSnapshot(base)[key]) {
+          (patch as Record<string, unknown>)[key] = lineupSnapshot(lineup)[key];
+          dirty = true;
         }
-      );
+      });
       if (dirty) lineups.push(patch);
     }
 
@@ -279,11 +277,7 @@ export default function ScorecardDetailPage() {
     }
   };
 
-  const updateLineup = (
-    side: 'a' | 'b',
-    lineupId: string,
-    patch: Partial<LineupEntry>
-  ) => {
+  const updateLineup = (side: 'a' | 'b', lineupId: string, patch: Partial<LineupEntry>) => {
     const setter = side === 'a' ? setLineupsA : setLineupsB;
     setter((current) =>
       current.map((lineup) => (lineup.id === lineupId ? { ...lineup, ...patch } : lineup))
@@ -320,9 +314,7 @@ export default function ScorecardDetailPage() {
         />
 
         {isLoading ? <LoadingSpinner className="h-8 w-8 text-[#12233D]" /> : null}
-        {isError ? (
-          <p className="text-sm text-red-600">Could not load this scorecard.</p>
-        ) : null}
+        {isError ? <p className="text-sm text-red-600">Could not load this scorecard.</p> : null}
 
         {data ? (
           <>
@@ -371,7 +363,11 @@ export default function ScorecardDetailPage() {
                   this only affects what&apos;s on this screen.
                 </p>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setDiscardConfirmOpen(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setDiscardConfirmOpen(false)}
+                  >
                     Cancel
                   </Button>
                   <Button

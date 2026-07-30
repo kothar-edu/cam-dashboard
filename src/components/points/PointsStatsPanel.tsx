@@ -44,7 +44,11 @@ function HighlightCard({
   );
 }
 
-export function PointsStatsPanel({ rows, topBatters = [], topBowlers = [] }: PointsStatsPanelProps) {
+export function PointsStatsPanel({
+  rows,
+  topBatters = [],
+  topBowlers = [],
+}: PointsStatsPanelProps) {
   const sorted = sortStandings(rows);
   const highlights = computeHighlights(rows);
   const chartRows = sorted.slice(0, 8);

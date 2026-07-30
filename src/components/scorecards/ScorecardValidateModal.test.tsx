@@ -42,7 +42,9 @@ describe('ScorecardValidateModal', () => {
     expect(screen.getByText('Cannot apply')).toBeInTheDocument();
     expect(screen.getByText('Winner will change')).toBeInTheDocument();
     expect(
-      screen.getByText(/Winner will change from A to B\. Group-stage points table may need review\./)
+      screen.getByText(
+        /Winner will change from A to B\. Group-stage points table may need review\./
+      )
     ).toBeInTheDocument();
     expect(screen.getByText('Match winner')).toBeInTheDocument();
 
@@ -128,7 +130,9 @@ describe('ScorecardValidateModal', () => {
           innings_index: 1,
           message: 'Innings 2: strike rotation is off from ball 2.0.2 onward.',
           balls: ['1.0.1'],
-          fix: [{ innings_index: 1, over_index: 0, ball_index: 1, striker: 'p1', non_striker: 'p2' }],
+          fix: [
+            { innings_index: 1, over_index: 0, ball_index: 1, striker: 'p1', non_striker: 'p2' },
+          ],
           caused_by_edit: false,
         },
       ],
@@ -168,11 +172,7 @@ describe('ScorecardValidateModal', () => {
 describe('BallByBallEditor', () => {
   it('shows empty state when there is no ball history', () => {
     render(
-      <BallByBallEditor
-        result={{ innings: [] }}
-        players={[]}
-        onBallChange={() => undefined}
-      />
+      <BallByBallEditor result={{ innings: [] }} players={[]} onBallChange={() => undefined} />
     );
     expect(screen.getByText(/No ball-by-ball history/i)).toBeInTheDocument();
   });

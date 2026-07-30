@@ -21,9 +21,7 @@ export function TeamLogoBadge({ team, side, className }: TeamLogoBadgeProps) {
       <span
         className={cn(
           'rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide',
-          side === 'batting'
-            ? 'bg-[#12233D] text-[#E8A93B]'
-            : 'bg-slate-700 text-white'
+          side === 'batting' ? 'bg-[#12233D] text-[#E8A93B]' : 'bg-slate-700 text-white'
         )}
       >
         {label}

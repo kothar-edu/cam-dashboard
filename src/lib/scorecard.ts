@@ -87,9 +87,7 @@ export function matchOutcomeLabel(
   return 'Completed';
 }
 
-export function manOfTheMatchName(
-  motm?: Fixture['man_of_the_match'] | null
-): string | null {
+export function manOfTheMatchName(motm?: Fixture['man_of_the_match'] | null): string | null {
   if (!motm) return null;
   return motm.full_name ?? motm.name ?? null;
 }

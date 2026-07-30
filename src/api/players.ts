@@ -103,11 +103,7 @@ export async function updatePlayer(
 }
 
 export function playerDisplayName(player: PlayerDetail): string {
-  return (
-    player.full_name ||
-    player.user?.full_name ||
-    'Unknown player'
-  );
+  return player.full_name || player.user?.full_name || 'Unknown player';
 }
 
 export function playerTeamName(player: PlayerDetail): string | null {

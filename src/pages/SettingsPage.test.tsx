@@ -33,9 +33,7 @@ vi.mock('@/contexts/TenantContext', () => ({
       is_active: true,
     },
     activeTenantId: 'cam_youth_association',
-    tenants: [
-      { id: 1, name: 'CAM Youth', schema_name: 'cam_youth_association', is_active: true },
-    ],
+    tenants: [{ id: 1, name: 'CAM Youth', schema_name: 'cam_youth_association', is_active: true }],
     loading: false,
     refreshTenants: vi.fn(),
   }),

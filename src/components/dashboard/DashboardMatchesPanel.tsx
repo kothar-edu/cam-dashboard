@@ -93,7 +93,9 @@ export function DashboardMatchesPanel() {
           data={fixtures}
           loading={isLoading}
           emptyMessage={
-            search ? 'No live or upcoming matches match your search.' : 'No live or upcoming matches.'
+            search
+              ? 'No live or upcoming matches match your search.'
+              : 'No live or upcoming matches.'
           }
           pagination={data ? { pageIndex, pageSize: PAGE_SIZE, totalCount: data.count } : undefined}
           onPaginationChange={({ pageIndex: nextPage }) => setPageIndex(nextPage)}

@@ -70,10 +70,7 @@ export default function VotingFormPage() {
 
   const standings = useMemo(() => {
     if (!nominationQuery.data) return [];
-    const poll = findPollForNomination(
-      nominationQuery.data,
-      pollsQuery.data?.results ?? []
-    );
+    const poll = findPollForNomination(nominationQuery.data, pollsQuery.data?.results ?? []);
     return buildStandings(nominationQuery.data, poll);
   }, [nominationQuery.data, pollsQuery.data?.results]);
 
@@ -146,7 +143,7 @@ export default function VotingFormPage() {
   const isLoadingEdit = isEdit && nominationQuery.isLoading;
   const loadFailed = isEdit && nominationQuery.isError;
   const title = isEdit
-    ? nominationQuery.data?.tournament.name ?? 'Voting poll'
+    ? (nominationQuery.data?.tournament.name ?? 'Voting poll')
     : 'Create voting nomination';
   const ballots = totalVotes(standings);
 
@@ -350,7 +347,9 @@ export default function VotingFormPage() {
                     variant="outline"
                     disabled={pending}
                     onClick={() =>
-                      isEdit && nominationQuery.data ? setTab('results') : navigate('/dashboard/voting')
+                      isEdit && nominationQuery.data
+                        ? setTab('results')
+                        : navigate('/dashboard/voting')
                     }
                   >
                     Cancel
@@ -380,9 +379,7 @@ function TabButton({
       onClick={onClick}
       className={cn(
         'rounded-md px-3 py-1.5 text-sm font-medium transition',
-        active
-          ? 'bg-[#12233D] text-white shadow-sm'
-          : 'text-muted-foreground hover:text-[#12233D]'
+        active ? 'bg-[#12233D] text-white shadow-sm' : 'text-muted-foreground hover:text-[#12233D]'
       )}
     >
       {children}

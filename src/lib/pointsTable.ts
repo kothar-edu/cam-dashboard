@@ -35,10 +35,7 @@ export function uniqueGroups(rows: PointsTableRow[]): string[] {
   return [...groups].sort((a, b) => a.localeCompare(b));
 }
 
-export function filterByGroup(
-  rows: PointsTableRow[],
-  group: string | 'all'
-): PointsTableRow[] {
+export function filterByGroup(rows: PointsTableRow[], group: string | 'all'): PointsTableRow[] {
   if (group === 'all') return rows;
   return rows.filter((row) => row.group === group);
 }

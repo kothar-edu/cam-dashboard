@@ -4,6 +4,7 @@ import {
   createFixturesBulk,
   getFixture,
   listFixtures,
+  listUpcomingFixtures,
   updateFixture,
   forfeitFixture,
   abandonFixture,
@@ -23,6 +24,17 @@ export function useFixtures(params?: ListParams, options?: { enabled?: boolean }
   return useQuery({
     queryKey: ['fixtures', activeTenantId, params],
     queryFn: () => listFixtures(params),
+    enabled: !!activeTenantId && (options?.enabled ?? true),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useUpcomingFixtures(params?: ListParams, options?: { enabled?: boolean }) {
+  const { activeTenantId } = useTenant();
+
+  return useQuery({
+    queryKey: ['fixtures-upcoming', activeTenantId, params],
+    queryFn: () => listUpcomingFixtures(params),
     enabled: !!activeTenantId && (options?.enabled ?? true),
     placeholderData: keepPreviousData,
   });

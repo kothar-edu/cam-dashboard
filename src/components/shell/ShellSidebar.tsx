@@ -18,6 +18,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { roleSummaryLabel } from '@/lib/roles';
 
 const APP_LOGO = '/assets/cricket_app_icon.png';
 
@@ -52,8 +53,9 @@ type ShellSidebarProps = {
 
 export function ShellSidebar({ className, onNavigate }: ShellSidebarProps) {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, roles, logout } = useAuth();
   const { activeTenant } = useTenant();
+  const role = roleSummaryLabel(roles);
 
   return (
     <aside
@@ -106,7 +108,12 @@ export function ShellSidebar({ className, onNavigate }: ShellSidebarProps) {
 
       <div className="border-t border-white/10 p-4">
         <div className="mb-3 min-w-0">
-          <p className="truncate text-sm font-medium">{user?.full_name ?? 'Admin'}</p>
+          <div className="flex items-center gap-2">
+            <p className="truncate text-sm font-medium">{user?.full_name ?? 'Admin'}</p>
+            <span className="shrink-0 rounded-full bg-[#E8A93B]/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#E8A93B]">
+              {role}
+            </span>
+          </div>
           <p className="truncate text-xs text-white/70">{user?.email}</p>
         </div>
         <Button

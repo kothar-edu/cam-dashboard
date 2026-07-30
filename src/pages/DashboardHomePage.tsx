@@ -1,21 +1,16 @@
-import { BarChart2, Calendar, Trophy, Users } from 'lucide-react';
+import { BarChart2, CalendarClock, ShieldCheck, Trophy, Users } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
+import { DashboardMatchesPanel } from '@/components/dashboard/DashboardMatchesPanel';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-
-function formatFixtureDate(value: string) {
-  return new Date(value).toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-}
+import { roleSummaryLabel } from '@/lib/roles';
 
 export default function DashboardHomePage() {
   const { activeTenant } = useTenant();
+  const { user, roles } = useAuth();
   const { data, isLoading, isError } = useDashboardStats();
 
   if (!activeTenant) {
@@ -62,9 +57,9 @@ export default function DashboardHomePage() {
       icon: Trophy,
     },
     {
-      label: 'Upcoming Matches',
-      value: data.upcomingFixtures.length,
-      icon: Calendar,
+      label: 'Live & Upcoming',
+      value: data.liveAndUpcomingCount,
+      icon: CalendarClock,
     },
   ];
 
@@ -74,6 +69,19 @@ export default function DashboardHomePage() {
         title="Dashboard"
         description={`${activeTenant.name} · tenant-scoped cricket overview`}
       />
+
+      <div className="flex flex-col items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-[#12233D]">
+            Signed in as {user?.full_name ?? 'you'}
+          </p>
+          <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+        </div>
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#12233D]/5 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#12233D]">
+          <ShieldCheck className="h-3.5 w-3.5 text-[#E8A93B]" />
+          {roleSummaryLabel(roles)}
+        </span>
+      </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         {stats.map((stat) => {
@@ -92,37 +100,7 @@ export default function DashboardHomePage() {
         })}
       </div>
 
-      {data.upcomingFixtures.length > 0 ? (
-        <Card className="border-[#12233D]/10">
-          <CardHeader>
-            <CardTitle className="text-[#12233D]">Upcoming Matches</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {data.upcomingFixtures.map((fixture) => (
-              <div
-                key={fixture.id}
-                className="flex flex-col gap-1 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4"
-              >
-                <div className="min-w-0">
-                  <p className="break-words font-medium text-[#12233D]">
-                    {fixture.opponent_a.team_name} vs {fixture.opponent_b.team_name}
-                  </p>
-                  <p className="text-sm text-muted-foreground">{formatFixtureDate(fixture.time)}</p>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="border-[#12233D]/10">
-          <CardHeader>
-            <CardTitle className="text-[#12233D]">Upcoming Matches</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">No scheduled fixtures found.</p>
-          </CardContent>
-        </Card>
-      )}
+      <DashboardMatchesPanel />
     </div>
   );
 }

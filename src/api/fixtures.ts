@@ -63,6 +63,14 @@ export async function listFixtures(params?: ListParams): Promise<Paginated<Fixtu
   return parsePaginated(response.data);
 }
 
+/** Live + Upcoming only (server-side, excludes Ended/Cancelled), sorted Live first then by time. */
+export async function listUpcomingFixtures(params?: ListParams): Promise<Paginated<Fixture>> {
+  const response = await apiClient.get<Paginated<Fixture>>('/game/match/upcoming/', {
+    params,
+  });
+  return parsePaginated(response.data);
+}
+
 export type CreateFixturePayload = {
   name: string;
   team_a: string;

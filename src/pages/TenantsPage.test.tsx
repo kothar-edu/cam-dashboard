@@ -23,6 +23,16 @@ vi.mock('@/contexts/TenantContext', () => ({
 }));
 
 vi.mock('@/hooks/useTenantAdmin', () => ({
+  useAccessibleTenantsPaged: () => ({
+    data: {
+      count: 1,
+      results: [
+        { id: 1, name: 'CAM Youth', schema_name: 'cam_youth_association', is_active: true },
+      ],
+    },
+    isLoading: false,
+    isError: false,
+  }),
   useTenantMemberships: () => ({
     data: {
       count: 1,

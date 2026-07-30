@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
   AlertTriangle,
+  Copy,
   ExternalLink,
   Flag,
   MoreVertical,
@@ -50,6 +52,16 @@ export function FixtureActionsMenu({ fixture }: FixtureActionsMenuProps) {
 
   const liveOrUpcoming = isLiveOrUpcoming(fixture.status);
 
+  const overlayUrl = `${window.location.origin}/broadcast/${fixture.id}?tenant=${activeTenant?.schema_name}`;
+  const legacyOverlayUrl = `${LIVESCORE_ADMIN_URL}/livestream/${fixture.id}?tenant=${activeTenant?.schema_name}`;
+
+  const copyLink = (url: string, label: string) => {
+    navigator.clipboard
+      .writeText(url)
+      .then(() => toast.success(`${label} link copied`))
+      .catch(() => toast.error('Could not copy link'));
+  };
+
   return (
     <>
       <DropdownMenu>
@@ -79,20 +91,44 @@ export function FixtureActionsMenu({ fixture }: FixtureActionsMenuProps) {
                 rel="noopener noreferrer"
               >
                 <ExternalLink className="h-4 w-4" />
-                OBS overlay
+                <span className="flex-1">OBS overlay</span>
+                <button
+                  type="button"
+                  aria-label="Copy OBS overlay link"
+                  className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    copyLink(overlayUrl, 'OBS overlay');
+                  }}
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </button>
               </Link>
             </DropdownMenuItem>
           )}
           {liveOrUpcoming && (
             <DropdownMenuItem asChild>
               <a
-                href={`${LIVESCORE_ADMIN_URL}/livestream/${fixture.id}?tenant=${activeTenant?.schema_name}`}
+                href={legacyOverlayUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-500"
               >
                 <ExternalLink className="h-4 w-4" />
-                OBS overlay (legacy)
+                <span className="flex-1">OBS overlay (legacy)</span>
+                <button
+                  type="button"
+                  aria-label="Copy legacy OBS overlay link"
+                  className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    copyLink(legacyOverlayUrl, 'Legacy OBS overlay');
+                  }}
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </button>
               </a>
             </DropdownMenuItem>
           )}

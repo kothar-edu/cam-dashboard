@@ -7,6 +7,8 @@ import {
   type AssignTenantAdminPayload,
   type CreateTenantPayload,
 } from '@/api/tenantAdmin';
+import { listAccessibleTenantsPaged } from '@/api/tenants';
+import type { ListParams } from '@/api/pagination';
 import { useTenant } from '@/contexts/TenantContext';
 
 export function useTenantMemberships(tenantId?: number) {
@@ -17,13 +19,22 @@ export function useTenantMemberships(tenantId?: number) {
   });
 }
 
+export function useAccessibleTenantsPaged(params: ListParams) {
+  return useQuery({
+    queryKey: ['accessibleTenantsPaged', params],
+    queryFn: () => listAccessibleTenantsPaged(params),
+  });
+}
+
 export function useCreateTenant() {
   const { refreshTenants } = useTenant();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (payload: CreateTenantPayload) => createTenant(payload),
     onSuccess: () => {
       void refreshTenants();
+      queryClient.invalidateQueries({ queryKey: ['accessibleTenantsPaged'] });
     },
   });
 }

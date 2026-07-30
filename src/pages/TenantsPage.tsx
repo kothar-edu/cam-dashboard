@@ -1,15 +1,27 @@
-import { useEffect, useMemo, useState, type FormEvent, type ChangeEvent } from 'react';
+import { useEffect, useState, type FormEvent, type ChangeEvent } from 'react';
 import toast from 'react-hot-toast';
-import { Building2, CheckCircle2, Plus, Shield, UserMinus, Users } from 'lucide-react';
+import {
+  Building2,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Shield,
+  UserMinus,
+  Users,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { DebouncedSearchField } from '@/components/forms/DebouncedSearchField';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { PageHeader } from '@/components/forms/PageHeader';
 import { SettingsEmptyState, SettingsSummaryChip } from '@/components/settings/AppSettingsPanel';
 import {
+  useAccessibleTenantsPaged,
   useAssignTenantAdmin,
   useCreateTenant,
   useRevokeTenantAdmin,
@@ -25,36 +37,48 @@ type TenantsPageProps = {
   embedded?: boolean;
 };
 
+const PAGE_SIZE = 3;
+
 export default function TenantsPage({ embedded = false }: TenantsPageProps) {
   const { canManageTenants } = useAuth();
-  const { tenants, loading: tenantsLoading, activeTenant } = useTenant();
-  const [selectedTenantId, setSelectedTenantId] = useState<number | undefined>(undefined);
+  const { activeTenant } = useTenant();
+  const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [newTenantName, setNewTenantName] = useState('');
   const [adminUserId, setAdminUserId] = useState('');
   const [resolvedAdminLabel, setResolvedAdminLabel] = useState('');
   const [revokeTarget, setRevokeTarget] = useState<TenantMembership | null>(null);
+  const [search, setSearch] = useState('');
+  const [pageIndex, setPageIndex] = useState(0);
+  const debouncedSearch = useDebouncedValue(search.trim());
 
+  const tenantsQuery = useAccessibleTenantsPaged({
+    limit: PAGE_SIZE,
+    offset: pageIndex * PAGE_SIZE,
+    ...(debouncedSearch ? { search: debouncedSearch } : {}),
+  });
+  const tenants = tenantsQuery.data?.results ?? [];
+  const totalCount = tenantsQuery.data?.count ?? 0;
+  const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  const selectedTenantId = selectedTenant?.id;
   const memberships = useTenantMemberships(selectedTenantId);
   const createTenantMutation = useCreateTenant();
   const assignAdminMutation = useAssignTenantAdmin();
   const revokeAdminMutation = useRevokeTenantAdmin();
 
   useEffect(() => {
-    if (selectedTenantId != null) return;
-    if (activeTenant?.id) {
-      setSelectedTenantId(activeTenant.id);
+    if (selectedTenant) return;
+    if (activeTenant) {
+      setSelectedTenant(activeTenant);
       return;
     }
-    if (tenants[0]?.id) setSelectedTenantId(tenants[0].id);
-  }, [activeTenant?.id, selectedTenantId, tenants]);
+    if (tenants[0]) setSelectedTenant(tenants[0]);
+  }, [activeTenant, selectedTenant, tenants]);
 
-  const selectedTenant = useMemo(
-    () => tenants.find((tenant) => tenant.id === selectedTenantId),
-    [selectedTenantId, tenants]
-  );
-
-  const activeCount = tenants.filter((tenant) => tenant.is_active).length;
+  // Every tenant this endpoint returns is already is_active=True (base
+  // queryset filter), so "active" always equals the total match count.
+  const activeCount = totalCount;
   const adminCount = memberships.data?.count ?? memberships.data?.results?.length ?? 0;
 
   if (!canManageTenants) {
@@ -74,7 +98,9 @@ export default function TenantsPage({ embedded = false }: TenantsPageProps) {
         onSuccess: (tenant) => {
           setNewTenantName('');
           setShowCreate(false);
-          setSelectedTenantId(tenant.id);
+          setSelectedTenant(tenant);
+          setSearch('');
+          setPageIndex(0);
           toast.success(`Organization created · schema ${tenant.schema_name}`);
         },
         onError: (error) => {
@@ -153,11 +179,11 @@ export default function TenantsPage({ embedded = false }: TenantsPageProps) {
         </form>
       ) : null}
 
-      {tenantsLoading && tenants.length === 0 ? (
+      {tenantsQuery.isLoading && !tenantsQuery.data && !debouncedSearch ? (
         <div className="flex min-h-[20vh] items-center justify-center">
           <LoadingSpinner className="h-8 w-8 text-[#12233D]" />
         </div>
-      ) : tenants.length === 0 ? (
+      ) : totalCount === 0 && !debouncedSearch ? (
         <SettingsEmptyState
           title="No organizations yet"
           description="Create the first tenant schema so leagues can run independently."
@@ -174,7 +200,7 @@ export default function TenantsPage({ embedded = false }: TenantsPageProps) {
             <SettingsSummaryChip
               icon={<Building2 className="h-3.5 w-3.5" />}
               label="Organizations"
-              value={String(tenants.length)}
+              value={String(totalCount)}
             />
             <SettingsSummaryChip
               icon={<CheckCircle2 className="h-3.5 w-3.5" />}
@@ -188,17 +214,61 @@ export default function TenantsPage({ embedded = false }: TenantsPageProps) {
             />
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {tenants.map((tenant) => (
-              <TenantCard
-                key={tenant.id}
-                tenant={tenant}
-                selected={tenant.id === selectedTenantId}
-                isCurrent={tenant.id === activeTenant?.id}
-                onSelect={() => setSelectedTenantId(tenant.id)}
-              />
-            ))}
-          </div>
+          <DebouncedSearchField
+            value={search}
+            onChange={(value) => {
+              setSearch(value);
+              setPageIndex(0);
+            }}
+            placeholder="Search organizations by name or schema…"
+            aria-label="Search organizations"
+          />
+
+          {tenants.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center text-sm text-muted-foreground">
+              No organizations match your search.
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {tenants.map((tenant) => (
+                <TenantCard
+                  key={tenant.id}
+                  tenant={tenant}
+                  selected={tenant.id === selectedTenantId}
+                  isCurrent={tenant.id === activeTenant?.id}
+                  onSelect={() => setSelectedTenant(tenant)}
+                />
+              ))}
+            </div>
+          )}
+
+          {totalCount > 0 ? (
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                Page {pageIndex + 1} of {pageCount} ({totalCount} total)
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  aria-label="Previous page"
+                  disabled={pageIndex === 0}
+                  className="rounded-md border p-1.5 disabled:opacity-40"
+                  onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next page"
+                  disabled={pageIndex >= pageCount - 1}
+                  className="rounded-md border p-1.5 disabled:opacity-40"
+                  onClick={() => setPageIndex((p) => p + 1)}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          ) : null}
 
           {selectedTenant ? (
             <section className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 sm:p-5">

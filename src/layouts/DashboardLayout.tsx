@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenant } from '@/contexts/TenantContext';
+import { APP_NAME } from '@/lib/branding';
 
 export default function DashboardLayout() {
   const { user } = useAuth();
@@ -46,7 +47,7 @@ export default function DashboardLayout() {
             </Button>
             <div className="min-w-0">
               <h1 className="truncate text-base font-semibold text-[#12233D] sm:text-lg">
-                CAM Dashboard
+                {APP_NAME} Dashboard
               </h1>
               <p className="truncate text-xs text-muted-foreground sm:text-sm">
                 {activeTenant?.name ?? 'Select an organization to manage cricket data'}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../lib/utils';
+import { cn } from '@/lib/utils.js';
 
 const Table = React.forwardRef(({ className, ...props }, ref) => (
   <table ref={ref} className={cn('w-full caption-bottom text-sm', className)} {...props} />

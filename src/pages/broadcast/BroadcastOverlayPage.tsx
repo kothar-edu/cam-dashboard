@@ -15,6 +15,7 @@ import { useEffect } from 'react';
 import { useLiveMatch } from '@/hooks/useLiveMatch';
 import { useLiveMatchInfo } from '@/hooks/useLiveMatchInfo';
 import { useCanvasScale } from '@/hooks/useCanvasScale';
+import { APP_NAME } from '@/lib/branding';
 
 const CANVAS_WIDTH = 1920;
 const CANVAS_HEIGHT = 1080;
@@ -32,7 +33,7 @@ export default function BroadcastOverlayPage() {
     document.title =
       state.opponents.team_a && state.opponents.team_b
         ? `LIVE | ${state.opponents.team_a.code} vs ${state.opponents.team_b.code}`
-        : 'CAM Live Broadcast';
+        : `${APP_NAME} Live Broadcast`;
   }, [state.opponents.team_a, state.opponents.team_b]);
 
   if (!matchId || isLoading || !info) {

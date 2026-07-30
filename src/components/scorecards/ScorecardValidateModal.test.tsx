@@ -101,9 +101,11 @@ describe('ScorecardValidateModal', () => {
     expect(onApply).toHaveBeenCalledTimes(1);
   });
 
-  it('shows edit-caused consistency issues and fires onResolveIssue from the Fix button', async () => {
-    const user = userEvent.setup();
-    const onResolveIssue = vi.fn();
+  it('keeps the data-consistency and pre-existing-issue sections hidden even when issues are present', () => {
+    // SHOW_CONSISTENCY_ISSUES is off (UI hidden by request) — the underlying
+    // rotation/batter-slot detection and Fix/Confirm plumbing stay in the
+    // component, just not rendered. Flip that flag to re-enable and restore
+    // the richer interaction assertions this test used to have.
     const outcome: ScorecardEditOutcome = {
       ok: true,
       errors: [],
@@ -120,6 +122,14 @@ describe('ScorecardValidateModal', () => {
             { innings_index: 0, over_index: 0, ball_index: 2, striker: 'p1', non_striker: 'p2' },
           ],
           caused_by_edit: true,
+        },
+        {
+          kind: 'rotation_shift',
+          innings_index: 1,
+          message: 'Innings 2: strike rotation is off from ball 2.0.2 onward.',
+          balls: ['1.0.1'],
+          fix: [{ innings_index: 1, over_index: 0, ball_index: 1, striker: 'p1', non_striker: 'p2' }],
+          caused_by_edit: false,
         },
       ],
       batter_slot_issues: [
@@ -146,60 +156,12 @@ describe('ScorecardValidateModal', () => {
         outcome={outcome}
         applying={false}
         onApply={vi.fn()}
-        onResolveIssue={onResolveIssue}
-      />
-    );
-
-    expect(screen.getByText('Data consistency — from this edit')).toBeInTheDocument();
-    expect(screen.queryByText(/Pre-existing in this innings/)).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Fix' }));
-    expect(onResolveIssue).toHaveBeenCalledWith(outcome.rotation_shift_issues[0].fix);
-
-    await user.click(screen.getByRole('button', { name: 'Confirm' }));
-    expect(onResolveIssue).toHaveBeenCalledWith(
-      [{ innings_index: 0, over_index: 0, ball_index: 3, striker: 'p1' }],
-      ['0.0.3.striker']
-    );
-  });
-
-  it('collapses pre-existing (not caused by this edit) issues behind a toggle', async () => {
-    const user = userEvent.setup();
-    const outcome: ScorecardEditOutcome = {
-      ok: true,
-      errors: [],
-      warnings: [],
-      changes: [],
-      preview: {},
-      rotation_shift_issues: [
-        {
-          kind: 'rotation_shift',
-          innings_index: 1,
-          message: 'Innings 2: strike rotation is off from ball 2.0.2 onward.',
-          balls: ['1.0.1'],
-          fix: [{ innings_index: 1, over_index: 0, ball_index: 1, striker: 'p1', non_striker: 'p2' }],
-          caused_by_edit: false,
-        },
-      ],
-      batter_slot_issues: [],
-    };
-
-    render(
-      <ScorecardValidateModal
-        open
-        onOpenChange={() => undefined}
-        outcome={outcome}
-        applying={false}
-        onApply={vi.fn()}
         onResolveIssue={vi.fn()}
       />
     );
 
     expect(screen.queryByText('Data consistency — from this edit')).not.toBeInTheDocument();
-    expect(screen.getByText('Pre-existing in this innings (1)')).toBeInTheDocument();
-    expect(screen.queryByText(/strike rotation is off from ball 2\.0\.2/)).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: /Pre-existing in this innings/ }));
-    expect(screen.getByText(/strike rotation is off from ball 2\.0\.2/)).toBeInTheDocument();
+    expect(screen.queryByText(/Pre-existing in this innings/)).not.toBeInTheDocument();
   });
 });
 

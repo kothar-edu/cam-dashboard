@@ -9,6 +9,11 @@ import type {
 } from '@/api/scorecards';
 import { cn } from '@/lib/utils';
 
+// Hides the "Data consistency" (from-this-edit) and "Pre-existing in this
+// innings" sections without deleting the code behind them. Flip back to true
+// to re-show.
+const SHOW_CONSISTENCY_ISSUES = false;
+
 type ResolveIssuePatch = {
   innings_index: number;
   over_index: number;
@@ -176,7 +181,7 @@ export function ScorecardValidateModal({
           </section>
         ) : null}
 
-        {hasEditIssues ? (
+        {SHOW_CONSISTENCY_ISSUES && hasEditIssues ? (
           <section className="rounded-lg border border-amber-200 bg-amber-50/70 p-3">
             <h3 className="text-sm font-semibold text-amber-900">Data consistency — from this edit</h3>
             <p className="mt-1 text-xs text-amber-800/80">
@@ -197,7 +202,7 @@ export function ScorecardValidateModal({
           </section>
         ) : null}
 
-        {hasPreExistingIssues ? (
+        {SHOW_CONSISTENCY_ISSUES && hasPreExistingIssues ? (
           <section className="rounded-lg border border-slate-200 bg-slate-50 p-3">
             <button
               type="button"

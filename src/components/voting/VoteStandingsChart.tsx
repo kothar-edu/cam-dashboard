@@ -96,51 +96,49 @@ export function VoteStandingsChart({
         </ResponsiveContainer>
       </div>
 
-      {!compact ? (
-        <div className="space-y-2">
-          {standings.map((player, index) => {
-            const votes = player.total_votes ?? 0;
-            const pct = voteShare(votes, total);
-            const isLeader = hasVotes && index === 0;
-            return (
-              <div
-                key={player.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 px-3 py-2"
-              >
-                <div className="min-w-0 flex items-center gap-2">
-                  <span
-                    className={cn(
-                      'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold',
-                      isLeader
-                        ? 'bg-[#E8A93B] text-[#12233D]'
-                        : 'bg-slate-100 text-muted-foreground'
-                    )}
-                  >
-                    {index + 1}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-[#12233D]">
-                      {isLeader ? (
-                        <Trophy className="mr-1 inline h-3.5 w-3.5 text-[#E8A93B]" />
-                      ) : null}
-                      {player.full_name}
-                    </p>
-                    {player.team_name ? (
-                      <p className="truncate text-[11px] text-muted-foreground">{player.team_name}</p>
+      <div className="space-y-2">
+        {standings.map((player, index) => {
+          const votes = player.total_votes ?? 0;
+          const pct = voteShare(votes, total);
+          const isLeader = hasVotes && index === 0;
+          return (
+            <div
+              key={player.id}
+              className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 px-3 py-2"
+            >
+              <div className="min-w-0 flex items-center gap-2">
+                <span
+                  className={cn(
+                    'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold',
+                    isLeader
+                      ? 'bg-[#E8A93B] text-[#12233D]'
+                      : 'bg-slate-100 text-muted-foreground'
+                  )}
+                >
+                  {index + 1}
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-[#12233D]">
+                    {isLeader ? (
+                      <Trophy className="mr-1 inline h-3.5 w-3.5 text-[#E8A93B]" />
                     ) : null}
-                  </div>
-                </div>
-                <div className="shrink-0 text-right">
-                  <p className="text-sm font-bold tabular-nums text-[#12233D]">{votes}</p>
-                  <p className="text-[10px] tabular-nums text-muted-foreground">
-                    {hasVotes ? `${pct}%` : '—'}
+                    {player.full_name}
                   </p>
+                  {!compact && player.team_name ? (
+                    <p className="truncate text-[11px] text-muted-foreground">{player.team_name}</p>
+                  ) : null}
                 </div>
               </div>
-            );
-          })}
-        </div>
-      ) : null}
+              <div className="shrink-0 text-right">
+                <p className="text-sm font-bold tabular-nums text-[#12233D]">{votes}</p>
+                <p className="text-[10px] tabular-nums text-muted-foreground">
+                  {hasVotes ? `${pct}%` : '—'}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       {hasVotes ? (
         <p className="pt-1 text-right text-[11px] text-muted-foreground">

@@ -1,6 +1,11 @@
 import type { ReactNode } from 'react';
 import type { PointsTableRow, TournamentPlayerStats } from '@/api/points';
-import { DualMetricBars, VerticalBarChart } from '@/components/scorecards/ScoreBars';
+import {
+  DivergingBarChart,
+  DualMetricBars,
+  RankedBarChart,
+  VerticalBarChart,
+} from '@/components/scorecards/ScoreBars';
 import {
   computeHighlights,
   formatNrr,
@@ -102,17 +107,12 @@ export function PointsStatsPanel({ rows, topBatters = [], topBowlers = [] }: Poi
         <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
           <h3 className="mb-1 text-sm font-semibold text-[#12233D]">Net run rate</h3>
           <p className="mb-4 text-xs text-muted-foreground">NRR comparison across the table</p>
-          <DualMetricBars
-            primaryColor="#12233D"
-            secondaryColor="#E8A93B"
+          <DivergingBarChart
+            formatValue={formatNrr}
             items={chartRows.map((row) => ({
               id: row.id,
-              label: row.team.name,
-              primary: Math.max(row.nrr, 0),
-              secondary: Math.abs(Math.min(row.nrr, 0)),
-              primaryLabel: formatNrr(row.nrr),
-              secondaryLabel:
-                row.nrr < 0 ? 'negative' : row.nrr > 0 ? 'positive' : 'even',
+              label: teamShortName(row.team.code || row.team.name, 6),
+              value: row.nrr,
             }))}
             emptyLabel="No NRR data."
           />
@@ -191,42 +191,20 @@ export function PlayerLeadersCard({
   metric: (p: TournamentPlayerStats) => number;
   formatMetric: (p: TournamentPlayerStats) => string;
 }) {
-  const max = Math.max(...players.map(metric), 1);
-
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
       <h3 className="mb-1 text-sm font-semibold text-[#12233D]">{title}</h3>
       <p className="mb-4 text-xs text-muted-foreground">{subtitle}</p>
-      <div className="space-y-3">
-        {players.map((player, index) => {
-          const value = metric(player);
-          const pct = Math.round((value / max) * 100);
-          return (
-            <div key={player.id} className="space-y-1">
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="truncate text-xs font-medium text-[#12233D]">
-                  <span className="mr-1.5 text-muted-foreground">{index + 1}.</span>
-                  {playerDisplayName(player)}
-                  {player.current_team?.name ? (
-                    <span className="ml-1 font-normal text-muted-foreground">
-                      · {player.current_team.name}
-                    </span>
-                  ) : null}
-                </span>
-                <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
-                  {formatMetric(player)}
-                </span>
-              </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
-                <div
-                  className="h-full rounded-full bg-[#12233D]"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <RankedBarChart
+        items={players.map((player) => ({
+          id: player.id,
+          label: playerDisplayName(player),
+          sublabel: player.current_team?.name,
+          value: metric(player),
+          valueLabel: formatMetric(player),
+        }))}
+        emptyLabel="No stats recorded yet."
+      />
     </div>
   );
 }

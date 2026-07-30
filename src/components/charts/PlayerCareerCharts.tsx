@@ -59,7 +59,7 @@ function ChartCard({
                 fontSize: 12,
               }}
             />
-            <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+            <Bar dataKey="value" radius={[6, 6, 0, 0]} isAnimationActive={false}>
               {data.map((entry) => (
                 <Cell key={entry.label} fill={entry.fill} />
               ))}

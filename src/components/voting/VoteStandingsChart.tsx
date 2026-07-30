@@ -87,7 +87,12 @@ export function VoteStandingsChart({
               }}
               labelFormatter={(label) => String(label)}
             />
-            <Bar dataKey="votes" radius={[0, 6, 6, 0]} maxBarSize={compact ? 16 : 22}>
+            <Bar
+              dataKey="votes"
+              radius={[0, 6, 6, 0]}
+              maxBarSize={compact ? 16 : 22}
+              isAnimationActive={false}
+            >
               {chartData.map((entry) => (
                 <Cell key={entry.id} fill={hasVotes ? entry.fill : CHART.grid} />
               ))}

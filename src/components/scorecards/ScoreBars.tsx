@@ -1,4 +1,22 @@
+import {
+  Bar,
+  BarChart,
+  Cell,
+  LabelList,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import { CHART } from '@/components/charts/chartTheme';
 import { cn } from '@/lib/utils';
+
+const tooltipStyle = {
+  borderRadius: 8,
+  borderColor: CHART.grid,
+  fontSize: 12,
+};
 
 type ComparisonBarProps = {
   labelA: string;
@@ -18,44 +36,51 @@ export function ComparisonBar({
   valueA,
   valueB,
   formatValue = String,
-  colorA = '#12233D',
-  colorB = '#E8A93B',
+  colorA = CHART.navy,
+  colorB = CHART.gold,
   className,
 }: ComparisonBarProps) {
-  const max = Math.max(valueA, valueB, 1);
-  const pctA = Math.round((valueA / max) * 100);
-  const pctB = Math.round((valueB / max) * 100);
+  const data = [
+    { id: 'a', name: labelA, value: valueA, fill: colorA },
+    { id: 'b', name: labelB, value: valueB, fill: colorB },
+  ];
 
   return (
-    <div className={cn('space-y-2', className)}>
-      <div className="flex items-center gap-2">
-        <span className="w-24 shrink-0 truncate text-right text-xs font-medium text-[#12233D] sm:w-32">
-          {labelA}
-        </span>
-        <div className="h-2.5 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-100">
-          <div
-            className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${pctA}%`, backgroundColor: colorA }}
+    <div className={cn('h-24 w-full', className)}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={data}
+          layout="vertical"
+          margin={{ top: 4, right: 44, left: 4, bottom: 4 }}
+          barCategoryGap="30%"
+        >
+          <XAxis type="number" hide />
+          <YAxis
+            type="category"
+            dataKey="name"
+            width={92}
+            tick={{ fill: CHART.navy, fontSize: 11, fontWeight: 600 }}
+            axisLine={false}
+            tickLine={false}
           />
-        </div>
-        <span className="w-12 shrink-0 text-xs font-semibold tabular-nums text-[#12233D]">
-          {formatValue(valueA)}
-        </span>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="w-24 shrink-0 truncate text-right text-xs font-medium text-[#12233D] sm:w-32">
-          {labelB}
-        </span>
-        <div className="h-2.5 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-100">
-          <div
-            className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${pctB}%`, backgroundColor: colorB }}
+          <Tooltip
+            cursor={{ fill: 'rgba(18, 35, 61, 0.04)' }}
+            contentStyle={tooltipStyle}
+            formatter={(value) => [formatValue(Number(value ?? 0)), 'Runs']}
           />
-        </div>
-        <span className="w-12 shrink-0 text-xs font-semibold tabular-nums text-[#12233D]">
-          {formatValue(valueB)}
-        </span>
-      </div>
+          <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={22} isAnimationActive={false}>
+            {data.map((entry) => (
+              <Cell key={entry.id} fill={entry.fill} />
+            ))}
+            <LabelList
+              dataKey="value"
+              position="right"
+              formatter={(value) => formatValue(Number(value ?? 0))}
+              style={{ fill: CHART.navy, fontSize: 12, fontWeight: 700 }}
+            />
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }
@@ -75,51 +100,70 @@ type VerticalBarChartProps = {
   className?: string;
 };
 
+function makeCategoryTick(data: Array<{ name: string; sublabel?: string }>) {
+  return function CategoryTick({ x, y, payload }: any) {
+    const item = data.find((d) => d.name === payload.value);
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text x={0} y={0} dy={12} textAnchor="middle" fontSize={10} fill={CHART.muted}>
+          {payload.value}
+        </text>
+        {item?.sublabel ? (
+          <text x={0} y={0} dy={24} textAnchor="middle" fontSize={9} fill={CHART.muted}>
+            {item.sublabel}
+          </text>
+        ) : null}
+      </g>
+    );
+  };
+}
+
 /** Compact vertical bar chart for top performers. */
 export function VerticalBarChart({
   items,
-  color = '#12233D',
+  color = CHART.navy,
   emptyLabel = 'No data yet',
   unit = '',
   className,
 }: VerticalBarChartProps) {
   if (!items.length) {
-    return (
-      <p className="py-8 text-center text-sm text-muted-foreground">{emptyLabel}</p>
-    );
+    return <p className="py-8 text-center text-sm text-muted-foreground">{emptyLabel}</p>;
   }
 
-  const max = Math.max(...items.map((i) => i.value), 1);
+  const data = items.map((item) => ({
+    id: item.id,
+    name: item.label,
+    sublabel: item.sublabel,
+    value: item.value,
+  }));
 
   return (
-    <div className={cn('flex h-44 items-end gap-2 sm:gap-3', className)}>
-      {items.map((item) => {
-        const heightPct = Math.max(8, Math.round((item.value / max) * 100));
-        return (
-          <div key={item.id} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
-            <span className="text-[11px] font-semibold tabular-nums text-[#12233D]">
-              {item.value}
-              {unit}
-            </span>
-            <div className="flex h-28 w-full items-end justify-center">
-              <div
-                className="w-full max-w-[2.25rem] rounded-t-md transition-all duration-500"
-                style={{ height: `${heightPct}%`, backgroundColor: color }}
-                title={`${item.label}: ${item.value}${unit}`}
-              />
-            </div>
-            <span
-              className="w-full truncate text-center text-[10px] font-medium leading-tight text-muted-foreground"
-              title={item.label}
-            >
-              {item.label}
-            </span>
-            {item.sublabel ? (
-              <span className="text-[10px] tabular-nums text-muted-foreground">{item.sublabel}</span>
-            ) : null}
-          </div>
-        );
-      })}
+    <div className={cn('h-52 w-full', className)}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} margin={{ top: 20, right: 8, left: 8, bottom: 24 }}>
+          <XAxis
+            dataKey="name"
+            tick={makeCategoryTick(data) as any}
+            axisLine={false}
+            tickLine={false}
+            interval={0}
+          />
+          <YAxis hide domain={[0, (max: number) => max * 1.15]} />
+          <Tooltip
+            cursor={{ fill: 'rgba(18, 35, 61, 0.04)' }}
+            contentStyle={tooltipStyle}
+            formatter={(value) => [`${Number(value ?? 0)}${unit}`, 'Value']}
+          />
+          <Bar dataKey="value" fill={color} radius={[6, 6, 0, 0]} maxBarSize={40} isAnimationActive={false}>
+            <LabelList
+              dataKey="value"
+              position="top"
+              formatter={(value) => `${Number(value ?? 0)}${unit}`}
+              style={{ fill: CHART.navy, fontSize: 11, fontWeight: 700 }}
+            />
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }
@@ -139,53 +183,243 @@ type DualMetricBarsProps = {
   className?: string;
 };
 
-/** Horizontal dual-metric bars (e.g. wickets + economy proxy). */
+/** Grouped horizontal bars comparing two metrics per category. */
 export function DualMetricBars({
   items,
-  primaryColor = '#12233D',
-  secondaryColor = '#E8A93B',
+  primaryColor = CHART.navy,
+  secondaryColor = CHART.gold,
   emptyLabel = 'No data yet',
   className,
 }: DualMetricBarsProps) {
   if (!items.length) {
-    return (
-      <p className="py-8 text-center text-sm text-muted-foreground">{emptyLabel}</p>
-    );
+    return <p className="py-8 text-center text-sm text-muted-foreground">{emptyLabel}</p>;
   }
 
-  const maxPrimary = Math.max(...items.map((i) => i.primary), 1);
-  const maxSecondary = Math.max(...items.map((i) => i.secondary), 1);
+  const data = items.map((item) => ({
+    id: item.id,
+    name: item.label,
+    primary: item.primary,
+    secondary: item.secondary,
+    primaryLabel: item.primaryLabel ?? String(item.primary),
+    secondaryLabel: item.secondaryLabel ?? String(item.secondary),
+  }));
+  const yAxisWidth = Math.min(140, Math.max(72, ...data.map((d) => d.name.length * 6)));
+  const height = Math.max(140, data.length * 60);
 
   return (
-    <div className={cn('space-y-3', className)}>
-      {items.map((item) => (
-        <div key={item.id} className="space-y-1">
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="truncate text-xs font-medium text-[#12233D]">{item.label}</span>
-            <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
-              {item.primaryLabel ?? item.primary}
-              {item.secondaryLabel ? ` · ${item.secondaryLabel}` : ''}
-            </span>
-          </div>
-          <div className="flex h-2 gap-1 overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full"
-              style={{
-                width: `${Math.round((item.primary / maxPrimary) * 100)}%`,
-                backgroundColor: primaryColor,
-              }}
+    <div className={cn('w-full', className)} style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={data}
+          layout="vertical"
+          margin={{ top: 4, right: 64, left: 4, bottom: 4 }}
+          barGap={4}
+        >
+          <XAxis type="number" hide />
+          <YAxis
+            type="category"
+            dataKey="name"
+            width={yAxisWidth}
+            tick={{ fill: CHART.navy, fontSize: 11 }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <Tooltip cursor={{ fill: 'rgba(18, 35, 61, 0.04)' }} contentStyle={tooltipStyle} />
+          <Bar
+            dataKey="primary"
+            fill={primaryColor}
+            radius={[0, 4, 4, 0]}
+            maxBarSize={14}
+            isAnimationActive={false}
+          >
+            <LabelList
+              dataKey="primaryLabel"
+              position="right"
+              style={{ fill: primaryColor, fontSize: 10, fontWeight: 600 }}
             />
-            <div
-              className="h-full rounded-full"
-              style={{
-                width: `${Math.round((item.secondary / maxSecondary) * 50)}%`,
-                backgroundColor: secondaryColor,
-                opacity: 0.85,
-              }}
+          </Bar>
+          <Bar
+            dataKey="secondary"
+            fill={secondaryColor}
+            radius={[0, 4, 4, 0]}
+            maxBarSize={14}
+            opacity={0.85}
+            isAnimationActive={false}
+          >
+            <LabelList
+              dataKey="secondaryLabel"
+              position="right"
+              style={{ fill: CHART.goldDark, fontSize: 10, fontWeight: 600 }}
             />
-          </div>
-        </div>
-      ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+type DivergingBarChartProps = {
+  items: Array<{ id: string; label: string; value: number }>;
+  formatValue?: (value: number) => string;
+  positiveColor?: string;
+  negativeColor?: string;
+  emptyLabel?: string;
+  className?: string;
+};
+
+function makeDivergingLabel(
+  formatValue: (value: number) => string,
+  positiveColor: string,
+  negativeColor: string
+) {
+  return function DivergingLabel(props: any) {
+    const { x, y, width, height, value } = props;
+    const isPositive = value >= 0;
+    const tx = isPositive ? x + width + 6 : x - 6;
+    return (
+      <text
+        x={tx}
+        y={y + height / 2}
+        dy={4}
+        fontSize={11}
+        fontWeight={700}
+        textAnchor={isPositive ? 'start' : 'end'}
+        fill={isPositive ? positiveColor : negativeColor}
+      >
+        {formatValue(value)}
+      </text>
+    );
+  };
+}
+
+/** Horizontal bars that diverge from zero — for signed metrics like NRR. */
+export function DivergingBarChart({
+  items,
+  formatValue = (value) => value.toFixed(2),
+  positiveColor = '#059669',
+  negativeColor = '#e11d48',
+  emptyLabel = 'No data yet',
+  className,
+}: DivergingBarChartProps) {
+  if (!items.length) {
+    return <p className="py-8 text-center text-sm text-muted-foreground">{emptyLabel}</p>;
+  }
+
+  const data = items.map((item) => ({ id: item.id, name: item.label, value: item.value }));
+  const maxAbs = Math.max(...data.map((d) => Math.abs(d.value)), 0.1) * 1.35;
+  const height = Math.max(140, data.length * 44);
+
+  return (
+    <div className={cn('w-full', className)} style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} layout="vertical" margin={{ top: 4, right: 44, left: 4, bottom: 4 }}>
+          <XAxis type="number" domain={[-maxAbs, maxAbs]} hide />
+          <YAxis
+            type="category"
+            dataKey="name"
+            width={92}
+            tick={{ fill: CHART.navy, fontSize: 11, fontWeight: 600 }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <ReferenceLine x={0} stroke={CHART.grid} />
+          <Tooltip
+            cursor={{ fill: 'rgba(18, 35, 61, 0.04)' }}
+            contentStyle={tooltipStyle}
+            formatter={(value) => [formatValue(Number(value ?? 0)), 'NRR']}
+          />
+          <Bar dataKey="value" radius={[4, 4, 4, 4]} maxBarSize={16} isAnimationActive={false}>
+            {data.map((entry) => (
+              <Cell key={entry.id} fill={entry.value >= 0 ? positiveColor : negativeColor} />
+            ))}
+            <LabelList
+              dataKey="value"
+              content={makeDivergingLabel(formatValue, positiveColor, negativeColor) as any}
+            />
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export type RankedBarItem = {
+  id: string;
+  label: string;
+  sublabel?: string;
+  value: number;
+  valueLabel?: string;
+};
+
+type RankedBarChartProps = {
+  items: RankedBarItem[];
+  color?: string;
+  emptyLabel?: string;
+  className?: string;
+};
+
+function makeRankTick(data: Array<{ name: string; sublabel?: string }>) {
+  return function RankTick({ x, y, payload, index }: any) {
+    const item = data[index] ?? data.find((d) => d.name === payload.value);
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text x={-4} y={-4} textAnchor="end" fontSize={11} fontWeight={600} fill={CHART.navy}>
+          <tspan fill={CHART.muted}>{index + 1}. </tspan>
+          <tspan>{payload.value}</tspan>
+        </text>
+        {item?.sublabel ? (
+          <text x={-4} y={9} textAnchor="end" fontSize={9} fill={CHART.muted}>
+            {item.sublabel}
+          </text>
+        ) : null}
+      </g>
+    );
+  };
+}
+
+/** Horizontal leaderboard bars — rank, name, sublabel and a formatted value. */
+export function RankedBarChart({
+  items,
+  color = CHART.navy,
+  emptyLabel = 'No data yet',
+  className,
+}: RankedBarChartProps) {
+  if (!items.length) {
+    return <p className="py-8 text-center text-sm text-muted-foreground">{emptyLabel}</p>;
+  }
+
+  const data = items.map((item) => ({
+    id: item.id,
+    name: item.label,
+    sublabel: item.sublabel,
+    value: item.value,
+    valueLabel: item.valueLabel ?? String(item.value),
+  }));
+  const height = Math.max(120, data.length * 40);
+
+  return (
+    <div className={cn('w-full', className)} style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} layout="vertical" margin={{ top: 4, right: 12, left: 4, bottom: 4 }}>
+          <XAxis type="number" hide />
+          <YAxis
+            type="category"
+            dataKey="name"
+            width={132}
+            tick={makeRankTick(data) as any}
+            axisLine={false}
+            tickLine={false}
+          />
+          <Tooltip cursor={{ fill: 'rgba(18, 35, 61, 0.04)' }} contentStyle={tooltipStyle} />
+          <Bar dataKey="value" fill={color} radius={[0, 6, 6, 0]} maxBarSize={14} isAnimationActive={false}>
+            <LabelList
+              dataKey="valueLabel"
+              position="right"
+              style={{ fill: CHART.navy, fontSize: 10, fontWeight: 600 }}
+            />
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }

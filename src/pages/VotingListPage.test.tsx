@@ -74,9 +74,9 @@ describe('VotingListPage', () => {
     expect(screen.getByText('Voting open')).toBeInTheDocument();
     expect(screen.getByText('Vote standings')).toBeInTheDocument();
     expect(screen.getAllByText('Player One').length).toBeGreaterThan(0);
-    expect(screen.getByText('Player Two')).toBeInTheDocument();
+    expect(screen.getAllByText('Player Two').length).toBeGreaterThan(0);
     expect(screen.getAllByText('12').length).toBeGreaterThan(0);
-    expect(screen.getByText('5')).toBeInTheDocument();
+    expect(screen.getAllByText('5').length).toBeGreaterThan(0);
     expect(screen.getByText(/17 total votes/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Close voting' })).toBeInTheDocument();
     expect(screen.getByText('Votes cast')).toBeInTheDocument();

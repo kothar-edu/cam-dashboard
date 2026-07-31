@@ -193,7 +193,7 @@ export default function TeamDetailPage() {
 
             <form
               onSubmit={handlePaymentSubmit}
-              className="max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
+              className="hidden max-w-xl space-y-4 rounded-lg border bg-white p-4 sm:p-6"
             >
               <h2 className="text-lg font-semibold text-[#12233D]">Payment settings</h2>
               <p className="text-sm text-muted-foreground">

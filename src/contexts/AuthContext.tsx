@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setTenantAdminSchemas([]);
   }, []);
 
-  const canManageTenants = Boolean(user?.is_staff || user?.is_superuser);
+  const canManageTenants = Boolean(user?.is_superuser);
 
   const value = useMemo<AuthContextValue>(
     () => ({

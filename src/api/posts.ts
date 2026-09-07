@@ -1,4 +1,4 @@
-import { newsfeedClient } from './client';
+import { apiClient } from './client';
 import { ListParams, Paginated, parsePaginated } from './pagination';
 
 export type Post = {
@@ -15,7 +15,7 @@ export type Post = {
 };
 
 export async function listPosts(params?: ListParams): Promise<Paginated<Post>> {
-  const response = await newsfeedClient.get<Paginated<Post> | Post[]>('/post/', { params });
+  const response = await apiClient.get<Paginated<Post> | Post[]>('/newsfeed/post/', { params });
   return parsePaginated(response.data);
 }
 
@@ -40,7 +40,7 @@ export type PostPayload = {
 };
 
 export async function getPost(id: string): Promise<PostDetail> {
-  const { data } = await newsfeedClient.get<PostDetail>(`/post/${id}/`);
+  const { data } = await apiClient.get<PostDetail>(`/newsfeed/post/${id}/`);
   return data;
 }
 
@@ -73,10 +73,10 @@ export async function createPost(payload: PostPayload): Promise<PostDetail> {
   if (payload.cover_image) {
     const form = new FormData();
     appendPostFields(form, payload);
-    const { data } = await newsfeedClient.post<PostDetail>('/post/', form);
+    const { data } = await apiClient.post<PostDetail>('/newsfeed/post/', form);
     return data;
   }
-  const { data } = await newsfeedClient.post<PostDetail>('/post/', jsonPostFields(payload));
+  const { data } = await apiClient.post<PostDetail>('/newsfeed/post/', jsonPostFields(payload));
   return data;
 }
 
@@ -84,13 +84,13 @@ export async function updatePost(id: string, payload: PostPayload): Promise<Post
   if (payload.cover_image) {
     const form = new FormData();
     appendPostFields(form, payload);
-    const { data } = await newsfeedClient.patch<PostDetail>(`/post/${id}/`, form);
+    const { data } = await apiClient.patch<PostDetail>(`/newsfeed/post/${id}/`, form);
     return data;
   }
-  const { data } = await newsfeedClient.patch<PostDetail>(`/post/${id}/`, jsonPostFields(payload));
+  const { data } = await apiClient.patch<PostDetail>(`/newsfeed/post/${id}/`, jsonPostFields(payload));
   return data;
 }
 
 export async function deletePost(id: string): Promise<void> {
-  await newsfeedClient.delete(`/post/${id}/`);
+  await apiClient.delete(`/newsfeed/post/${id}/`);
 }

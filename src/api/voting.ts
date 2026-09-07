@@ -27,14 +27,14 @@ export type NomineeVotingPlayerPayload = {
 };
 
 export async function listVotingPolls(params?: ListParams): Promise<Paginated<VotingPoll>> {
-  const response = await apiClient.get<Paginated<VotingPoll> | VotingPoll[]>('/game/voting/', {
+  const response = await apiClient.get<Paginated<VotingPoll> | VotingPoll[]>('/newsfeed/voting/', {
     params,
   });
   return parsePaginated(response.data);
 }
 
 export async function getNomineeVotingPlayer(id: string): Promise<NomineeVotingPlayer> {
-  const { data } = await apiClient.get<NomineeVotingPlayer>(`/game/nominee-voting-player/${id}/`);
+  const { data } = await apiClient.get<NomineeVotingPlayer>(`/newsfeed/nominee-voting-player/${id}/`);
   return data;
 }
 
@@ -42,7 +42,7 @@ export async function listNomineeVotingPlayers(
   params?: ListParams & { tournament?: string }
 ): Promise<Paginated<NomineeVotingPlayer>> {
   const response = await apiClient.get<Paginated<NomineeVotingPlayer> | NomineeVotingPlayer[]>(
-    '/game/nominee-voting-player/',
+    '/newsfeed/nominee-voting-player/',
     { params }
   );
   return parsePaginated(response.data);
@@ -52,7 +52,7 @@ export async function createNomineeVotingPlayer(
   payload: NomineeVotingPlayerPayload
 ): Promise<NomineeVotingPlayer> {
   const { data } = await apiClient.post<NomineeVotingPlayer>(
-    '/game/nominee-voting-player/',
+    '/newsfeed/nominee-voting-player/',
     payload
   );
   return data;
@@ -63,12 +63,12 @@ export async function updateNomineeVotingPlayer(
   payload: NomineeVotingPlayerPayload
 ): Promise<NomineeVotingPlayer> {
   const { data } = await apiClient.patch<NomineeVotingPlayer>(
-    `/game/nominee-voting-player/${id}/`,
+    `/newsfeed/nominee-voting-player/${id}/`,
     payload
   );
   return data;
 }
 
 export async function deleteNomineeVotingPlayer(id: string): Promise<void> {
-  await apiClient.delete(`/game/nominee-voting-player/${id}/`);
+  await apiClient.delete(`/newsfeed/nominee-voting-player/${id}/`);
 }

@@ -36,10 +36,12 @@ export function clearStoredTenantId() {
 
 const viteBase = (import.meta.env.VITE_URL ?? '/').replace(/\/+$/, '');
 const apiBaseURL = `${viteBase}/api`;
-const newsfeedBaseURL = `${viteBase}/newsfeed/api/v1`;
 
+// One client for the whole backend. The newsfeed used to be mounted at its
+// own top-level newsfeed/api/v1 prefix and needed a second axios instance
+// with a duplicate copy of the auth and tenant interceptors; it is routed
+// under /api/ with everything else now.
 export const apiClient = axios.create({ baseURL: apiBaseURL });
-export const newsfeedClient = axios.create({ baseURL: newsfeedBaseURL });
 
 let refreshPromise: Promise<string | null> | null = null;
 
@@ -91,4 +93,3 @@ function attachAuthInterceptors(client: AxiosInstance) {
 }
 
 attachAuthInterceptors(apiClient);
-attachAuthInterceptors(newsfeedClient);

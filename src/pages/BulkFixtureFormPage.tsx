@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { PICKER_LIST_PARAMS } from '@/api/pagination';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
@@ -221,7 +222,7 @@ export default function BulkFixtureFormPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const lockedTournamentId = searchParams.get('tournamentId') || undefined;
-  const teamsQuery = useTeams();
+  const teamsQuery = useTeams(PICKER_LIST_PARAMS);
   const tournamentsQuery = useTournaments(undefined, { enabled: !lockedTournamentId });
   const lockedTournamentQuery = useTournament(lockedTournamentId);
   const bulkMutation = useCreateFixturesBulk();

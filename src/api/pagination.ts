@@ -16,3 +16,12 @@ export function parsePaginated<T>(data: Paginated<T> | T[]): Paginated<T> {
     results: data.results ?? [],
   };
 }
+
+/**
+ * Params for a list request that fills a dropdown rather than a paged table.
+ *
+ * Every list endpoint is paginated server-side (default 20; 200 is the hard ceiling on most of them), so
+ * a picker that passes no limit silently shows the first 20 rows and offers no
+ * way to reach the rest. Pickers pass this instead.
+ */
+export const PICKER_LIST_PARAMS: ListParams = { limit: 200 };

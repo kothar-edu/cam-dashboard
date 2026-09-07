@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { PICKER_LIST_PARAMS } from '@/api/pagination';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
@@ -27,8 +28,8 @@ export default function VotingFormPage() {
   const navigate = useNavigate();
   const nominationQuery = useNomineeVotingPlayer(id);
   const pollsQuery = useVotingPolls();
-  const tournamentsQuery = useTournaments();
-  const playersQuery = usePlayers();
+  const tournamentsQuery = useTournaments(PICKER_LIST_PARAMS);
+  const playersQuery = usePlayers(PICKER_LIST_PARAMS);
   const createMutation = useCreateNomineeVotingPlayer();
   const updateMutation = useUpdateNomineeVotingPlayer();
 

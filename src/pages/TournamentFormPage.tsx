@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { PICKER_LIST_PARAMS } from '@/api/pagination';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +30,7 @@ export default function TournamentFormPage() {
   const isEdit = Boolean(id);
   const navigate = useNavigate();
   const tournamentQuery = useTournament(id);
-  const teamsQuery = useTeams();
+  const teamsQuery = useTeams(PICKER_LIST_PARAMS);
   const createMutation = useCreateTournament();
   const updateMutation = useUpdateTournament();
   const addTeamsMutation = useAddTeamsToTournament();

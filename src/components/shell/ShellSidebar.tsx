@@ -8,6 +8,7 @@ import {
   Newspaper,
   RefreshCw,
   Settings,
+  Shirt,
   Trophy,
   UserCheck,
   Users,
@@ -35,6 +36,7 @@ const routes = [
   { title: 'Points Table', href: '/dashboard/points', icon: BarChart },
   { title: 'Posts', href: '/dashboard/posts', icon: Newspaper },
   { title: 'Sponsors', href: '/dashboard/sponsors', icon: Award },
+  { title: 'Jersey orders', href: '/dashboard/jersey', icon: Shirt },
   { title: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 

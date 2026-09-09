@@ -24,6 +24,7 @@ import PointsPage from '@/pages/PointsPage';
 import PostsPage from '@/pages/PostsPage';
 import PostFormPage from '@/pages/PostFormPage';
 import SponsorsPage from '@/pages/SponsorsPage';
+import JerseyPage from '@/pages/JerseyPage';
 import SponsorFormPage from '@/pages/SponsorFormPage';
 import VerificationPage from '@/pages/VerificationPage';
 import TransfersPage from '@/pages/TransfersPage';
@@ -77,6 +78,7 @@ export default function App() {
           <Route path="sponsors" element={<SponsorsPage />} />
           <Route path="sponsors/new" element={<SponsorFormPage />} />
           <Route path="sponsors/:id" element={<SponsorFormPage />} />
+          <Route path="jersey" element={<JerseyPage />} />
           <Route
             path="boundary-labels"
             element={<Navigate to="/dashboard/sponsors?tab=boundary-labels" replace />}
